@@ -22,7 +22,8 @@ import net.runelite.api.coords.WorldPoint;
  * Decides what goes in the field notes. Only changes are written: a new step, a target that could
  * not be found, a planner snapshot that differs from the last, a varbit or message while in a
  * minigame, a click, a finished round, and every so often the objects and characters around you
- * that the Pilot has not noted yet, each marked with whether the Pilot was tracking it.
+ * that the Pilot has not noted yet, each marked with whether the Pilot was tracking it. Away from
+ * the minigames, only where you are, once a minute.
  */
 final class Recorder
 {
@@ -37,7 +38,7 @@ final class Recorder
 	private String lastStep;
 	private String lastMiss;
 	private String lastState;
-	private int sinceSurvey;
+	private int sinceSurvey = SURVEY_EVERY;
 	private final Set<String> surveyed = new HashSet<>();
 
 	Recorder(FieldNotes notes)
@@ -83,6 +84,16 @@ final class Recorder
 		}
 		if (activity == View.Activity.NONE)
 		{
+			// Away from the minigames, a line a minute saying where you are, so a minigame the
+			// Pilot failed to recognise still shows up in the notes.
+			if (++sinceSurvey >= SURVEY_EVERY && at != null)
+			{
+				sinceSurvey = 0;
+				JsonObject b = new JsonObject();
+				b.add("at", point(at));
+				b.addProperty("region", at.getRegionID());
+				notes.note("where", b);
+			}
 			return;
 		}
 
