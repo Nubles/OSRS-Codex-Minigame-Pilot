@@ -14,13 +14,19 @@ import com.codex.minigamepilot.pilot.Pilots;
 import com.codex.minigamepilot.ui.PilotPanel;
 import com.codex.minigamepilot.ui.Sigil;
 import com.codex.minigamepilot.ui.View;
+import com.codex.minigamepilot.pilot.FieldNotes;
+import com.google.gson.Gson;
 import com.google.inject.Provides;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 import javax.inject.Inject;
 import javax.swing.SwingUtilities;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
+import net.runelite.api.Item;
 import net.runelite.api.ItemContainer;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.ChatMessage;
@@ -30,13 +36,17 @@ import net.runelite.api.events.GameObjectDespawned;
 import net.runelite.api.events.GameObjectSpawned;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
+import net.runelite.api.events.ItemContainerChanged;
+import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.api.events.WallObjectDespawned;
 import net.runelite.api.events.WallObjectSpawned;
 import net.runelite.api.gameval.InventoryID;
+import net.runelite.client.RuneLite;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.events.RuneScapeProfileChanged;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
@@ -55,6 +65,8 @@ import net.runelite.client.util.Text;
 public class CodexMinigamePilotPlugin extends Plugin
 {
 	private static final String CONTRACT_KEY = "contract";
+	private static final String PACE_KEY = "pace.";
+	private static final String VERSION = "1.1";
 
 	@Inject
 	private Client client;
@@ -77,6 +89,9 @@ public class CodexMinigamePilotPlugin extends Plugin
 	@Inject
 	private CodexMinigamePilotConfig config;
 
+	@Inject
+	private Gson gson;
+
 	private final StepPlaque plaque = new StepPlaque();
 	private volatile Flight flight;
 	private Pilots pilots;
@@ -88,6 +103,8 @@ public class CodexMinigamePilotPlugin extends Plugin
 	private String shown;
 	private WorldPoint arrow;
 	private WorldMapPoint mapPoint;
+	private FieldNotes notes;
+	private final Map<Integer, Integer> lastInventory = new HashMap<>();
 
 	@Provides
 	CodexMinigamePilotConfig provideConfig(ConfigManager configManager)
@@ -98,7 +115,12 @@ public class CodexMinigamePilotPlugin extends Plugin
 	@Override
 	protected void startUp()
 	{
-		pilots = new Pilots(client, loadContract(), this::saveContract);
+		notes = new FieldNotes(new File(RuneLite.RUNELITE_DIR, "codex-minigame-pilot"), gson);
+		if (config.fieldNotes())
+		{
+			notes.open(VERSION);
+		}
+		pilots = new Pilots(client, loadContract(), this::saveContract, notes, this::loadBests, this::saveBests);
 		panel = new PilotPanel();
 		navButton = NavigationButton.builder()
 			.tooltip("Codex Minigame Pilot")
@@ -142,6 +164,71 @@ public class CodexMinigamePilotPlugin extends Plugin
 		pilots = null;
 		panel = null;
 		shown = null;
+		notes.shutdown();
+		notes = null;
+		lastInventory.clear();
+	}
+
+	@Subscribe
+	public void onConfigChanged(ConfigChanged event)
+	{
+		if (!CodexMinigamePilotConfig.GROUP.equals(event.getGroup()) || !"fieldNotes".equals(event.getKey()) || notes == null)
+		{
+			return;
+		}
+		if (config.fieldNotes())
+		{
+			notes.open(VERSION);
+		}
+		else
+		{
+			notes.close();
+		}
+	}
+
+	@Subscribe
+	public void onVarbitChanged(VarbitChanged event)
+	{
+		if (pilots != null)
+		{
+			pilots.varbit(event.getVarbitId(), event.getValue());
+		}
+	}
+
+	@Subscribe
+	public void onItemContainerChanged(ItemContainerChanged event)
+	{
+		if (event.getContainerId() != InventoryID.INV || pilots == null)
+		{
+			return;
+		}
+		Map<Integer, Integer> now = new HashMap<>();
+		for (Item item : event.getItemContainer().getItems())
+		{
+			if (item.getId() > 0)
+			{
+				now.merge(item.getId(), item.getQuantity(), Integer::sum);
+			}
+		}
+		Map<Integer, Integer> changes = new HashMap<>();
+		for (Map.Entry<Integer, Integer> e : now.entrySet())
+		{
+			int d = e.getValue() - lastInventory.getOrDefault(e.getKey(), 0);
+			if (d != 0)
+			{
+				changes.put(e.getKey(), d);
+			}
+		}
+		for (Map.Entry<Integer, Integer> e : lastInventory.entrySet())
+		{
+			if (!now.containsKey(e.getKey()))
+			{
+				changes.put(e.getKey(), -e.getValue());
+			}
+		}
+		lastInventory.clear();
+		lastInventory.putAll(now);
+		pilots.inventory(changes);
 	}
 
 	@Subscribe
@@ -207,13 +294,15 @@ public class CodexMinigamePilotPlugin extends Plugin
 		ChatMessageType type = event.getType();
 		if (type == ChatMessageType.GAMEMESSAGE || type == ChatMessageType.SPAM || type == ChatMessageType.MESBOX)
 		{
-			pilots.chat(Text.removeTags(event.getMessage()));
+			pilots.chat(type.name(), Text.removeTags(event.getMessage()));
 		}
 	}
 
 	@Subscribe
 	public void onMenuOptionClicked(MenuOptionClicked event)
 	{
+		pilots.click(Text.removeTags(event.getMenuOption()), Text.removeTags(event.getMenuTarget()), event.getId(),
+			event.getMenuAction() == null ? null : event.getMenuAction().name(), event.getItemId());
 		int id = event.getItemId();
 		if (id == ItemIds.COAL_BAG || id == ItemIds.COAL_BAG_OPEN)
 		{
@@ -330,6 +419,16 @@ public class CodexMinigamePilotPlugin extends Plugin
 				p.update(view);
 			}
 		});
+	}
+
+	private String loadBests(View.Activity activity)
+	{
+		return configManager.getRSProfileConfiguration(CodexMinigamePilotConfig.GROUP, PACE_KEY + activity.name());
+	}
+
+	private void saveBests(View.Activity activity, String bests)
+	{
+		configManager.setRSProfileConfiguration(CodexMinigamePilotConfig.GROUP, PACE_KEY + activity.name(), bests);
 	}
 
 	private Contract loadContract()

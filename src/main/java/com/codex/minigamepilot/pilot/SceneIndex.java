@@ -90,6 +90,13 @@ public final class SceneIndex
 		return out;
 	}
 
+	/** Whether this very object is indexed, so the field notes can show what the Pilot missed. */
+	public boolean knows(TileObject o)
+	{
+		Set<TileObject> set = byId.get(o.getId());
+		return set != null && set.contains(o) || banks.contains(o);
+	}
+
 	public Set<TileObject> banks()
 	{
 		return banks;

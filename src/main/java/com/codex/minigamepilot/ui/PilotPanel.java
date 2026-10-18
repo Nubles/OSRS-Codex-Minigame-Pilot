@@ -10,8 +10,8 @@ import net.runelite.client.ui.PluginPanel;
 
 /**
  * The Pilot side panel. The helm at the top always holds the one next action. Under it, the
- * loop with your place in it, the minigame's gauges, a checklist where there is one, and the
- * session so far. Away from the minigames it lists the three it flies and what is waiting at each.
+ * loop with your place in it, the minigame's gauges, a checklist where there is one, the pace
+ * coach's verdict on the last round, and the session so far. Away from the minigames it lists the three it flies and what is waiting at each.
  */
 public class PilotPanel extends PluginPanel
 {
@@ -84,6 +84,19 @@ public class PilotPanel extends PluginPanel
 				lines.add(new LineRow(line));
 			}
 			card.add(lines, BorderLayout.CENTER);
+			body.add(card);
+		}
+
+		if (v.pace != null)
+		{
+			body.add(new SectionHeader("Pace"));
+			Card card = new Card(new BorderLayout());
+			card.accent(v.pace.isBest ? Theme.GOLD_BRIGHT : v.pace.costly ? Theme.EMBER : Theme.GREEN);
+			StackPanel stack = new StackPanel(4, 0);
+			stack.add(new PaceDial(v.pace));
+			stack.add(Ui.wrapped(v.pace.advice, Theme.small(), v.pace.costly ? Theme.EMBER : Theme.GREEN, WIDTH - 30));
+			stack.add(Ui.wrapped(v.pace.tail, Theme.small(), Theme.TEXT_FAINT, WIDTH - 30));
+			card.add(stack, BorderLayout.CENTER);
 			body.add(card);
 		}
 

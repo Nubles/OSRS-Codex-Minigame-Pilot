@@ -107,6 +107,31 @@ public final class View
 		}
 	}
 
+	/** The pace coach's verdict on the last round. */
+	public static final class PaceCard
+	{
+		final int lastTicks;
+		/** Your best for this kind of round, this one included; 0 when there is none. */
+		final int bestTicks;
+		final boolean isBest;
+		/** Ticks over (positive) or under your best before this round; 0 when there was none. */
+		final int againstBest;
+		final String advice;
+		final boolean costly;
+		final String tail;
+
+		public PaceCard(int lastTicks, int bestTicks, boolean isBest, int againstBest, String advice, boolean costly, String tail)
+		{
+			this.lastTicks = lastTicks;
+			this.bestTicks = bestTicks;
+			this.isBest = isBest;
+			this.againstBest = againstBest;
+			this.advice = advice;
+			this.costly = costly;
+			this.tail = tail;
+		}
+	}
+
 	final boolean loggedIn;
 	final Activity activity;
 	final Step step;
@@ -119,6 +144,7 @@ public final class View
 	String linesTitle;
 	String linesNote;
 	final List<Brief> briefs = new ArrayList<>();
+	PaceCard pace;
 
 	/**
 	 * @param place where, such as "Falador" or "Lower level", or null
@@ -138,6 +164,17 @@ public final class View
 	public static View loggedOut()
 	{
 		return new View(false, Activity.NONE, null, null, null, -1);
+	}
+
+	public int loopAt()
+	{
+		return loopAt;
+	}
+
+	public View pace(PaceCard p)
+	{
+		pace = p;
+		return this;
 	}
 
 	public View gauge(Gauge g)
@@ -176,6 +213,10 @@ public final class View
 		for (Line l : lines)
 		{
 			b.append('|').append(l.text).append(l.trailing).append(l.mark);
+		}
+		if (pace != null)
+		{
+			b.append("|pace").append(pace.lastTicks).append(pace.bestTicks).append(pace.advice).append(pace.tail);
 		}
 		for (Brief r : briefs)
 		{

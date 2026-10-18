@@ -38,6 +38,14 @@ public final class MotherlodePilot
 	private int collected;
 	private int sacks;
 	private boolean wasEmptying;
+	/** The last snapshot planned from, for the field notes. */
+	Object lastState;
+
+	/** A running count of what rounds produce, for the pace coach. */
+	int units()
+	{
+		return cycle.getDeposited();
+	}
 
 	static boolean isWatched(int id)
 	{
@@ -86,6 +94,7 @@ public final class MotherlodePilot
 		Ground ground = Ground.read(client, rockfalls, ROCKFALL_COST);
 
 		MotherlodeCycle.Snapshot s = new MotherlodeCycle.Snapshot();
+		lastState = s;
 		s.payDirt = pack.count(ItemIds.PAYDIRT);
 		s.free = pack.free();
 		s.loot = pack.count(ItemIds.MOTHERLODE_LOOT);

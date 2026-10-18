@@ -43,6 +43,9 @@ public interface CodexMinigamePilotConfig extends Config
 	@ConfigSection(name = "Guidance", description = "How the next step is shown", position = 1)
 	String GUIDANCE = "guidance";
 
+	@ConfigSection(name = "Field notes", description = "A local record of what the Pilot saw, for checking its guidance", position = 2, closedByDefault = true)
+	String NOTES = "notes";
+
 	@ConfigItem(keyName = "motherlode", name = "Motherlode Mine", description = "Guide the Motherlode Mine loop", section = MINIGAMES, position = 0)
 	default boolean motherlode()
 	{
@@ -126,5 +129,17 @@ public interface CodexMinigamePilotConfig extends Config
 	default boolean worldMap()
 	{
 		return true;
+	}
+
+	@ConfigItem(
+		keyName = "fieldNotes",
+		name = "Keep field notes",
+		description = "While in a minigame, write what the Pilot sees and decides (steps, objects nearby, varbits, game messages, rounds) to .runelite/codex-minigame-pilot. Stays on your computer; nothing is sent anywhere",
+		section = NOTES,
+		position = 0
+	)
+	default boolean fieldNotes()
+	{
+		return false;
 	}
 }

@@ -65,6 +65,8 @@ public final class HomesPilot
 	private Contract.Tier asked;
 	private String lastDialog;
 	private int contracts;
+	/** The last snapshot planned from, for the field notes. */
+	Object lastState;
 	private int points;
 	private long assignedAt;
 
@@ -83,6 +85,18 @@ public final class HomesPilot
 	void load(Contract saved)
 	{
 		contract = saved;
+	}
+
+	/** A running count of what rounds produce, for the pace coach. */
+	int units()
+	{
+		return contracts;
+	}
+
+	/** Contracts are only compared with the same house and tier. */
+	String kindHint()
+	{
+		return contract == null ? null : contract.getHome().getName() + (contract.getTier() == null ? "" : " " + contract.getTier().getName());
 	}
 
 	static boolean isWatched(int id)
@@ -211,6 +225,7 @@ public final class HomesPilot
 		Pack pack = Pack.read(client);
 
 		Contract.Snapshot s = new Contract.Snapshot();
+		lastState = s;
 		for (int i = 0; i < Home.HOTSPOTS; i++)
 		{
 			s.values[i] = client.getVarbitValue(Home.HOTSPOT_VARBIT + i);

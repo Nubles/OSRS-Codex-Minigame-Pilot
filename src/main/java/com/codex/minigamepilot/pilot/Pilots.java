@@ -2,10 +2,14 @@ package com.codex.minigamepilot.pilot;
 
 import com.codex.minigamepilot.core.Bar;
 import com.codex.minigamepilot.core.Contract;
+import com.codex.minigamepilot.core.Pace;
 import com.codex.minigamepilot.ui.View;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import net.runelite.api.Client;
 import net.runelite.api.GameObject;
 import net.runelite.api.NPC;
@@ -20,11 +24,20 @@ public final class Pilots
 	private final MotherlodePilot motherlode = new MotherlodePilot();
 	private final FurnacePilot furnace = new FurnacePilot();
 	private final HomesPilot homes;
+	private final Coach coach;
+	private final Recorder recorder;
 	private View.Activity last = View.Activity.NONE;
 
-	public Pilots(Client client, Contract saved, Consumer<Contract> save)
+	/**
+	 * @param loadBests the pace coach's saved bests for a minigame
+	 * @param saveBests saves them again when a round beats one
+	 */
+	public Pilots(Client client, Contract saved, Consumer<Contract> save, FieldNotes notes,
+		Function<View.Activity, String> loadBests, BiConsumer<View.Activity, String> saveBests)
 	{
 		this.client = client;
+		this.coach = new Coach(loadBests, saveBests);
+		this.recorder = new Recorder(notes);
 		this.scene = new SceneIndex(client, id -> MotherlodePilot.isWatched(id) || FurnacePilot.isWatched(id) || HomesPilot.isWatched(id));
 		this.homes = new HomesPilot(saved, save);
 	}
@@ -42,10 +55,12 @@ public final class Pilots
 	public void loadContract(Contract saved)
 	{
 		homes.load(saved);
+		coach.reload();
 	}
 
-	public void chat(String message)
+	public void chat(String type, String message)
 	{
+		recorder.chat(type, message);
 		furnace.coalBag.chat(message);
 		homes.chat(message);
 	}
@@ -54,6 +69,21 @@ public final class Pilots
 	public void coalBagOption(String option, int inventoryCoal, int bankCoal)
 	{
 		furnace.coalBag.option(option, inventoryCoal, bankCoal);
+	}
+
+	public void varbit(int id, int value)
+	{
+		recorder.varbit(id, value);
+	}
+
+	public void click(String option, String target, int id, String action, int itemId)
+	{
+		recorder.click(option, target, id, action, itemId);
+	}
+
+	public void inventory(Map<Integer, Integer> changes)
+	{
+		recorder.inventory(changes);
 	}
 
 	/** Indexes what is already loaded, for when the plugin starts while logged in. */
@@ -88,15 +118,22 @@ public final class Pilots
 	{
 		View.Activity activity;
 		Flight flight;
+		Object state = null;
+		int units = 0;
+		String kind = null;
 		if (useMotherlode && MotherlodePilot.inMine(client))
 		{
 			activity = View.Activity.MOTHERLODE;
 			flight = motherlode.fly(client, scene, now);
+			state = motherlode.lastState;
+			units = motherlode.units();
 		}
 		else if (useFurnace && FurnacePilot.atFurnace(client))
 		{
 			activity = View.Activity.FURNACE;
 			flight = furnace.fly(client, scene, bar, cofferLow, now);
+			state = furnace.lastState;
+			units = furnace.units();
 		}
 		else if (useHomes && homes.active(client, now))
 		{
@@ -107,6 +144,9 @@ public final class Pilots
 				npcs.add(n);
 			}
 			flight = homes.fly(client, scene, npcs, now);
+			state = homes.lastState;
+			units = homes.units();
+			kind = homes.kindHint();
 		}
 		else
 		{
@@ -125,6 +165,9 @@ public final class Pilots
 			}
 			last = activity;
 		}
+		Pace.Round round = coach.tick(client, flight, units, kind);
+		coach.decorate(flight.view, activity);
+		recorder.tick(client, scene, flight, state, round);
 		return flight;
 	}
 

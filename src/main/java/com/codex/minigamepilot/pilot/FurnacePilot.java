@@ -32,8 +32,16 @@ public final class FurnacePilot
 	private Bar last;
 	private int lastBars = -1;
 	private int barsTaken;
+	/** The last snapshot planned from, for the field notes. */
+	Object lastState;
 	private int loads;
 	private int lastOre = -1;
+
+	/** A running count of what rounds produce, for the pace coach. */
+	int units()
+	{
+		return barsTaken;
+	}
 
 	static boolean isWatched(int id)
 	{
@@ -76,6 +84,7 @@ public final class FurnacePilot
 		coalBag.tick(pack.count(Bar.COAL));
 
 		FurnaceCycle.Snapshot s = new FurnaceCycle.Snapshot();
+		lastState = s;
 		s.bar = bar;
 		s.furnaceCoal = client.getVarbitValue(Bar.COAL_VARBIT);
 		s.furnaceOre = client.getVarbitValue(bar.getOreVarbit());
