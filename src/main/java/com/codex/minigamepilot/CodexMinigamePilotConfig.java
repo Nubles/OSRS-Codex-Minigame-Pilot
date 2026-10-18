@@ -1,0 +1,130 @@
+package com.codex.minigamepilot;
+
+import net.runelite.client.config.Config;
+import net.runelite.client.config.ConfigGroup;
+import net.runelite.client.config.ConfigItem;
+import net.runelite.client.config.ConfigSection;
+import net.runelite.client.config.Range;
+
+@ConfigGroup(CodexMinigamePilotConfig.GROUP)
+public interface CodexMinigamePilotConfig extends Config
+{
+	String GROUP = "codexminigamepilot";
+
+	/** Which bar the Blast Furnace pilot plans for. */
+	enum BarChoice
+	{
+		AUTO("Work it out"),
+		IRON("Iron"),
+		STEEL("Steel"),
+		MITHRIL("Mithril"),
+		ADAMANTITE("Adamantite"),
+		RUNITE("Runite"),
+		GOLD("Gold"),
+		SILVER("Silver");
+
+		private final String label;
+
+		BarChoice(String label)
+		{
+			this.label = label;
+		}
+
+		@Override
+		public String toString()
+		{
+			return label;
+		}
+	}
+
+	@ConfigSection(name = "Minigames", description = "Which minigames the Pilot guides", position = 0)
+	String MINIGAMES = "minigames";
+
+	@ConfigSection(name = "Guidance", description = "How the next step is shown", position = 1)
+	String GUIDANCE = "guidance";
+
+	@ConfigItem(keyName = "motherlode", name = "Motherlode Mine", description = "Guide the Motherlode Mine loop", section = MINIGAMES, position = 0)
+	default boolean motherlode()
+	{
+		return true;
+	}
+
+	@ConfigItem(keyName = "furnace", name = "Blast Furnace", description = "Guide the Blast Furnace loop", section = MINIGAMES, position = 1)
+	default boolean furnace()
+	{
+		return true;
+	}
+
+	@ConfigItem(keyName = "homes", name = "Mahogany Homes", description = "Guide Mahogany Homes contracts", section = MINIGAMES, position = 2)
+	default boolean homes()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "bar",
+		name = "Blast Furnace bar",
+		description = "The bar to plan for. Work it out picks it from the ore you carry, the ore in the furnace or the ore in your bank",
+		section = MINIGAMES,
+		position = 3
+	)
+	default BarChoice bar()
+	{
+		return BarChoice.AUTO;
+	}
+
+	@ConfigItem(
+		keyName = "cofferLow",
+		name = "Top up coffer below",
+		description = "Ask for the Blast Furnace coffer to be topped up when it holds fewer coins than this",
+		section = MINIGAMES,
+		position = 4
+	)
+	@Range(min = 0, max = 100_000)
+	default int cofferLow()
+	{
+		return 2500;
+	}
+
+	@ConfigItem(keyName = "plaque", name = "Step plaque", description = "Show the next step on a small plaque in the game view", section = GUIDANCE, position = 0)
+	default boolean plaque()
+	{
+		return true;
+	}
+
+	@ConfigItem(keyName = "route", name = "Path", description = "Draw the walk to the next step as a trail on the ground", section = GUIDANCE, position = 1)
+	default boolean route()
+	{
+		return true;
+	}
+
+	@ConfigItem(keyName = "minimap", name = "Path on minimap", description = "Draw the walk on the minimap too", section = GUIDANCE, position = 2)
+	default boolean minimap()
+	{
+		return true;
+	}
+
+	@ConfigItem(keyName = "labels", name = "Action labels", description = "Name the action over the thing to click, such as Deposit", section = GUIDANCE, position = 3)
+	default boolean labels()
+	{
+		return true;
+	}
+
+	@ConfigItem(keyName = "others", name = "Mark what comes after", description = "Quietly outline the next vein, and furniture still to fix", section = GUIDANCE, position = 4)
+	default boolean others()
+	{
+		return true;
+	}
+
+	@ConfigItem(keyName = "hintArrow", name = "Hint arrow", description = "Point the game's hint arrow at a Mahogany Homes client's house", section = GUIDANCE, position = 5)
+	default boolean hintArrow()
+	{
+		return true;
+	}
+
+	@ConfigItem(keyName = "worldMap", name = "World map marker", description = "Mark a Mahogany Homes client's house on the world map", section = GUIDANCE, position = 6)
+	default boolean worldMap()
+	{
+		return true;
+	}
+}
