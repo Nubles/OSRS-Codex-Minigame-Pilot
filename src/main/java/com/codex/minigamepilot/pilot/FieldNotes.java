@@ -13,7 +13,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Field notes: an optional, local record of what the Pilot saw and decided, one JSON object a
@@ -21,9 +22,9 @@ import lombok.extern.slf4j.Slf4j;
  * against a real session: which objects and varbits the game showed, which step was chosen,
  * where a target could not be found, and how each round went. Nothing is sent anywhere.
  */
-@Slf4j
 public final class FieldNotes
 {
+	private static final Logger log = LoggerFactory.getLogger(FieldNotes.class);
 	/** A notes file stops growing past this, so a forgotten setting cannot fill a disk. */
 	private static final long LIMIT = 25L * 1024 * 1024;
 
