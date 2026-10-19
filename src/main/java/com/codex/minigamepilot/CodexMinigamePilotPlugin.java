@@ -162,6 +162,9 @@ public class CodexMinigamePilotPlugin extends Plugin
 			key -> configManager.getRSProfileConfiguration(CodexMinigamePilotConfig.GROUP, key),
 			(key, value) -> configManager.setRSProfileConfiguration(CodexMinigamePilotConfig.GROUP, key, value),
 			this::bankStock);
+		// Turned on while logged in, no profile change arrives for this account: note it now, or a
+		// later login to another account would not be told apart from it.
+		pilots.profile(configManager.getRSProfileKey());
 		goals = new GoalWatch(key -> configManager.getRSProfileConfiguration(CodexMinigamePilotConfig.GROUP, key),
 			(key, value) -> configManager.setRSProfileConfiguration(CodexMinigamePilotConfig.GROUP, key, value),
 			this::navigatorBoard);
