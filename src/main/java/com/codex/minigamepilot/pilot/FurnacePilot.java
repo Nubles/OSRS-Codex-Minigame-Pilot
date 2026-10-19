@@ -92,14 +92,13 @@ public final class FurnacePilot
 		return com.codex.minigamepilot.core.Visit.of(now, session.activeMs(), parts);
 	}
 
-	/** @param lastVisit the summary saved when you last left the furnace, or null */
-	/** Logged in again or hopped: readings start afresh, ore on the belt stays on the belt. */
 	/** Another account logged in: the session and its counts start over on its first tick. */
 	void newAccount()
 	{
 		session.startOver();
 	}
 
+	/** Logged in again or hopped: readings start afresh, ore on the belt stays on the belt. */
 	void relogged()
 	{
 		cycle.relog();
@@ -107,7 +106,10 @@ public final class FurnacePilot
 		lastOre = -1;
 	}
 
-	/** @param best your fastest visit, or null */
+	/**
+	 * @param lastVisit the summary saved when you last left the furnace, or null
+	 * @param best your fastest visit, or null
+	 */
 	View.Brief brief(com.codex.minigamepilot.core.Visit lastVisit, com.codex.minigamepilot.core.BestVisit best, long now)
 	{
 		String status = lastVisit != null ? lastVisit.status(now)

@@ -64,4 +64,17 @@ public class SessionTest
 		assertFalse("back on the same account", Pilots.switched("alpha", "alpha"));
 		assertTrue(Pilots.switched("alpha", "beta"));
 	}
+
+	@Test
+	public void anotherAccountsSessionIsNotShownBeforeItsFirstTick()
+	{
+		// The card away from the mine reads the session's counts; between another account's login
+		// and its first tick there it would have given the last account's pay-dirt as its own.
+		Session s = new Session(net.runelite.api.Skill.MINING);
+		s.tick(1000, true, 1_760_000_000_000L);
+		assertTrue(s.begun());
+		s.startOver();
+		assertFalse(s.begun());
+		assertEquals(0, s.startedAt());
+	}
 }

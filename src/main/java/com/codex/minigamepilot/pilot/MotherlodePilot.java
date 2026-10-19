@@ -87,13 +87,13 @@ public final class MotherlodePilot
 		haul.forget();
 	}
 
-	/** Logged in again or hopped: readings start afresh, pay-dirt in flight stays in flight. */
 	/** Another account logged in: the session and its counts start over on its first tick. */
 	void newAccount()
 	{
 		session.startOver();
 	}
 
+	/** Logged in again or hopped: readings start afresh, pay-dirt in flight stays in flight. */
 	void relogged()
 	{
 		cycle.relog();

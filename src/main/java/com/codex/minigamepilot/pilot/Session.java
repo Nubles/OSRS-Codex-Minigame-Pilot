@@ -61,9 +61,10 @@ final class Session
 		return started != 0 && now - last > BREAK_MS;
 	}
 
+	/** Whether a session is under way; not once another account has logged in, until its first tick. */
 	boolean begun()
 	{
-		return started > 0;
+		return started > 0 && !startOver;
 	}
 
 	/**
@@ -78,7 +79,7 @@ final class Session
 	/** When this session began, or 0 before it has; a new one after a break begins again. */
 	long startedAt()
 	{
-		return started;
+		return startOver ? 0 : started;
 	}
 
 	/** How long the session has run, to its last tick. */

@@ -77,6 +77,12 @@ public final class BestVisit
 		return held.startedAt == reading.startedAt ? Outcome.QUIET : Outcome.BEATEN;
 	}
 
+	/** Whether two readings are of the same session. */
+	public boolean sameSession(BestVisit other)
+	{
+		return other != null && other.startedAt == startedAt;
+	}
+
 	public long getPerHour()
 	{
 		return perHour;

@@ -94,6 +94,7 @@ public final class Pilots
 			furnace.newAccount();
 			homes.newAccount();
 			said.clear();
+			unsaid.clear();
 		}
 		if (profile != null)
 		{
@@ -270,9 +271,9 @@ public final class Pilots
 
 	/**
 	 * Saves a visit's summary and weighs its pace against your best visit, and holds both for
-	 * the chat when it was walked out of.
+	 * the chat when it was walked out of. Package-private for tests.
 	 */
-	private void keep(View.Activity activity, Visit visit, BestVisit pace, boolean say)
+	void keep(View.Activity activity, Visit visit, BestVisit pace, boolean say)
 	{
 		if (visit == null)
 		{
@@ -283,6 +284,7 @@ public final class Pilots
 			saveKey.accept(VISIT_KEY + activity.name(), visit.encode());
 		}
 		String beat = null;
+		String unit = activity == View.Activity.FURNACE ? FurnacePilot.UNIT : MotherlodePilot.UNIT;
 		BestVisit held = best(activity);
 		BestVisit.Outcome outcome = BestVisit.judge(held, pace);
 		if (outcome != BestVisit.Outcome.KEPT && saveKey != null)
@@ -290,7 +292,25 @@ public final class Pilots
 			saveKey.accept(BEST_KEY + activity.name(), pace.encode());
 			if (outcome == BestVisit.Outcome.BEATEN)
 			{
-				beat = pace.beat(held, activity == View.Activity.FURNACE ? FurnacePilot.UNIT : MotherlodePilot.UNIT);
+				if (say)
+				{
+					beat = pace.beat(held, unit);
+				}
+				else
+				{
+					// Beaten at a hop or logout, where nothing is said: once the session goes on,
+					// its later readings only weigh against its own, so keep what it beat.
+					unsaid.put(activity, held);
+				}
+			}
+		}
+		if (say)
+		{
+			BestVisit from = unsaid.remove(activity);
+			BestVisit record = beat == null && from != null ? best(activity) : null;
+			if (record != null && record.sameSession(pace))
+			{
+				beat = record.beat(from, unit);
 			}
 		}
 		// A session carries on when you step out and back in, so leaving again with nothing more
@@ -301,6 +321,9 @@ public final class Pilots
 			said.put(activity, visit);
 		}
 	}
+
+	/** The other session's record a visit beat while nothing could be said, to say as it is walked out of. */
+	private final java.util.Map<View.Activity, BestVisit> unsaid = new java.util.EnumMap<>(View.Activity.class);
 
 	/** Where each minigame's fastest visit is kept: this and the minigame's name. */
 	static final String BEST_KEY = "best.";
