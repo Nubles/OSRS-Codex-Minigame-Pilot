@@ -42,6 +42,38 @@ public class FurnaceCycleTest
 		assertTrue(FurnaceCycle.coalRunNext(s));
 	}
 
+	/**
+	 * Plays runite out trip by trip as the pilot calls them: coal trips bring a pack and a bag,
+	 * ore trips burn a load less what the bag brings. About one and a half coal trips go to each
+	 * ore trip, the same as the "what pays" ranking counts, not three.
+	 */
+	@Test
+	public void runiteTakesAboutOneAndAHalfCoalTripsAnOreTrip()
+	{
+		FurnaceCycle.Snapshot s = snap(Bar.RUNITE);
+		s.coalBag = true;
+		s.bagCapacity = 27;
+		s.furnaceCoal = 0;
+		int coalTrips = 0;
+		int oreTrips = 0;
+		while (oreTrips < 1000)
+		{
+			if (FurnaceCycle.coalRunNext(s))
+			{
+				s.furnaceCoal += FurnaceCycle.coalTrip(s);
+				coalTrips++;
+			}
+			else
+			{
+				s.furnaceCoal -= Bar.RUNITE.getCoal() * FurnaceCycle.load(s) - s.bagCapacity;
+				oreTrips++;
+			}
+		}
+		double perOre = coalTrips / (double) oreTrips;
+		assertEquals(1.45, perOre, 0.01);
+		assertEquals(BarPick.coalTrips(Bar.RUNITE.getCoal(), FurnaceCycle.load(s), 27), perOre, 0.01);
+	}
+
 	@Test
 	public void atTheBankFillsTheBagThenWithdraws()
 	{

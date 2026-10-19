@@ -20,7 +20,7 @@ It is part of the **Codex** suite, alongside [Codex Navigator](https://github.co
 - **Either level.** It tells the upper and lower levels apart and sends you to the ladder when what you need is on the other.
 
 ### Blast Furnace
-- **Coal trips worked out ahead.** At the bank it compares the coal in the furnace, plus a full coal bag, with what a load of ore will burn, and calls a coal trip only when the ore would otherwise sit unsmelted. Steel with a coal bag never needs one; runite gets three to each ore trip.
+- **Coal trips worked out ahead.** At the bank it compares the coal in the furnace, plus a full coal bag, with what a load of ore will burn, and calls a coal trip only when the ore would otherwise sit unsmelted. Steel with a coal bag never needs one, mithril needs one every other ore trip, and runite about one and a half to each ore trip.
 - **The whole round.** Deposit bars, fill the coal bag, withdraw coal or ore (ringed in the bank), load the belt, empty the coal bag and load again, put on ice gloves while the bars smelt, take them, bank. Gold asks for goldsmith gauntlets before the ore goes on the belt.
 - **Coffer watch.** It asks you to top up the coffer before it runs dry, and the panel shows how many minutes of smelting are left.
 - **Any bar.** Iron, steel, mithril, adamantite, runite, gold and silver, picked from the ore you carry, the ore in the furnace or the ore in your bank, or chosen in the settings.
@@ -71,11 +71,11 @@ Each minigame works toward something, chosen in the settings: a reward from its 
 - **Mahogany Homes** saves points for the plank sack, the carpenter's outfit, Amy's saw or the Hosidius blueprints, and counts the contracts left at your tier.
 - **Blast Furnace** has no shop, so its goal is a Smithing level, the next one unless you pick another.
 
-Pieces you already own are ticked off wherever they are: carried, worn, or in your bank as it was the last time you opened it. Nuggets in the bank count toward the total. Your Mahogany Homes points are read from the message after each contract.
+Pieces you already own are ticked off wherever they are: carried, worn, or in your bank as it was the last time you opened it. Nuggets in the bank count toward the total. Your Mahogany Homes points are read from the message after each contract. The card shows how much is left, what that comes to in contracts and time at the pace you have kept this session, and lights any piece you can already pay for. Once every reward is owned, the goal moves to the next level. Away from the minigames, the panel lists every goal at once.
 
 Whether that message's total is what you can spend or everything you have ever earned, the Pilot works out as you play rather than guessing. A total that drops can only be a balance; so can a total smaller than what the rewards you own cost. Buy a reward between two contracts and the next total settles it: a balance falls by the price, a lifetime total keeps climbing by a contract's few points. A reward that turns up in your pack from nowhere you had it (not carried, worn or in the bank a moment ago) counts as bought. Until it is settled, the card takes the lower of the two readings, so it never lights a reward you cannot afford yet.
 
-**With Codex Navigator.** If you use [Codex Navigator](https://github.com/Nubles/OSRS-Codex-Navigator), a level goal the Pilot picks (the Blast Furnace level left at 0, or Next level and Next reward once the rewards are owned) follows the level your pinned goals need: your focus goal's first, otherwise the nearest one up. The card says which goal it is for, such as "Dragon Slayer II needs Smithing 70". Without Navigator nothing changes. The card shows how much is left, what that comes to in contracts and time at the pace you have kept this session, and lights any piece you can already pay for. Once every reward is owned, the goal moves to the next level. Away from the minigames, the panel lists every goal at once.
+**With Codex Navigator.** If you use [Codex Navigator](https://github.com/Nubles/OSRS-Codex-Navigator), a level goal the Pilot picks (the Blast Furnace level left at 0, or Next level and Next reward once the rewards are owned) follows the level your pinned goals need: your focus goal's first, otherwise the nearest one up. The card says which goal it is for, such as "Dragon Slayer II needs Smithing 70". Without Navigator nothing changes.
 
 <p align="center">
   <img src="docs/screenshots/goal-motherlode.png" width="225" alt="Goal and stage splits at the Motherlode Mine">
