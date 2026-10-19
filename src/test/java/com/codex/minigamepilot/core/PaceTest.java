@@ -170,4 +170,58 @@ public class PaceTest
 		assertEquals("1:00", Pace.clock(100));
 		assertEquals("0:06", Pace.clock(10));
 	}
+
+	@Test
+	public void eachStageIsTimedAndTheSlowestAgainstItsBestIsNamed()
+	{
+		Pace p = new Pace();
+		run(p, 1, 0, "mine", "a vein", false, 0, -1, 0);
+		// A first round: 4 mining, 6 at the hopper.
+		run(p, 3, 0, "mine", "a vein", false, 0, -1, 0);
+		run(p, 6, 1, "hopper", "the hopper", false, 1, -1, 0);
+		Pace.Round first = run(p, 1, 0, "mine", "a vein", false, 0, -1, 27);
+		assertEquals(4, first.stageTicks(0));
+		assertEquals(6, first.stageTicks(1));
+		assertEquals(0, first.stageBest(1));
+		assertEquals(-1, first.slowestStage());
+		// A second round of the same kind loses 7 ticks at the hopper.
+		run(p, 3, 0, "mine", "a vein", false, 0, -1, 27);
+		run(p, 13, 1, "hopper", "the hopper", false, 1, -1, 27);
+		Pace.Round second = run(p, 1, 0, "mine", "a vein", false, 0, -1, 54);
+		assertEquals(first.kind, second.kind);
+		assertEquals(6, second.stageBest(1));
+		assertEquals(13, second.stageTicks(1));
+		assertEquals(1, second.slowestStage());
+		assertArrayEquals6(p.stageBests(first.kind));
+	}
+
+	private static void assertArrayEquals6(int[] bests)
+	{
+		assertEquals(4, bests[0]);
+		assertEquals(6, bests[1]);
+	}
+
+	@Test
+	public void stageBestsAreSavedAndReadBackBesideRoundBests()
+	{
+		Pace p = new Pace();
+		p.loadBests("3/27=15;3/27#0=4;3/27#1=6;3/27#99=2;bad#x=3");
+		assertEquals(15, p.best("3/27"));
+		assertEquals(4, p.stageBests("3/27")[0]);
+		assertEquals(6, p.stageBests("3/27")[1]);
+		assertEquals(0, p.best("3/27#0"));
+		assertEquals("3/27=15;3/27#0=4;3/27#1=6", p.saveBests());
+	}
+
+	@Test
+	public void fieldNotesSeeTheRoundAsBefore()
+	{
+		Pace p = new Pace();
+		run(p, 2, 0, "mine", "a vein", false, 0, -1, 0);
+		run(p, 2, 1, "hopper", "the hopper", false, 0, -1, 0);
+		Pace.Round r = run(p, 1, 0, "mine", "a vein", false, 0, -1, 27);
+		String json = new com.google.gson.Gson().toJson(r);
+		assertFalse(json, json.contains("stage"));
+		assertTrue(json, json.contains("\"ticks\":4"));
+	}
 }

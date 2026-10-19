@@ -85,6 +85,16 @@ public final class FurnaceCycle
 		lastFurnace = inFurnace;
 	}
 
+	/**
+	 * After logging in or hopping: the last readings are no base for change, but ore already on
+	 * the belt is still on its way.
+	 */
+	public void relog()
+	{
+		lastCarried = -1;
+		lastFurnace = -1;
+	}
+
 	public void reset()
 	{
 		onBelt = 0;

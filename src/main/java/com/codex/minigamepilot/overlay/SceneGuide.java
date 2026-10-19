@@ -3,7 +3,6 @@ package com.codex.minigamepilot.overlay;
 import com.codex.minigamepilot.pilot.Flight;
 import com.codex.minigamepilot.ui.Theme;
 import com.codex.minigamepilot.ui.Ui;
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
@@ -11,7 +10,6 @@ import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
-import java.awt.geom.RoundRectangle2D;
 import java.util.List;
 import java.util.function.Supplier;
 import net.runelite.api.Client;
@@ -34,11 +32,17 @@ public class SceneGuide extends Overlay
 {
 	/** Beads drawn at most, so a long walk does not paint the whole screen. */
 	private static final int MAX_BEADS = 40;
+	private static final Color PLATE_RIM_GOLD = Theme.alpha(Theme.GOLD, 200);
+	private static final Color PLATE_RIM_TEAL = Theme.alpha(Theme.TEAL, 200);
+	private static final Color PLATE_TEXT_GOLD = Theme.mix(Theme.GOLD, Color.WHITE, 0.3);
+	private static final Color PLATE_TEXT_TEAL = Theme.mix(Theme.TEAL, Color.WHITE, 0.3);
 	private static final int PULSE_MS = 1600;
 
 	private final Client client;
 	private final Supplier<Flight> flight;
 	private final Supplier<Settings> settings;
+	/** Reused for every bead, so the trail allocates nothing per frame. */
+	private final Ellipse2D.Float bead = new Ellipse2D.Float();
 
 	/** What to draw, from the plugin's config. */
 	public static final class Settings
@@ -83,8 +87,8 @@ public class SceneGuide extends Overlay
 				Shape box = o.getClickbox();
 				if (box != null)
 				{
-					g.setStroke(new BasicStroke(1f));
-					g.setColor(Theme.alpha(Theme.GOLD, 90));
+					g.setStroke(Ink.THIN);
+					g.setColor(Ink.OTHER_RIM);
 					g.draw(box);
 				}
 			}
@@ -125,36 +129,38 @@ public class SceneGuide extends Overlay
 				Polygon tile = Perspective.getCanvasTilePoly(client, lp);
 				if (tile != null)
 				{
-					g.setColor(Theme.alpha(Theme.TEAL, 40));
+					g.setColor(Ink.END_FILL);
 					g.fill(tile);
-					g.setStroke(new BasicStroke(1.5f));
-					g.setColor(Theme.alpha(Theme.TEAL, 200));
+					g.setStroke(Ink.MEDIUM);
+					g.setColor(Ink.END_RIM);
 					g.draw(tile);
 				}
 				continue;
 			}
 			double t = n <= 1 ? 1 : i / (double) (n - 1);
 			float r = (float) (2.2 + 1.4 * t);
-			int alpha = (int) Math.round(waiting ? 60 : 110 + 120 * t);
-			g.setColor(Theme.alpha(Color.BLACK, alpha / 2));
-			g.fill(new Ellipse2D.Float(p.getX() - r + 1, p.getY() - r + 1, r * 2, r * 2));
-			g.setColor(Theme.alpha(Theme.mix(Theme.TEAL, Theme.TEXT, 0.25 * t), alpha));
-			g.fill(new Ellipse2D.Float(p.getX() - r, p.getY() - r, r * 2, r * 2));
+			g.setColor(waiting ? Ink.WAIT_SHADOW : Ink.at(Ink.BEAD_SHADOW, t));
+			bead.setFrame(p.getX() - r + 1, p.getY() - r + 1, r * 2, r * 2);
+			g.fill(bead);
+			g.setColor(waiting ? Ink.WAIT_BEAD : Ink.at(Ink.BEAD, t));
+			bead.setFrame(p.getX() - r, p.getY() - r, r * 2, r * 2);
+			g.fill(bead);
 		}
 	}
 
 	private void drawObject(Graphics2D g, TileObject o, Flight f, double pulse, boolean label)
 	{
 		Shape box = o.getClickbox();
-		Color tone = f.step.isWaiting() ? Theme.TEAL : Theme.GOLD;
+		boolean teal = f.step.isWaiting();
+		Color tone = teal ? Theme.TEAL : Theme.GOLD;
 		if (box != null)
 		{
 			Point mouse = client.getMouseCanvasPosition();
 			boolean hover = mouse != null && box.contains(mouse.getX(), mouse.getY());
-			g.setColor(Theme.alpha(tone, (int) Math.round(hover ? 90 : 30 + 40 * pulse)));
+			g.setColor(hover ? (teal ? Ink.TEAL_HOVER : Ink.GOLD_HOVER) : Ink.at(teal ? Ink.TEAL_PULSE : Ink.GOLD_PULSE, pulse));
 			g.fill(box);
-			g.setStroke(new BasicStroke(2f));
-			g.setColor(Theme.alpha(Theme.mix(tone, Color.WHITE, hover ? 0.4 : 0.15), 230));
+			g.setStroke(Ink.THICK);
+			g.setColor(teal ? (hover ? Ink.TEAL_RIM_HOVER : Ink.TEAL_RIM) : (hover ? Ink.GOLD_RIM_HOVER : Ink.GOLD_RIM));
 			g.draw(box);
 		}
 		if (label)
@@ -172,10 +178,10 @@ public class SceneGuide extends Overlay
 		Shape hull = npc.getConvexHull();
 		if (hull != null)
 		{
-			g.setColor(Theme.alpha(Theme.GOLD, (int) Math.round(25 + 35 * pulse)));
+			g.setColor(Ink.at(Ink.HULL_PULSE, pulse));
 			g.fill(hull);
-			g.setStroke(new BasicStroke(2f));
-			g.setColor(Theme.alpha(Theme.GOLD_BRIGHT, 220));
+			g.setStroke(Ink.THICK);
+			g.setColor(Ink.HULL_RIM);
 			g.draw(hull);
 		}
 		if (label)
@@ -197,12 +203,12 @@ public class SceneGuide extends Overlay
 		int h = fm.getAscent() + 8;
 		int left = x + fm.stringWidth(text) / 2 - w / 2;
 		int top = y - fm.getAscent() - 4;
-		RoundRectangle2D shape = new RoundRectangle2D.Float(left + 0.5f, top + 0.5f, w, h, 8, 8);
-		g.setColor(Theme.alpha(Theme.INK_DEEP, 215));
-		g.fill(shape);
-		g.setStroke(new BasicStroke(1f));
-		g.setColor(Theme.alpha(tone, 200));
-		g.draw(shape);
-		Ui.shadowed(g, text, left + 7, top + fm.getAscent() + 3, Theme.mix(tone, Color.WHITE, 0.3));
+		g.setColor(Ink.PLATE_FILL);
+		g.fillRoundRect(left, top, w, h, 8, 8);
+		g.setStroke(Ink.THIN);
+		boolean teal = tone == Theme.TEAL;
+		g.setColor(teal ? PLATE_RIM_TEAL : PLATE_RIM_GOLD);
+		g.drawRoundRect(left, top, w, h, 8, 8);
+		Ui.shadowed(g, text, left + 7, top + fm.getAscent() + 3, teal ? PLATE_TEXT_TEAL : PLATE_TEXT_GOLD);
 	}
 }

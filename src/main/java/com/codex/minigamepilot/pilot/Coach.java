@@ -88,7 +88,8 @@ final class Coach
 		int route = flight.route == null || flight.route.isEmpty() ? -1 : flight.route.size();
 		Pace pace = pace(flight.activity);
 		Pace.Round done = pace.tick(flight.view.loopAt(), leg, place(step), still, step.isWaiting(), moved, route, units, kindHint);
-		if (done != null && done.isBest())
+		// Every fair round can set a stage best even when the round as a whole was slower.
+		if (done != null && !done.hadBreak)
 		{
 			save.accept(flight.activity, pace.saveBests());
 		}
@@ -125,9 +126,43 @@ final class Coach
 		String tail = rounds + (rounds == 1 ? " round" : " rounds")
 			+ (typical > 0 && rounds > 2 ? " · usually " + Pace.clock(typical) : "")
 			+ (p.idleTotal() > 0 ? " · " + Pace.clock(p.idleTotal()) + " idle" : "");
-		view.pace(new View.PaceCard(last.ticks, best, last.isBest(),
+		View.PaceCard card = new View.PaceCard(last.ticks, best, last.isBest(),
 			last.bestBefore > 0 && !last.hadBreak ? last.ticks - last.bestBefore : 0,
-			last.advice(), last.costly(), tail));
+			last.advice(), last.costly(), tail);
+		String[] names = view.loopNames();
+		if (names != null && !last.hadBreak)
+		{
+			card.splits(splits(last, names), splitNote(last, names));
+		}
+		view.pace(card);
+	}
+
+	/** The round's stages in loop order, those it spent time in. */
+	static java.util.List<View.Split> splits(Pace.Round round, String[] names)
+	{
+		java.util.List<View.Split> list = new java.util.ArrayList<>();
+		int slow = round.slowestStage();
+		for (int s = 0; s < names.length; s++)
+		{
+			if (round.stageTicks(s) > 0)
+			{
+				list.add(new View.Split(names[s], round.stageTicks(s), round.stageBest(s), s == slow));
+			}
+		}
+		return list;
+	}
+
+	/** "Bank took 0:14, 0:05 over your best", or null when no stage lost much. */
+	static String splitNote(Pace.Round round, String[] names)
+	{
+		int slow = round.slowestStage();
+		if (slow < 0 || slow >= names.length)
+		{
+			return null;
+		}
+		int ticks = round.stageTicks(slow);
+		int over = ticks - round.stageBest(slow);
+		return names[slow] + " took " + Pace.clock(ticks) + ", " + Pace.clock(over) + " over your best for it";
 	}
 
 	private static boolean busy(Client client)

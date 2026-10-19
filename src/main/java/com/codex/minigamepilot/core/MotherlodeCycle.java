@@ -68,6 +68,16 @@ public final class MotherlodeCycle
 		lastSack = sack;
 	}
 
+	/**
+	 * After logging in or hopping: the last readings are no base for change, but pay-dirt already
+	 * in the hopper is still on its way to the sack.
+	 */
+	public void relog()
+	{
+		lastPayDirt = -1;
+		lastSack = -1;
+	}
+
 	/** Forgets what was in flight, such as after leaving the mine. */
 	public void reset()
 	{

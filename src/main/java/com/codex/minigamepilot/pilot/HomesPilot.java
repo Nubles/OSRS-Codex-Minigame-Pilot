@@ -1,9 +1,12 @@
 package com.codex.minigamepilot.pilot;
 
+import com.codex.minigamepilot.core.BankStock;
 import com.codex.minigamepilot.core.Contract;
+import com.codex.minigamepilot.core.ContractBook;
 import com.codex.minigamepilot.core.Home;
 import com.codex.minigamepilot.core.ItemIds;
 import com.codex.minigamepilot.core.Step;
+import com.codex.minigamepilot.core.Supplies;
 import com.codex.minigamepilot.ui.Theme;
 import com.codex.minigamepilot.ui.View;
 import java.util.ArrayList;
@@ -12,7 +15,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.IntUnaryOperator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.runelite.api.Client;
@@ -59,21 +65,153 @@ public final class HomesPilot
 	}
 
 	private final Session session = new Session(Skill.CONSTRUCTION);
+
+	/** Another account logged in: the session and its counts start over on its first tick. */
+	void newAccount()
+	{
+		session.startOver();
+	}
 	private final Consumer<Contract> save;
 	private final Map<Integer, String> objectNames = new HashMap<>();
 	private Contract contract;
 	private Contract.Tier asked;
 	private String lastDialog;
 	private int contracts;
+	/** Contracts and points from before this session began, left out of its counts. */
+	private int contractsBefore;
+	private int pointsBefore;
 	/** The last snapshot planned from, for the field notes. */
 	Object lastState;
+	/** The contract tier's planks carried, plank sack included, as of the last tick flown. */
+	private int lastPlanks;
 	private int points;
 	private long assignedAt;
 
-	HomesPilot(Contract saved, Consumer<Contract> save)
+	/** Where the contract book is saved for this account. */
+	static final String BOOK_KEY = "homes.book";
+	/** Ticks after the hand-in message before its experience is read, so the reward has landed. */
+	static final int SETTLE_TICKS = 3;
+	private final Function<String, String> load;
+	private final BiConsumer<String, String> saveKey;
+	private ContractBook book = new ContractBook();
+	/** The contract being measured: its house, the experience when work began, and what it takes. */
+	private Home meterHome;
+	/** Experience when the job was first seen untouched, -1 before that, -2 when first seen part done. */
+	private long meterXp = -1;
+	private int meterPlanks;
+	private int meterSteel;
+	private Contract.Tier meterTier;
+	/** A handed-in contract waiting for its experience to settle: ticks left, or -1. */
+	private int settleIn = -1;
+	private long settleXp;
+	private int settlePlanks;
+	private int settleSteel;
+	private Contract.Tier settleTier;
+	private long settleSeconds;
+	/** When the last contract was handed in, for the time a whole loop takes. */
+	private long lastHandIn;
+
+	HomesPilot(Contract saved, Consumer<Contract> save, Function<String, String> load, BiConsumer<String, String> saveKey)
 	{
 		this.contract = saved;
 		this.save = save;
+		this.load = load;
+		this.saveKey = saveKey;
+		reloadBook();
+	}
+
+	/** This account's contract book, after logging in or switching account. */
+	void reloadBook()
+	{
+		book = ContractBook.decode(load == null ? null : load.apply(BOOK_KEY));
+		meterHome = null;
+		meterXp = -1;
+		settleIn = -1;
+		lastHandIn = 0;
+	}
+
+	ContractBook getBook()
+	{
+		return book;
+	}
+
+	/**
+	 * Measures the contract open now: the first time its furniture is seen with every piece still
+	 * to do, the experience and the planks and steel the job takes are noted. A job first seen part
+	 * done is not measured, since what was done before would be missing.
+	 */
+	void meter(Contract open, int[] values, long xp)
+	{
+		if (open == null || open.getTier() == null)
+		{
+			return;
+		}
+		if (open.getHome() != meterHome)
+		{
+			meterHome = open.getHome();
+			meterXp = -1;
+		}
+		// No experience at all means the skills have not arrived yet (just logged in): wait for them.
+		if (meterXp != -1 || xp <= 0 || !Contract.known(values))
+		{
+			return;
+		}
+		int used = 0;
+		for (int v : values)
+		{
+			if (v != 0)
+			{
+				used++;
+			}
+		}
+		int left = open.remaining(values).size();
+		if (left == 0)
+		{
+			// Every piece done: the end of a job (this one or the last), which says nothing yet.
+			return;
+		}
+		if (left == used)
+		{
+			meterXp = xp;
+			meterPlanks = open.planksNeeded(values);
+			meterSteel = open.steelNeeded(values);
+			meterTier = open.getTier();
+		}
+		else
+		{
+			meterXp = -2;
+		}
+	}
+
+	/** The hand-in message: a measured contract waits a few ticks for its experience to land. */
+	private void handedIn(long now)
+	{
+		if (contract != null && contract.getHome() == meterHome && meterXp >= 0)
+		{
+			settleIn = SETTLE_TICKS;
+			settleXp = meterXp;
+			settlePlanks = meterPlanks;
+			settleSteel = meterSteel;
+			settleTier = meterTier;
+			settleSeconds = lastHandIn > 0 ? (now - lastHandIn) / 1000 : 0;
+		}
+		lastHandIn = now;
+		meterHome = null;
+		meterXp = -1;
+	}
+
+	/** Every tick, wherever you are: files a handed-in contract once its experience has landed. */
+	void settle(long xp)
+	{
+		if (settleIn < 0 || --settleIn > 0)
+		{
+			return;
+		}
+		settleIn = -1;
+		if (xp > 0 && book.record(settleTier, xp - settleXp, settlePlanks, settleSteel, settleSeconds) && saveKey != null)
+		{
+			saveKey.accept(BOOK_KEY, book.encode());
+		}
 	}
 
 	Contract getContract()
@@ -139,11 +277,20 @@ public final class HomesPilot
 		return tier != null && Pack.read(client).carries(tier.getPlank());
 	}
 
-	View.Brief brief()
+	View.Brief brief(BankStock stock, int constructionLevel)
 	{
 		String status = contract == null ? "No contract open"
 			: (contract.getTier() == null ? "A" : contract.getTier().getName()) + " contract for " + contract.getHome().getName()
 			+ " in " + contract.getHome().getCity().getName();
+		Contract.Tier tier = contract != null && contract.getTier() != null ? contract.getTier() : Contract.Tier.forLevel(constructionLevel);
+		if (stock != null && tier != null)
+		{
+			Supplies.Homes h = Supplies.homes(tier, stock.count(tier.getPlank()), stock.count(Contract.STEEL_BAR), book.tally(tier));
+			if (h.getContracts() >= 0)
+			{
+				status += ". In the bank: " + Character.toLowerCase(h.headline().charAt(0)) + h.headline().substring(1);
+			}
+		}
 		return new View.Brief(View.Activity.HOMES, status,
 			"Contracts from Amy in Falador, Marlo in Varrock, Ellie in East Ardougne or Angelo in Hosidius.");
 	}
@@ -158,6 +305,7 @@ public final class HomesPilot
 		}
 		if (FINISHED.matcher(text).find())
 		{
+			handedIn(System.currentTimeMillis());
 			if (contract != null)
 			{
 				contracts++;
@@ -250,11 +398,15 @@ public final class HomesPilot
 			}
 		}
 		s.steelBars = pack.count(Contract.STEEL_BAR);
+		meter(contract, s.values, client.getSkillExperience(Skill.CONSTRUCTION));
+		lastPlanks = s.planks;
 		Home home = contract == null ? null : contract.getHome();
 		s.atHome = home != null && home.contains(at.getX(), at.getY());
-		if (contract != null)
+		if (contract != null && session.tick(client, now))
 		{
-			session.tick(client, now);
+			// A new session after a break: contracts from the last one would inflate its hourly rate.
+			contractsBefore = contracts;
+			pointsBefore = points;
 		}
 
 		Step step = Contract.next(contract, s);
@@ -385,8 +537,8 @@ public final class HomesPilot
 		}
 		if (session.begun())
 		{
-			view.stat(new View.Stat(String.valueOf(contracts), "Contracts", session.perHour(contracts, now), Theme.GOLD));
-			view.stat(new View.Stat(String.valueOf(points), "Points", "From finished contracts", Theme.TEAL));
+			view.stat(new View.Stat(String.valueOf(contracts - contractsBefore), "Contracts", session.perHour(contracts - contractsBefore, now), Theme.GOLD));
+			view.stat(new View.Stat(String.valueOf(points - pointsBefore), "Points", "From contracts", Theme.TEAL));
 			int xp = session.xp(client);
 			view.stat(new View.Stat(Session.format(xp), "Con xp", session.perHour(xp, now), Theme.GREEN));
 			view.stat(new View.Stat(session.elapsed(now), "Time", "On contracts", Theme.TEXT_MUTED));
@@ -398,6 +550,101 @@ public final class HomesPilot
 		out.destination = flight.destination;
 		out.others.addAll(flight.others);
 		return out;
+	}
+
+	/**
+	 * What each tier costs you per experience point at today's prices, from your own finished
+	 * contracts; null until one is finished or while prices are loading.
+	 */
+	View.PickCard costs(IntUnaryOperator price, int constructionLevel)
+	{
+		if (book.isEmpty() || price == null)
+		{
+			return null;
+		}
+		List<ContractBook.Row> rows = book.rank(price, constructionLevel);
+		if (rows.isEmpty())
+		{
+			return null;
+		}
+		Contract.Tier current = contract != null && contract.getTier() != null ? contract.getTier() : Contract.Tier.forLevel(constructionLevel);
+		return costCard(rows, current);
+	}
+
+	/** The ranking as the panel shows it. */
+	static View.PickCard costCard(List<ContractBook.Row> rows, Contract.Tier current)
+	{
+		double cheapest = 0;
+		for (ContractBook.Row r : rows)
+		{
+			if (r.isKnown() && r.getPerXp() > 0 && (cheapest == 0 || r.getPerXp() < cheapest))
+			{
+				cheapest = r.getPerXp();
+			}
+		}
+		List<View.Pick> picks = new ArrayList<>();
+		for (ContractBook.Row r : rows)
+		{
+			Contract.Tier t = r.getTier();
+			if (!r.isKnown())
+			{
+				picks.add(new View.Pick(t.getName(), "", r.isUnlocked() ? "Finish one to learn what it costs" : "Needs Construction " + t.getLevel(),
+					false, t == current, 0, false));
+				continue;
+			}
+			ContractBook.Tally tally = r.getTally();
+			String detail = Session.format(Math.round(tally.xpEach())) + " xp · " + compact(Math.round(r.getCoinsEach())) + " gp"
+				+ (r.getXpPerHour() > 0 ? " · " + compact(Math.round(r.getXpPerHour())) + " xp/h" : "");
+			double share = r.getPerXp() <= 0 ? 1 : cheapest / r.getPerXp();
+			picks.add(new View.Pick(t.getName(), perXp(r.getPerXp()), detail, true, t == current, share, false));
+		}
+		String note = "A contract's planks and steel at today's prices, against the experience your own contracts gave."
+			+ " Rates count the whole loop, contract to contract.";
+		return new View.PickCard("What it costs", "coins an xp", note, picks);
+	}
+
+	/**
+	 * How far the planks and steel bars you have go: in the bank (as last seen by the Pilot or Bank
+	 * Steward), carried and in the plank sack. Null when no bank has been seen yet.
+	 */
+	View.Supply supply(BankStock stock, int constructionLevel, long now)
+	{
+		if (stock == null)
+		{
+			return null;
+		}
+		Contract.Tier tier = contract != null && contract.getTier() != null ? contract.getTier() : Contract.Tier.forLevel(constructionLevel);
+		boolean sameTier = contract != null && contract.getTier() == tier;
+		long planks = stock.count(tier.getPlank()) + (sameTier ? lastPlanks : 0);
+		long steel = stock.count(Contract.STEEL_BAR);
+		Supplies.Homes h = Supplies.homes(tier, planks, steel, book.tally(tier));
+		List<View.Line> lines = new ArrayList<>();
+		String plankName = tier.planks(2).substring(2);
+		lines.add(new View.Line(Character.toUpperCase(plankName.charAt(0)) + plankName.substring(1), Session.format(planks),
+			planks > 0 ? View.Line.Mark.TODO : View.Line.Mark.IDLE));
+		lines.add(new View.Line("Steel bars", Session.format(steel), steel > 0 ? View.Line.Mark.TODO : View.Line.Mark.IDLE));
+		String detail = h.getContracts() < 0 ? "Finish a contract and this counts the jobs they cover"
+			: h.isSteelShort() ? "Steel bars run out first" : null;
+		return new View.Supply(tier.getName(), lines, h.headline(), detail, h.isSteelShort() || h.getContracts() == 0, seenNote(stock, now));
+	}
+
+	/** Where and when the bank was seen: "Your bank as the Pilot saw it 12 minutes ago". */
+	static String seenNote(BankStock stock, long now)
+	{
+		String who = stock.getSource() == BankStock.Source.BANK_STEWARD ? "as Codex Bank Steward saw it" : "as last seen";
+		long minutes = stock.getSavedAt() <= 0 ? -1 : Math.max(0, (now - stock.getSavedAt()) / 60_000L);
+		String when = minutes < 0 ? "" : minutes < 1 ? ", just now" : ", " + com.codex.minigamepilot.core.Goal.duration(minutes) + " ago";
+		return "Your bank " + who + when + ", with what you carry.";
+	}
+
+	private static String perXp(double coins)
+	{
+		return String.format(Locale.ENGLISH, coins < 10 ? "%.2f gp" : "%.1f gp", coins);
+	}
+
+	private static String compact(long n)
+	{
+		return com.codex.minigamepilot.core.Figures.brief(n);
 	}
 
 	private Step climb(Home home, Ground ground, SceneIndex scene, String why)

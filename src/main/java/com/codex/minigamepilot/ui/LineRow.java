@@ -12,13 +12,57 @@ import javax.swing.JComponent;
 /** One line of a checklist: a diamond that is hollow to do, lit for next and ticked when done. */
 class LineRow extends JComponent
 {
+	/** The width a row has in a card on the side panel, its first guess before it is laid out. */
+	static final int ROOM = PilotPanel.WIDTH - 22;
+
 	private final View.Line line;
+	/**
+	 * True when the text and its trailing note do not fit side by side at the row's width: the
+	 * note then drops to a second line of its own, so a name never pushes the cost out.
+	 */
+	private boolean twoLines;
 
 	LineRow(View.Line line)
 	{
 		this.line = line;
 		setOpaque(false);
-		setPreferredSize(new Dimension(10, 18));
+		twoLines = !fits(getFontMetrics(Theme.small()), line, ROOM);
+		setPreferredSize(new Dimension(10, height(twoLines)));
+	}
+
+	private static int height(boolean twoLines)
+	{
+		return twoLines ? 31 : 18;
+	}
+
+	/** Whether a line's text and trailing note fit side by side in a row this wide. */
+	static boolean fits(FontMetrics fm, View.Line line, int width)
+	{
+		int trailing = line.trailing == null || line.trailing.isEmpty() ? 0 : fm.stringWidth(line.trailing) + 10;
+		return 16 + fm.stringWidth(line.text) + trailing + 4 <= width;
+	}
+
+	/**
+	 * The row's real width is only known once it is laid out, and a card can be narrower than the
+	 * first guess (a scroll bar, a nested card) or wider. When the guess was wrong the row takes
+	 * the height it needs and asks for a fresh layout; the width does not depend on the height,
+	 * so this settles at once.
+	 */
+	@Override
+	public void setBounds(int x, int y, int width, int height)
+	{
+		super.setBounds(x, y, width, height);
+		if (width <= 0)
+		{
+			return;
+		}
+		boolean two = !fits(getFontMetrics(Theme.small()), line, width);
+		if (two != twoLines)
+		{
+			twoLines = two;
+			setPreferredSize(new Dimension(10, height(two)));
+			revalidate();
+		}
 	}
 
 	@Override
@@ -40,7 +84,7 @@ class LineRow extends JComponent
 		{
 			case NEXT:
 				g.setColor(Theme.alpha(Theme.GOLD, 50));
-				g.fillRoundRect(-2, 0, w + 2, 18, 8, 8);
+				g.fillRoundRect(-2, 0, w + 2, getHeight(), 8, 8);
 				g.setColor(Theme.GOLD_BRIGHT);
 				g.fill(diamond);
 				text = Theme.GOLD_BRIGHT;
@@ -70,9 +114,13 @@ class LineRow extends JComponent
 		int right = w - 4;
 		if (line.trailing != null && !line.trailing.isEmpty())
 		{
-			int tw = fm.stringWidth(line.trailing);
-			Ui.shadowed(g, line.trailing, w - tw - 4, mid + 5, line.mark == View.Line.Mark.NEXT ? Theme.GOLD : Theme.TEXT_MUTED);
-			right = w - tw - 10;
+			// A long name keeps its line; the note then sits under it, right-aligned.
+			// On its own line the note has the row to itself; only a row too narrow for even
+			// that (never at the side panel's width) cuts it.
+			String trailing = twoLines ? Ui.clip(line.trailing, fm, w - 4) : line.trailing;
+			int tw = fm.stringWidth(trailing);
+			Ui.shadowed(g, trailing, w - tw - 4, twoLines ? mid + 18 : mid + 5, line.mark == View.Line.Mark.NEXT ? Theme.GOLD : Theme.TEXT_MUTED);
+			right = twoLines ? w - 4 : w - tw - 10;
 		}
 		Ui.shadowed(g, Ui.clip(line.text, fm, right - 16), 16, mid + 5, text);
 		g.dispose();

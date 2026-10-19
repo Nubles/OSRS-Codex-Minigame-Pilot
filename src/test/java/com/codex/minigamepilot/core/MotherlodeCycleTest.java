@@ -114,4 +114,18 @@ public class MotherlodeCycleTest
 		s.capacity = 189;
 		assertEquals(Step.Target.VEIN, c.next(s).getTarget());
 	}
+
+	@Test
+	public void aHopKeepsPayDirtInFlightButReadsAfresh()
+	{
+		MotherlodeCycle c = new MotherlodeCycle();
+		c.observe(27, 54, true, false);
+		c.observe(0, 54, true, false);
+		c.relog();
+		// Back in after the login grace: the first readings are only a base.
+		c.observe(0, 54, true, false);
+		c.observe(0, 54, true, false);
+		assertEquals("still on its way, and no deposit counted twice", 27, c.getInFlight());
+		assertEquals(27, c.getDeposited());
+	}
 }

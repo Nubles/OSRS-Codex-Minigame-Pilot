@@ -20,6 +20,11 @@ public class PilotPanel extends PluginPanel
 	private final Helm helm = new Helm();
 	private final StackPanel body = new StackPanel(8, 8);
 	private View view = View.loggedOut();
+	/** An item's picture by its id, for the reward road; null draws bare medallions. */
+	private java.util.function.IntFunction<java.awt.image.BufferedImage> icons;
+	/** Whether the panel is open in the sidebar; the plugin skips rebuilding it while it is not. */
+	private volatile boolean open;
+	private Runnable onOpen;
 
 	public PilotPanel()
 	{
@@ -37,6 +42,52 @@ public class PilotPanel extends PluginPanel
 		scroll.getVerticalScrollBar().setPreferredSize(new Dimension(8, 0));
 		add(scroll, BorderLayout.CENTER);
 		rebuild();
+	}
+
+	/** Where the reward road gets each item's picture. */
+	public void icons(java.util.function.IntFunction<java.awt.image.BufferedImage> source)
+	{
+		java.util.Map<Integer, java.awt.image.BufferedImage> kept = new java.util.HashMap<>();
+		// Each picture is asked for once and kept, and the panel repaints once as it arrives,
+		// however often the road is rebuilt.
+		icons = source == null ? null : id -> kept.computeIfAbsent(id, k ->
+		{
+			java.awt.image.BufferedImage img = source.apply(k);
+			if (img instanceof net.runelite.client.util.AsyncBufferedImage)
+			{
+				((net.runelite.client.util.AsyncBufferedImage) img).onLoaded(() -> javax.swing.SwingUtilities.invokeLater(this::repaint));
+			}
+			return img;
+		});
+	}
+
+	/** Called when the panel is opened, so the plugin can bring it up to date. */
+	public void onOpen(Runnable action)
+	{
+		onOpen = action;
+	}
+
+	/** True while the panel is open in the sidebar. Safe to read from any thread. */
+	public boolean isOpen()
+	{
+		return open || isShowing();
+	}
+
+	@Override
+	public void onActivate()
+	{
+		open = true;
+		Runnable r = onOpen;
+		if (r != null)
+		{
+			r.run();
+		}
+	}
+
+	@Override
+	public void onDeactivate()
+	{
+		open = false;
 	}
 
 	/** Called on the Swing thread whenever anything shown changes. */
@@ -87,6 +138,76 @@ public class PilotPanel extends PluginPanel
 			body.add(card);
 		}
 
+		if (!v.goals.isEmpty())
+		{
+			body.add(new SectionHeader(v.goals.size() == 1 ? "Goal" : "Goals", v.goals.size() == 1 ? v.goals.get(0).unit : null));
+			for (View.GoalCard goal : v.goals)
+			{
+				body.add(goalCard(goal, v.goals.size() > 1));
+			}
+		}
+
+		if (!v.road.isEmpty())
+		{
+			int owned = 0;
+			for (com.codex.minigamepilot.core.RewardRoad.Stop s : v.road)
+			{
+				owned += s.isOwned() ? 1 : 0;
+			}
+			body.add(new SectionHeader(v.activity == View.Activity.FURNACE ? "Smithing road" : "Reward road", owned + " of " + v.road.size() + " done"));
+			Card card = new Card(new BorderLayout());
+			card.setBorder(new javax.swing.border.EmptyBorder(4, 8, 4, 8));
+			card.add(new RoadView(v.road, icons), BorderLayout.CENTER);
+			String why = RoadView.footnote(v.road);
+			if (why != null)
+			{
+				card.add(Ui.wrapped(why, Theme.small(), Theme.TEAL, WIDTH - 30), BorderLayout.SOUTH);
+			}
+			body.add(card);
+		}
+
+		if (v.pick != null && !v.pick.picks.isEmpty())
+		{
+			body.add(new SectionHeader(v.pick.title, v.pick.trailing));
+			Card card = new Card(new BorderLayout(0, 4));
+			StackPanel rows = new StackPanel(2, 0);
+			for (View.Pick p : v.pick.picks)
+			{
+				rows.add(new PickRow(p));
+			}
+			card.add(rows, BorderLayout.CENTER);
+			card.add(Ui.wrapped(v.pick.note, Theme.small(), Theme.TEXT_FAINT, WIDTH - 30), BorderLayout.SOUTH);
+			body.add(card);
+		}
+
+		if (v.supply != null && !v.supply.lines.isEmpty())
+		{
+			body.add(new SectionHeader("In the bank", v.supply.trailing));
+			Card card = new Card(new BorderLayout());
+			card.accent(v.supply.warn ? Theme.EMBER : Theme.TEAL);
+			StackPanel stack = new StackPanel(4, 0);
+			StackPanel lines = new StackPanel(1, 0);
+			for (View.Line line : v.supply.lines)
+			{
+				lines.add(new LineRow(line));
+			}
+			stack.add(lines);
+			if (v.supply.headline != null)
+			{
+				stack.add(Ui.wrapped(v.supply.headline, Theme.small(), Theme.TEXT, WIDTH - 30));
+			}
+			if (v.supply.detail != null)
+			{
+				stack.add(Ui.wrapped(v.supply.detail, Theme.small(), v.supply.warn ? Theme.EMBER : Theme.TEXT_MUTED, WIDTH - 30));
+			}
+			if (v.supply.note != null)
+			{
+				stack.add(Ui.wrapped(v.supply.note, Theme.small(), Theme.TEXT_FAINT, WIDTH - 30));
+			}
+			card.add(stack, BorderLayout.CENTER);
+			body.add(card);
+		}
+
 		if (v.pace != null)
 		{
 			body.add(new SectionHeader("Pace"));
@@ -95,6 +216,14 @@ public class PilotPanel extends PluginPanel
 			StackPanel stack = new StackPanel(4, 0);
 			stack.add(new PaceDial(v.pace));
 			stack.add(Ui.wrapped(v.pace.advice, Theme.small(), v.pace.costly ? Theme.EMBER : Theme.GREEN, WIDTH - 30));
+			if (v.pace.splits.size() > 1)
+			{
+				stack.add(new StageStrip(v.pace.splits));
+				if (v.pace.splitNote != null)
+				{
+					stack.add(Ui.wrapped(v.pace.splitNote, Theme.small(), Theme.mix(Theme.TEXT_MUTED, Theme.EMBER, 0.5), WIDTH - 30));
+				}
+			}
 			stack.add(Ui.wrapped(v.pace.tail, Theme.small(), Theme.TEXT_FAINT, WIDTH - 30));
 			card.add(stack, BorderLayout.CENTER);
 			body.add(card);
@@ -125,6 +254,10 @@ public class PilotPanel extends PluginPanel
 				{
 					text.add(Ui.wrapped(b.status, Theme.small(), Theme.TEXT, WIDTH - 30));
 				}
+				if (b.best != null)
+				{
+					text.add(Ui.wrapped(b.best, Theme.small(), Theme.GOLD, WIDTH - 30));
+				}
 				if (b.how != null)
 				{
 					text.add(Ui.wrapped(b.how, Theme.small(), Theme.TEXT_MUTED, WIDTH - 30));
@@ -138,5 +271,40 @@ public class PilotPanel extends PluginPanel
 		body.repaint();
 		revalidate();
 		repaint();
+	}
+
+	/**
+	 * A goal: how far along it is, how far off in rounds and time, and its pieces ticked off.
+	 * A goal of one piece is all in its gauge ("Coal bag 64 / 100"), so a list of that one piece
+	 * would only say its cost twice.
+	 */
+	private static Card goalCard(View.GoalCard goal, boolean named)
+	{
+		Card card = new Card(new BorderLayout());
+		card.accent(goal.done ? Theme.GREEN : Theme.GOLD);
+		StackPanel stack = new StackPanel(4, 0);
+		if (named)
+		{
+			stack.add(Ui.label(goal.activity.getTitle(), Theme.small(), Theme.GOLD_DIM));
+		}
+		int have = (int) Math.min(Integer.MAX_VALUE, goal.have);
+		int need = (int) Math.min(Integer.MAX_VALUE, goal.need);
+		stack.add(new GaugeBar(new View.Gauge(goal.title, have, 0, need, null, goal.done ? Theme.GREEN : Theme.progressColor(need == 0 ? 1 : have / (double) need))));
+		stack.add(Ui.wrapped(goal.note, Theme.small(), goal.done ? Theme.GREEN : Theme.TEXT_MUTED, WIDTH - 30));
+		if (goal.aside != null)
+		{
+			stack.add(Ui.wrapped(goal.aside, Theme.small(), Theme.TEAL, WIDTH - 30));
+		}
+		if (goal.pieces.size() > 1)
+		{
+			StackPanel lines = new StackPanel(1, 0);
+			for (View.Line line : goal.pieces)
+			{
+				lines.add(new LineRow(line));
+			}
+			stack.add(lines);
+		}
+		card.add(stack, BorderLayout.CENTER);
+		return card;
 	}
 }

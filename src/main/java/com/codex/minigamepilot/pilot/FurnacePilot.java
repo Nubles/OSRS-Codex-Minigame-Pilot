@@ -1,12 +1,18 @@
 package com.codex.minigamepilot.pilot;
 
+import com.codex.minigamepilot.core.BankStock;
 import com.codex.minigamepilot.core.Bar;
+import com.codex.minigamepilot.core.BarPick;
 import com.codex.minigamepilot.core.FurnaceCycle;
 import com.codex.minigamepilot.core.ItemIds;
 import com.codex.minigamepilot.core.Step;
+import com.codex.minigamepilot.core.Supplies;
 import com.codex.minigamepilot.ui.Theme;
 import com.codex.minigamepilot.ui.View;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.function.IntUnaryOperator;
 import net.runelite.api.Client;
 import net.runelite.api.Player;
 import net.runelite.api.Skill;
@@ -32,10 +38,14 @@ public final class FurnacePilot
 	private Bar last;
 	private int lastBars = -1;
 	private int barsTaken;
+	/** Bars taken before this session began, left out of its count. */
+	private int barsBefore;
 	/** The last snapshot planned from, for the field notes. */
 	Object lastState;
 	private int loads;
 	private int lastOre = -1;
+	/** This session's experience as last shown, for its summary when you leave. */
+	private int xpSeen;
 
 	/** A running count of what rounds produce, for the pace coach. */
 	int units()
@@ -62,11 +72,60 @@ public final class FurnacePilot
 		lastOre = -1;
 	}
 
-	View.Brief brief()
+	/** What this session came to, for when you leave the furnace, or null when it was too short or idle. */
+	com.codex.minigamepilot.core.Visit visit(long now)
 	{
-		String status = session.begun() ? barsTaken + " bars this session" : null;
+		if (!session.begun())
+		{
+			return null;
+		}
+		java.util.List<String> parts = new java.util.ArrayList<>();
+		int bars = barsTaken - barsBefore;
+		if (bars > 0)
+		{
+			parts.add(Session.format(bars) + (bars == 1 ? " bar" : " bars"));
+		}
+		if (xpSeen > 0)
+		{
+			parts.add(Session.format(xpSeen) + " Smithing xp");
+		}
+		return com.codex.minigamepilot.core.Visit.of(now, session.activeMs(), parts);
+	}
+
+	/** Another account logged in: the session and its counts start over on its first tick. */
+	void newAccount()
+	{
+		session.startOver();
+	}
+
+	/** Logged in again or hopped: readings start afresh, ore on the belt stays on the belt. */
+	void relogged()
+	{
+		cycle.relog();
+		lastBars = -1;
+		lastOre = -1;
+	}
+
+	/**
+	 * @param lastVisit the summary saved when you last left the furnace, or null
+	 * @param best your fastest visit, or null
+	 */
+	View.Brief brief(com.codex.minigamepilot.core.Visit lastVisit, com.codex.minigamepilot.core.BestVisit best, long now)
+	{
+		String status = lastVisit != null ? lastVisit.status(now)
+			: session.begun() ? Session.format(barsTaken - barsBefore) + " bars this session" : null;
 		return new View.Brief(View.Activity.FURNACE, status,
-			"In Keldagrim. Bring coins for the coffer, ice gloves, and a coal bag for steel and up.");
+			"In Keldagrim. Bring coins for the coffer, ice gloves, and a coal bag for steel and up.")
+			.best(best == null ? null : best.status(UNIT, "Smithing", lastVisit, now));
+	}
+
+	/** What the furnace's pace is counted in. */
+	static final String UNIT = "bars";
+
+	/** This session's pace so far, as a reading for your best visit, or null while it is too short. */
+	com.codex.minigamepilot.core.BestVisit pace(long now)
+	{
+		return com.codex.minigamepilot.core.BestVisit.of(session.startedAt(), now, session.activeMs(), barsTaken - barsBefore, xpSeen);
 	}
 
 	/**
@@ -74,7 +133,11 @@ public final class FurnacePilot
 	 */
 	Flight fly(Client client, SceneIndex scene, Bar choice, int cofferLow, long now)
 	{
-		session.tick(client, now);
+		if (session.tick(client, now))
+		{
+			// A new session after a break: bars from the last one would inflate its hourly rate.
+			barsBefore = barsTaken;
+		}
 		Pack pack = Pack.read(client);
 		Bar bar = choice != null ? choice : detect(client, pack);
 		last = bar;
@@ -173,12 +236,139 @@ public final class FurnacePilot
 			minutes >= 60 ? (minutes / 60) + "h " + (minutes % 60) + "m of smelting" : minutes + " minutes of smelting",
 			s.coffer < cofferLow ? Theme.BLOOD : Theme.GOLD));
 
-		view.stat(new View.Stat(Session.format(barsTaken), "Bars", session.perHour(barsTaken, now), Theme.GOLD));
+		view.stat(new View.Stat(Session.format(barsTaken - barsBefore), "Bars", session.perHour(barsTaken - barsBefore, now), Theme.GOLD));
 		view.stat(new View.Stat(Session.format(loads), "Ore loads", FurnaceCycle.coalRunNext(s) ? "Next: coal" : "Next: ore", Theme.TEAL));
 		int xp = session.xp(client);
+		xpSeen = xp;
 		view.stat(new View.Stat(Session.format(xp), "Smithing xp", session.perHour(xp, now), Theme.GREEN));
 		view.stat(new View.Stat(session.elapsed(now), "Time", "At the furnace", Theme.TEXT_MUTED));
 		return new Flight(View.Activity.FURNACE, step, view).to(way);
+	}
+
+	/**
+	 * What each bar pays at today's prices, for the furnace as you run it: your coal bag, the ore
+	 * a trip carries and, once a few trips are timed, your trip time.
+	 *
+	 * @param tripSeconds your usual trip this session, or 0 before one is timed
+	 * @return the card, or null when prices are not loaded
+	 */
+	View.PickCard pick(Client client, IntUnaryOperator price, double tripSeconds)
+	{
+		FurnaceCycle.Snapshot s = lastState instanceof FurnaceCycle.Snapshot ? (FurnaceCycle.Snapshot) lastState : null;
+		BarPick.Setup setup = new BarPick.Setup();
+		setup.level = client.getRealSkillLevel(Skill.SMITHING);
+		setup.coalBag = s == null || s.coalBag;
+		setup.bagCapacity = s == null ? 27 : s.bagCapacity;
+		setup.oreSlots = s == null ? 27 : FurnaceCycle.load(s);
+		setup.tripSeconds = tripSeconds;
+		setup.goldsmith = s != null && (s.goldsmithWorn || s.goldsmithCarried);
+		return card(BarPick.rank(price, setup), last, tripSeconds, setup.level);
+	}
+
+	/**
+	 * How far the bar's ore and the coal you have go: in the bank (as last seen by the Pilot or
+	 * Bank Steward), carried, in the coal bag and waiting in the furnace. Null before any bank is seen.
+	 *
+	 * @param tripSeconds your usual trip this session, or 0 before one is timed
+	 */
+	View.Supply supply(BankStock stock, double tripSeconds, long now)
+	{
+		FurnaceCycle.Snapshot s = lastState instanceof FurnaceCycle.Snapshot ? (FurnaceCycle.Snapshot) lastState : null;
+		if (stock == null || s == null)
+		{
+			return null;
+		}
+		Bar bar = s.bar;
+		long ore = stock.count(bar.getOre()) + s.ore + s.furnaceOre;
+		long coal = stock.count(Bar.COAL) + s.coal + Math.max(0, s.bagCoal) + s.furnaceCoal;
+		Supplies.Furnace f = Supplies.furnace(bar, ore, coal, FurnaceCycle.load(s), s.coalBag ? s.bagCapacity : 0, tripSeconds);
+		List<View.Line> lines = new ArrayList<>();
+		String oreName = Character.toUpperCase(bar.oreName().charAt(0)) + bar.oreName().substring(1);
+		lines.add(new View.Line(oreName, Session.format(ore), ore > 0 ? View.Line.Mark.TODO : View.Line.Mark.IDLE));
+		if (bar.getCoal() > 0)
+		{
+			lines.add(new View.Line("Coal", Session.format(coal), coal > 0 ? View.Line.Mark.TODO : View.Line.Mark.IDLE));
+		}
+		String detail = f.limit();
+		if (detail != null && tripSeconds <= 0 && f.getBars() > 0)
+		{
+			detail += ". Time a few trips and this turns into time";
+		}
+		else if (detail == null && tripSeconds <= 0 && f.getBars() > 0)
+		{
+			detail = "Time a few trips and this turns into time";
+		}
+		return new View.Supply(bar.getName(), lines, f.headline(), detail, f.isCoalShort() || f.getBars() == 0,
+			HomesPilot.seenNote(stock, now));
+	}
+
+	/** The ranking as the panel shows it. */
+	static View.PickCard card(List<BarPick.Row> rows, Bar making, double tripSeconds, int level)
+	{
+		if (rows.isEmpty())
+		{
+			return null;
+		}
+		double top = 0;
+		for (BarPick.Row r : rows)
+		{
+			if (r.isUnlocked())
+			{
+				top = Math.max(top, r.getPerTrip());
+			}
+		}
+		boolean timed = tripSeconds > 0;
+		List<View.Pick> picks = new ArrayList<>();
+		for (BarPick.Row r : rows)
+		{
+			String figure;
+			String detail;
+			if (!r.isUnlocked())
+			{
+				figure = signed(r.getPerBar());
+				detail = "Needs Smithing " + r.getLevel();
+			}
+			else
+			{
+				figure = timed ? compact(r.getPerHour()) + "/h" : signed(r.getPerBar());
+				String trips = r.getCoalTrips() <= 0 ? "no coal trips" : coalTrips(r.getCoalTrips());
+				detail = timed ? signed(r.getPerBar()) + "/bar · " + trips + " · " + com.codex.minigamepilot.core.Figures.brief(Math.round(r.getXpPerHour())) + " xp"
+					: "a bar · " + trips + (r.getCoalTrips() > 0 ? " a load" : "");
+			}
+			double share = top <= 0 ? 0 : Math.max(0, r.getPerTrip() / top);
+			picks.add(new View.Pick(r.getBar().getName(), figure, detail, r.isUnlocked(), r.getBar() == making, share,
+				timed ? r.getPerHour() < 0 : r.getPerBar() < 0));
+		}
+		String fee = "the coffer's " + Session.format(BarPick.COFFER_PER_HOUR) + " an hour"
+			+ (level < BarPick.FOREMAN_FREE_LEVEL ? " and the foreman's " + Session.format(BarPick.FOREMAN_PER_HOUR) : "");
+		String note = timed
+			? "Grand Exchange prices, at your usual trip of " + clock(tripSeconds) + ", after " + fee + "."
+			: "Grand Exchange prices, after ore and coal. Time a few trips and this turns into coins an hour, after " + fee + ".";
+		return new View.PickCard(timed ? "an hour" : "a bar", note, picks);
+	}
+
+	private static String signed(long n)
+	{
+		return (n >= 0 ? "+" : "-") + Session.format(Math.abs(n));
+	}
+
+	private static String coalTrips(double trips)
+	{
+		double rounded = Math.round(trips * 2) / 2.0;
+		String n = rounded == Math.floor(rounded) ? String.valueOf((long) rounded) : String.valueOf(rounded);
+		return n + (rounded == 1 ? " coal trip" : " coal trips");
+	}
+
+	/** Coins with their sign, shortened past ten thousand: "+71k", "-104k", "+9,870". */
+	static String compact(long n)
+	{
+		return com.codex.minigamepilot.core.Figures.signed(n);
+	}
+
+	private static String clock(double seconds)
+	{
+		long s = Math.round(seconds);
+		return s / 60 + ":" + (s % 60 < 10 ? "0" : "") + s % 60;
 	}
 
 	/** The bar being made: ore carried first, then ore in the furnace, then the last one seen. */

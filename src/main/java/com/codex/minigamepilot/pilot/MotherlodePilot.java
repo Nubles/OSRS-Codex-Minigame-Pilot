@@ -37,7 +37,15 @@ public final class MotherlodePilot
 	private int lastSack = -1;
 	private int collected;
 	private int sacks;
+	/** Pay-dirt deposited before this session began, left out of its count. */
+	private int depositedBefore;
+	private final com.codex.minigamepilot.core.OreHaul haul = new com.codex.minigamepilot.core.OreHaul();
+	/** Grand Exchange prices, or null when not set. */
+	private java.util.function.IntUnaryOperator price;
 	private boolean wasEmptying;
+	/** This session's experience and ore worth as last shown, for its summary when you leave. */
+	private int xpSeen;
+	private long worthSeen;
 	/** The last snapshot planned from, for the field notes. */
 	Object lastState;
 
@@ -76,19 +84,95 @@ public final class MotherlodePilot
 	{
 		cycle.reset();
 		lastSack = -1;
+		haul.forget();
 	}
 
-	/** Brief for the panel when the player is elsewhere. */
-	View.Brief brief()
+	/** Another account logged in: the session and its counts start over on its first tick. */
+	void newAccount()
 	{
-		String status = session.begun() ? Session.format(cycle.getDeposited()) + " pay-dirt deposited this session" : null;
-		return new View.Brief(View.Activity.MOTHERLODE, status,
-			"Under Falador, through the Dwarven Mine or the Falador mining guild. Bring a pickaxe; a hammer helps.");
+		session.startOver();
 	}
+
+	/** Logged in again or hopped: readings start afresh, pay-dirt in flight stays in flight. */
+	void relogged()
+	{
+		cycle.relog();
+		lastSack = -1;
+		haul.forget();
+	}
+
+	/** Pay-dirt deposited this session. */
+	private int deposited()
+	{
+		return Math.max(0, cycle.getDeposited() - depositedBefore);
+	}
+
+	void setPrice(java.util.function.IntUnaryOperator price)
+	{
+		this.price = price;
+	}
+
+	/** What this session came to, for when you leave the mine, or null when it was too short or idle. */
+	com.codex.minigamepilot.core.Visit visit(long now)
+	{
+		if (!session.begun())
+		{
+			return null;
+		}
+		java.util.List<String> parts = new java.util.ArrayList<>();
+		if (deposited() > 0)
+		{
+			parts.add(Session.format(deposited()) + " pay-dirt");
+		}
+		if (collected > 0)
+		{
+			parts.add(Session.format(collected) + " ore");
+		}
+		if (xpSeen > 0)
+		{
+			parts.add(Session.format(xpSeen) + " Mining xp");
+		}
+		if (worthSeen > 0)
+		{
+			parts.add("ore worth " + Session.format(worthSeen));
+		}
+		return com.codex.minigamepilot.core.Visit.of(now, session.activeMs(), parts);
+	}
+
+	/** This session's pace so far, as a reading for your best visit, or null while it is too short. */
+	com.codex.minigamepilot.core.BestVisit pace(long now)
+	{
+		return com.codex.minigamepilot.core.BestVisit.of(session.startedAt(), now, session.activeMs(), deposited(), xpSeen);
+	}
+
+	/**
+	 * Brief for the panel when the player is elsewhere.
+	 *
+	 * @param lastVisit the summary saved when you last left the mine, or null
+	 * @param best your fastest visit, or null
+	 */
+	View.Brief brief(com.codex.minigamepilot.core.Visit lastVisit, com.codex.minigamepilot.core.BestVisit best, long now)
+	{
+		String status = lastVisit != null ? lastVisit.status(now)
+			: session.begun() ? Session.format(deposited()) + " pay-dirt deposited this session" : null;
+		return new View.Brief(View.Activity.MOTHERLODE, status,
+			"Under Falador, through the Dwarven Mine or the Falador mining guild. Bring a pickaxe; a hammer helps.")
+			.best(best == null ? null : best.status(UNIT, "Mining", lastVisit, now));
+	}
+
+	/** What the mine's pace is counted in. */
+	static final String UNIT = "pay-dirt";
 
 	Flight fly(Client client, SceneIndex scene, long now)
 	{
-		session.tick(client, now);
+		if (session.tick(client, now))
+		{
+			// A new session after a break: counts from the last one would inflate its hourly rates.
+			collected = 0;
+			sacks = 0;
+			depositedBefore = cycle.getDeposited();
+			haul.clear();
+		}
 		Pack pack = Pack.read(client);
 		Collection<TileObject> rockfalls = scene.get(ROCKFALLS);
 		Ground ground = Ground.read(client, rockfalls, ROCKFALL_COST);
@@ -107,11 +191,16 @@ public final class MotherlodePilot
 		TileObject hopper = first(scene.get(ObjectID.MOTHERLODE_HOPPER));
 		boolean nearHopper = hopper != null && client.getLocalPlayer().getWorldLocation().distanceTo(hopper.getWorldLocation()) <= 2;
 		cycle.observe(s.payDirt, s.sack, nearHopper, s.brokenStruts >= 2);
-		if (lastSack >= 0 && s.sack < lastSack)
-		{
-			collected += lastSack - s.sack;
-		}
+		boolean paidOut = lastSack >= 0 && s.sack < lastSack;
+		int drop = paidOut ? lastSack - s.sack : 0;
+		collected += drop;
 		lastSack = s.sack;
+		int[] ores = new int[com.codex.minigamepilot.core.OreHaul.ORES.length];
+		for (int i = 0; i < ores.length; i++)
+		{
+			ores[i] = pack.count(com.codex.minigamepilot.core.OreHaul.ORES[i]);
+		}
+		haul.observe(ores, pack.count(ItemIds.GOLDEN_NUGGET), drop, pack.carries(ItemIds.COAL_BAG_OPEN));
 
 		Step step = cycle.next(s);
 		if (wasEmptying && !cycle.isEmptying())
@@ -178,11 +267,19 @@ public final class MotherlodePilot
 			view.gauge(new View.Gauge("Struts working", 2 - Math.min(2, s.brokenStruts), 0, 2,
 				s.brokenStruts >= 2 ? "The wheel has stopped" : "One broken: the wheel still turns", s.brokenStruts >= 2 ? Theme.BLOOD : Theme.EMBER));
 		}
-		view.stat(new View.Stat(Session.format(cycle.getDeposited()), "Pay-dirt", session.perHour(cycle.getDeposited(), now), Theme.GOLD));
+		view.stat(new View.Stat(Session.format(deposited()), "Pay-dirt", session.perHour(deposited(), now), Theme.GOLD));
 		view.stat(new View.Stat(Session.format(collected), "Ore", sacks + (sacks == 1 ? " sack emptied" : " sacks emptied"), Theme.TEAL));
 		int xp = session.xp(client);
+		xpSeen = xp;
 		view.stat(new View.Stat(Session.format(xp), "Mining xp", session.perHour(xp, now), Theme.GREEN));
 		view.stat(new View.Stat(session.elapsed(now), "Time", "In the mine", Theme.TEXT_MUTED));
+		long worth = price == null ? 0 : haul.worth(price);
+		worthSeen = worth;
+		if (worth > 0)
+		{
+			String rate = session.perHour(worth, now);
+			view.stat(new View.Stat(Session.format(worth), "Ore worth", rate.isEmpty() ? "At GE prices" : rate, Theme.GOLD_BRIGHT));
+		}
 
 		Flight flight = new Flight(View.Activity.MOTHERLODE, step, view).to(way);
 		if (step.getTarget() == Step.Target.VEIN && way != null)
