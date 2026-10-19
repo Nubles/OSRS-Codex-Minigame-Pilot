@@ -32,4 +32,18 @@ public class GoalWatchTest
 		assertTrue(read.containsKey(12019));
 		assertTrue(GoalWatch.decode(null).isEmpty());
 	}
+
+	@Test
+	public void nuggetsMovedOutOfTheBankAreNotEarned()
+	{
+		// 40 banked, none carried; withdraw all 40 and close the bank on the same tick.
+		int before = 0 + 40;
+		int after = 40 + 0;
+		assertEquals(0, GoalWatch.nuggetsEarned(before, after, false));
+		// A sack search adds 3 to the carried pile.
+		assertEquals(3, GoalWatch.nuggetsEarned(after, after + 3, false));
+		// Nothing counts while the bank is open, nor before the first tick.
+		assertEquals(0, GoalWatch.nuggetsEarned(10, 50, true));
+		assertEquals(0, GoalWatch.nuggetsEarned(-1, 50, false));
+	}
 }

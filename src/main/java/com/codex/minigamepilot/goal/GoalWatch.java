@@ -143,6 +143,19 @@ public final class GoalWatch
 		}
 	}
 
+	/**
+	 * Nuggets earned between two ticks, from what you hold carried and banked together. Taking
+	 * nuggets out of the bank leaves that total as it was, even when the bank is closed on the
+	 * same tick, so it never counts as earning. While the bank is open nothing counts, so the
+	 * first look at a bank that changed since it was last seen is not taken for a haul.
+	 *
+	 * @param before carried plus banked nuggets on the last tick, or -1 when not known
+	 */
+	static int nuggetsEarned(int before, int now, boolean bankOpen)
+	{
+		return before >= 0 && now > before && !bankOpen ? now - before : 0;
+	}
+
 	/** A game message: the line after a finished contract gives your points. */
 	public void chat(String message)
 	{
@@ -180,6 +193,8 @@ public final class GoalWatch
 		ItemContainer inv = client.getItemContainer(InventoryID.INV);
 		ItemContainer worn = client.getItemContainer(InventoryID.WORN);
 		int nuggets = inv == null ? 0 : inv.count(ItemIds.GOLDEN_NUGGET);
+		// Carried plus banked as last seen: moving nuggets between the two changes neither.
+		int heldNuggets = nuggets + bank.getOrDefault(ItemIds.GOLDEN_NUGGET, 0);
 		Skill skill = skillOf(activity);
 		long xp = skill == null ? -1 : client.getSkillExperience(skill);
 		if (activity != View.Activity.NONE)
@@ -190,16 +205,14 @@ public final class GoalWatch
 			{
 				r.xp += xp - lastXp;
 			}
-			// Nuggets taken out of the bank are not nuggets earned.
-			if (activity == View.Activity.MOTHERLODE && last == activity && lastNuggets >= 0 && nuggets > lastNuggets
-				&& !com.codex.minigamepilot.pilot.FurnacePilot.bankOpen(client))
+			if (activity == View.Activity.MOTHERLODE && last == activity)
 			{
-				r.currency += nuggets - lastNuggets;
+				r.currency += nuggetsEarned(lastNuggets, heldNuggets, com.codex.minigamepilot.pilot.FurnacePilot.bankOpen(client));
 			}
 		}
 		last = activity;
 		lastXp = xp;
-		lastNuggets = nuggets;
+		lastNuggets = heldNuggets;
 
 		Have have = new Have(inv, worn, bank);
 		if (activity == View.Activity.NONE)

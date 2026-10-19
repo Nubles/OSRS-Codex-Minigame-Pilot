@@ -30,7 +30,8 @@ public final class Goal
 		CARPENTERS_TROUSERS("Carpenter's trousers", 600, Currency.POINTS, 24876),
 		CARPENTERS_BOOTS("Carpenter's boots", 200, Currency.POINTS, 24878),
 		PLANK_SACK("Plank sack", 350, Currency.POINTS, 24882),
-		AMYS_SAW("Amy's saw", 500, Currency.POINTS, 24880),
+		/** The saw, or the same saw made into an off-hand. */
+		AMYS_SAW("Amy's saw", 500, Currency.POINTS, 24880, 29774),
 		HOSIDIUS_BLUEPRINTS("Hosidius blueprints", 2000, Currency.POINTS, 24885);
 
 		private final String name;

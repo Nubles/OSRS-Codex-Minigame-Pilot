@@ -149,4 +149,11 @@ public class GoalTest
 		assertTrue(g.done());
 		assertEquals("All owned. Pick another goal in the settings", g.describe());
 	}
+
+	@Test
+	public void theOffHandSawStillCountsAsAmysSaw()
+	{
+		// ItemID.WEARABLE_SAW_OFFHAND: the saw after it is made into an off-hand.
+		org.junit.Assert.assertTrue(Goal.Reward.AMYS_SAW.ownedBy(id -> id == 29774));
+	}
 }
