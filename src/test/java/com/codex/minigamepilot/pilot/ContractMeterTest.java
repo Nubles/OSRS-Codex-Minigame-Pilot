@@ -94,4 +94,22 @@ public class ContractMeterTest
 		assertTrue(sig, sig.contains("Adept15.5 gp1,000 xp · 15.5k gp · 15k xp/htrue"));
 		assertTrue(sig, sig.contains("NoviceFinish one to learn what it costs"));
 	}
+
+	@Test
+	public void experienceNotLoadedYetIsNotTakenAsTheStart()
+	{
+		HomesPilot p = pilot();
+		Contract c = new Contract(Home.LARRY, Contract.Tier.ADEPT);
+		p.load(c);
+		int[] fresh = {1, 3, 4, 4, 1, 3, 1, 0};
+		// Just logged in: the furniture is read before the skills arrive.
+		p.meter(c, fresh, 0);
+		p.meter(c, fresh, 5_000);
+		handIn(p);
+		for (int i = 0; i < 3; i++)
+		{
+			p.settle(6_000);
+		}
+		assertEquals(1000, p.getBook().tally(Contract.Tier.ADEPT).xpEach(), 0);
+	}
 }

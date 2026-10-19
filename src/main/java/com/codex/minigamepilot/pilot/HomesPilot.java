@@ -142,7 +142,8 @@ public final class HomesPilot
 			meterHome = open.getHome();
 			meterXp = -1;
 		}
-		if (meterXp != -1 || !Contract.known(values))
+		// No experience at all means the skills have not arrived yet (just logged in): wait for them.
+		if (meterXp != -1 || xp <= 0 || !Contract.known(values))
 		{
 			return;
 		}
@@ -198,7 +199,7 @@ public final class HomesPilot
 			return;
 		}
 		settleIn = -1;
-		if (book.record(settleTier, xp - settleXp, settlePlanks, settleSteel, settleSeconds) && saveKey != null)
+		if (xp > 0 && book.record(settleTier, xp - settleXp, settlePlanks, settleSteel, settleSeconds) && saveKey != null)
 		{
 			saveKey.accept(BOOK_KEY, book.encode());
 		}
