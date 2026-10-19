@@ -302,6 +302,6 @@ public final class Goal
 
 	static String group(long n)
 	{
-		return String.format(Locale.ENGLISH, "%,d", n);
+		return Figures.count(n);
 	}
 }

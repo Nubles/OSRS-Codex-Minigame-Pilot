@@ -65,6 +65,12 @@ public final class HomesPilot
 	}
 
 	private final Session session = new Session(Skill.CONSTRUCTION);
+
+	/** Another account logged in: the session and its counts start over on its first tick. */
+	void newAccount()
+	{
+		session.startOver();
+	}
 	private final Consumer<Contract> save;
 	private final Map<Integer, String> objectNames = new HashMap<>();
 	private Contract contract;
@@ -638,19 +644,7 @@ public final class HomesPilot
 
 	private static String compact(long n)
 	{
-		if (Math.abs(n) >= 1_000_000)
-		{
-			return String.format(Locale.ENGLISH, "%.1fM", n / 1_000_000d);
-		}
-		if (Math.abs(n) >= 100_000)
-		{
-			return Math.round(n / 1000d) + "k";
-		}
-		if (Math.abs(n) >= 1000)
-		{
-			return String.format(Locale.ENGLISH, "%.1fk", n / 1000d).replace(".0k", "k");
-		}
-		return String.valueOf(n);
+		return com.codex.minigamepilot.core.Figures.brief(n);
 	}
 
 	private Step climb(Home home, Ground ground, SceneIndex scene, String why)

@@ -1,5 +1,6 @@
 package com.codex.minigamepilot.ui;
 
+import com.codex.minigamepilot.core.Figures;
 import java.awt.BasicStroke;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
@@ -25,12 +26,6 @@ class GaugeBar extends JComponent
 		setPreferredSize(new Dimension(10, gauge.note == null || gauge.note.isEmpty() ? 30 : 42));
 	}
 
-	/** 41,000 as 41K, so coins fit beside the label. */
-	private static String compact(int n)
-	{
-		return n >= 10_000 ? (n / 1000) + "K" : String.valueOf(n);
-	}
-
 	@Override
 	protected void paintComponent(Graphics graphics)
 	{
@@ -39,7 +34,7 @@ class GaugeBar extends JComponent
 		int w = getWidth();
 		g.setFont(Theme.small());
 		FontMetrics fm = g.getFontMetrics();
-		String figure = gauge.max > 0 ? compact(gauge.value) + " / " + compact(gauge.max) : compact(gauge.value);
+		String figure = gauge.max > 0 ? Figures.pair(gauge.value, gauge.max) : Figures.brief(gauge.value);
 		if (gauge.coming > 0)
 		{
 			figure = "+" + gauge.coming + "  " + figure;

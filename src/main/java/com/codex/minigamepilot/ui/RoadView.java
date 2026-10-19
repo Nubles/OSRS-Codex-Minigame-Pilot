@@ -79,7 +79,7 @@ class RoadView extends JComponent
 
 	static String count(long n)
 	{
-		return String.format(Locale.ENGLISH, "%,d", n);
+		return com.codex.minigamepilot.core.Figures.count(n);
 	}
 
 	/** "1,250 nuggets", "320 points", "412K xp". */
@@ -88,11 +88,7 @@ class RoadView extends JComponent
 		Goal.Currency c = s.getCurrency();
 		if (c == null)
 		{
-			if (n >= 1_000_000)
-			{
-				return String.format(Locale.ENGLISH, "%.1fM xp", n / 1_000_000.0);
-			}
-			return (n >= 10_000 ? count(Math.round(n / 1000.0)) + "K" : count(n)) + " xp";
+			return com.codex.minigamepilot.core.Figures.brief(n) + " xp";
 		}
 		return count(n) + " " + c.of(n);
 	}

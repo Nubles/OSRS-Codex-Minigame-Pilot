@@ -2,6 +2,7 @@ package com.codex.minigamepilot.pilot;
 
 import com.codex.minigamepilot.core.BankStock;
 import com.codex.minigamepilot.core.Bar;
+import com.codex.minigamepilot.core.BestVisit;
 import com.codex.minigamepilot.core.Contract;
 import com.codex.minigamepilot.core.Pace;
 import com.codex.minigamepilot.core.Visit;
@@ -73,6 +74,37 @@ public final class Pilots
 	public void clearScene()
 	{
 		scene.clear();
+	}
+
+	/** The last account that was logged in, so logging out and back in is not a new one. */
+	private String account;
+
+	/**
+	 * The save profile changed. It changes to none on every logout and back on login, so only a
+	 * login to a different account than the last starts every session over: back on the same
+	 * account soon, the session goes on as it always has.
+	 *
+	 * @param profile the profile now, or null while logged out
+	 */
+	public void profile(String profile)
+	{
+		if (switched(account, profile))
+		{
+			motherlode.newAccount();
+			furnace.newAccount();
+			homes.newAccount();
+			said.clear();
+		}
+		if (profile != null)
+		{
+			account = profile;
+		}
+	}
+
+	/** Whether a login to {@code profile} is another account than {@code last}, the last one logged in. */
+	static boolean switched(String last, String profile)
+	{
+		return profile != null && last != null && !profile.equals(last);
 	}
 
 	public void loadContract(Contract saved)
@@ -181,12 +213,12 @@ public final class Pilots
 		{
 			if (last == View.Activity.MOTHERLODE)
 			{
-				keep(last, motherlode.visit(now), true);
+				keep(last, motherlode.visit(now), motherlode.pace(now), true);
 				motherlode.left();
 			}
 			else if (last == View.Activity.FURNACE)
 			{
-				keep(last, furnace.visit(now), true);
+				keep(last, furnace.visit(now), furnace.pace(now), true);
 				furnace.left();
 			}
 			last = activity;
@@ -224,11 +256,11 @@ public final class Pilots
 	{
 		if (last == View.Activity.MOTHERLODE)
 		{
-			keep(last, motherlode.visit(now), false);
+			keep(last, motherlode.visit(now), motherlode.pace(now), false);
 		}
 		else if (last == View.Activity.FURNACE)
 		{
-			keep(last, furnace.visit(now), false);
+			keep(last, furnace.visit(now), furnace.pace(now), false);
 		}
 		motherlode.relogged();
 		furnace.relogged();
@@ -236,8 +268,11 @@ public final class Pilots
 		last = View.Activity.NONE;
 	}
 
-	/** Saves a visit's summary, and holds it for the chat when it was walked out of. */
-	private void keep(View.Activity activity, Visit visit, boolean say)
+	/**
+	 * Saves a visit's summary and weighs its pace against your best visit, and holds both for
+	 * the chat when it was walked out of.
+	 */
+	private void keep(View.Activity activity, Visit visit, BestVisit pace, boolean say)
 	{
 		if (visit == null)
 		{
@@ -247,13 +282,33 @@ public final class Pilots
 		{
 			saveKey.accept(VISIT_KEY + activity.name(), visit.encode());
 		}
+		String beat = null;
+		BestVisit held = best(activity);
+		BestVisit.Outcome outcome = BestVisit.judge(held, pace);
+		if (outcome != BestVisit.Outcome.KEPT && saveKey != null)
+		{
+			saveKey.accept(BEST_KEY + activity.name(), pace.encode());
+			if (outcome == BestVisit.Outcome.BEATEN)
+			{
+				beat = pace.beat(held, activity == View.Activity.FURNACE ? FurnacePilot.UNIT : MotherlodePilot.UNIT);
+			}
+		}
 		// A session carries on when you step out and back in, so leaving again with nothing more
 		// done would say the same counts twice.
 		if (say && !visit.sameCounts(said.get(activity)))
 		{
-			note = activity.getTitle() + ", " + visit.line();
+			note = activity.getTitle() + ", " + visit.line() + (beat == null ? "" : " " + beat);
 			said.put(activity, visit);
 		}
+	}
+
+	/** Where each minigame's fastest visit is kept: this and the minigame's name. */
+	static final String BEST_KEY = "best.";
+
+	/** Your fastest visit to a minigame, or null. */
+	private BestVisit best(View.Activity activity)
+	{
+		return load == null ? null : BestVisit.decode(load.apply(BEST_KEY + activity.name()));
 	}
 
 	/** The summary of a visit just walked out of, once, or null. */
@@ -295,8 +350,8 @@ public final class Pilots
 		View v = new View(true, View.Activity.NONE, null, null, null, -1);
 		v.brief(homes.brief(stock == null ? null : stock.get(), client.getRealSkillLevel(net.runelite.api.Skill.CONSTRUCTION)));
 		long now = System.currentTimeMillis();
-		v.brief(motherlode.brief(lastVisit(View.Activity.MOTHERLODE), now));
-		v.brief(furnace.brief(lastVisit(View.Activity.FURNACE), now));
+		v.brief(motherlode.brief(lastVisit(View.Activity.MOTHERLODE), best(View.Activity.MOTHERLODE), now));
+		v.brief(furnace.brief(lastVisit(View.Activity.FURNACE), best(View.Activity.FURNACE), now));
 		return v;
 	}
 }

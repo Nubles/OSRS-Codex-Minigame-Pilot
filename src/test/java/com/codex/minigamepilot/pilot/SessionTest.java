@@ -34,4 +34,34 @@ public class SessionTest
 		// A tick where the skills read nothing again (logging out) shows nothing, not a loss.
 		assertEquals(0, s.xp(0));
 	}
+
+	@Test
+	public void anotherAccountStartsTheSessionOverEvenAfterAShortLogout()
+	{
+		long t = 1_760_000_000_000L;
+		Session s = new Session(net.runelite.api.Skill.MINING);
+		assertFalse(s.tick(1000, true, t));
+		assertFalse(s.tick(2000, true, t + 600));
+		// Logged out and into another account a minute later: without this the new account would
+		// carry the last one's start, its counts and its hourly pace (and so its best visit).
+		s.startOver();
+		assertTrue(s.tick(50_000, true, t + 60_000L));
+		assertEquals(t + 60_000L, s.startedAt());
+		assertEquals(0, s.xp(50_000));
+		assertFalse("only once", s.tick(50_100, true, t + 60_600L));
+		// Before any session there is nothing to start over.
+		Session fresh = new Session(net.runelite.api.Skill.MINING);
+		fresh.startOver();
+		assertFalse(fresh.tick(10, true, t));
+	}
+
+	@Test
+	public void onlyALoginToAnotherAccountIsASwitch()
+	{
+		// The profile goes to none at every logout and back at login.
+		assertFalse(Pilots.switched(null, "alpha"));
+		assertFalse(Pilots.switched("alpha", null));
+		assertFalse("back on the same account", Pilots.switched("alpha", "alpha"));
+		assertTrue(Pilots.switched("alpha", "beta"));
+	}
 }

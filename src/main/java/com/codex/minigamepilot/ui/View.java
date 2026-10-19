@@ -100,6 +100,15 @@ public final class View
 		final String status;
 		final String how;
 
+		/** Your fastest visit, in gold under the status, or null. */
+		String best;
+
+		public Brief best(String line)
+		{
+			best = line;
+			return this;
+		}
+
 		public Brief(Activity activity, String status, String how)
 		{
 			this.activity = activity;
@@ -429,7 +438,7 @@ public final class View
 		}
 		for (Brief r : briefs)
 		{
-			b.append('|').append(r.activity).append(r.status);
+			b.append('|').append(r.activity).append(r.status).append(r.best);
 		}
 		if (pick != null)
 		{

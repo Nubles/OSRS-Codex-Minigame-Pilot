@@ -94,6 +94,12 @@ public final class FurnacePilot
 
 	/** @param lastVisit the summary saved when you last left the furnace, or null */
 	/** Logged in again or hopped: readings start afresh, ore on the belt stays on the belt. */
+	/** Another account logged in: the session and its counts start over on its first tick. */
+	void newAccount()
+	{
+		session.startOver();
+	}
+
 	void relogged()
 	{
 		cycle.relog();
@@ -101,12 +107,23 @@ public final class FurnacePilot
 		lastOre = -1;
 	}
 
-	View.Brief brief(com.codex.minigamepilot.core.Visit lastVisit, long now)
+	/** @param best your fastest visit, or null */
+	View.Brief brief(com.codex.minigamepilot.core.Visit lastVisit, com.codex.minigamepilot.core.BestVisit best, long now)
 	{
 		String status = lastVisit != null ? lastVisit.status(now)
-			: session.begun() ? (barsTaken - barsBefore) + " bars this session" : null;
+			: session.begun() ? Session.format(barsTaken - barsBefore) + " bars this session" : null;
 		return new View.Brief(View.Activity.FURNACE, status,
-			"In Keldagrim. Bring coins for the coffer, ice gloves, and a coal bag for steel and up.");
+			"In Keldagrim. Bring coins for the coffer, ice gloves, and a coal bag for steel and up.")
+			.best(best == null ? null : best.status(UNIT, "Smithing", lastVisit, now));
+	}
+
+	/** What the furnace's pace is counted in. */
+	static final String UNIT = "bars";
+
+	/** This session's pace so far, as a reading for your best visit, or null while it is too short. */
+	com.codex.minigamepilot.core.BestVisit pace(long now)
+	{
+		return com.codex.minigamepilot.core.BestVisit.of(session.startedAt(), now, session.activeMs(), barsTaken - barsBefore, xpSeen);
 	}
 
 	/**
@@ -313,7 +330,7 @@ public final class FurnacePilot
 			{
 				figure = timed ? compact(r.getPerHour()) + "/h" : signed(r.getPerBar());
 				String trips = r.getCoalTrips() <= 0 ? "no coal trips" : coalTrips(r.getCoalTrips());
-				detail = timed ? signed(r.getPerBar()) + "/bar · " + trips + " · " + compact(Math.round(r.getXpPerHour())).substring(1) + " xp"
+				detail = timed ? signed(r.getPerBar()) + "/bar · " + trips + " · " + com.codex.minigamepilot.core.Figures.brief(Math.round(r.getXpPerHour())) + " xp"
 					: "a bar · " + trips + (r.getCoalTrips() > 0 ? " a load" : "");
 			}
 			double share = top <= 0 ? 0 : Math.max(0, r.getPerTrip() / top);
@@ -343,17 +360,7 @@ public final class FurnacePilot
 	/** Coins with their sign, shortened past ten thousand: "+71K", "-104K", "+9,870". */
 	static String compact(long n)
 	{
-		long a = Math.abs(n);
-		String sign = n < 0 ? "-" : "+";
-		if (a >= 10_000_000)
-		{
-			return sign + Math.round(a / 1_000_000.0) + "M";
-		}
-		if (a >= 10_000)
-		{
-			return sign + Math.round(a / 1000.0) + "K";
-		}
-		return sign + Session.format(a);
+		return com.codex.minigamepilot.core.Figures.signed(n);
 	}
 
 	private static String clock(double seconds)

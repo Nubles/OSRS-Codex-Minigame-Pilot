@@ -15,7 +15,8 @@ public class FurnacePickTest
 		assertEquals("+9,870", FurnacePilot.compact(9_870));
 		assertEquals("+71K", FurnacePilot.compact(70_552));
 		assertEquals("-104K", FurnacePilot.compact(-104_276));
-		assertEquals("+12M", FurnacePilot.compact(12_400_000));
+		assertEquals("+12.4M", FurnacePilot.compact(12_400_000));
+		assertEquals("+1.0M", FurnacePilot.compact(999_700));
 		assertEquals("+0", FurnacePilot.compact(0));
 	}
 

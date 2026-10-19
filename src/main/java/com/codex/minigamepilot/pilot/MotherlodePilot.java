@@ -88,6 +88,12 @@ public final class MotherlodePilot
 	}
 
 	/** Logged in again or hopped: readings start afresh, pay-dirt in flight stays in flight. */
+	/** Another account logged in: the session and its counts start over on its first tick. */
+	void newAccount()
+	{
+		session.startOver();
+	}
+
 	void relogged()
 	{
 		cycle.relog();
@@ -133,18 +139,29 @@ public final class MotherlodePilot
 		return com.codex.minigamepilot.core.Visit.of(now, session.activeMs(), parts);
 	}
 
+	/** This session's pace so far, as a reading for your best visit, or null while it is too short. */
+	com.codex.minigamepilot.core.BestVisit pace(long now)
+	{
+		return com.codex.minigamepilot.core.BestVisit.of(session.startedAt(), now, session.activeMs(), deposited(), xpSeen);
+	}
+
 	/**
 	 * Brief for the panel when the player is elsewhere.
 	 *
 	 * @param lastVisit the summary saved when you last left the mine, or null
+	 * @param best your fastest visit, or null
 	 */
-	View.Brief brief(com.codex.minigamepilot.core.Visit lastVisit, long now)
+	View.Brief brief(com.codex.minigamepilot.core.Visit lastVisit, com.codex.minigamepilot.core.BestVisit best, long now)
 	{
 		String status = lastVisit != null ? lastVisit.status(now)
 			: session.begun() ? Session.format(deposited()) + " pay-dirt deposited this session" : null;
 		return new View.Brief(View.Activity.MOTHERLODE, status,
-			"Under Falador, through the Dwarven Mine or the Falador mining guild. Bring a pickaxe; a hammer helps.");
+			"Under Falador, through the Dwarven Mine or the Falador mining guild. Bring a pickaxe; a hammer helps.")
+			.best(best == null ? null : best.status(UNIT, "Mining", lastVisit, now));
 	}
+
+	/** What the mine's pace is counted in. */
+	static final String UNIT = "pay-dirt";
 
 	Flight fly(Client client, SceneIndex scene, long now)
 	{

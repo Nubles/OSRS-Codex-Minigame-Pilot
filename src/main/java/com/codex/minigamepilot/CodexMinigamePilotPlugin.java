@@ -364,6 +364,7 @@ public class CodexMinigamePilotPlugin extends Plugin
 	@Subscribe
 	public void onRuneScapeProfileChanged(RuneScapeProfileChanged event)
 	{
+		pilots.profile(event.getNewProfile());
 		pilots.loadContract(loadContract());
 		if (goals != null)
 		{

@@ -1,7 +1,5 @@
 package com.codex.minigamepilot.pilot;
 
-import java.text.NumberFormat;
-import java.util.Locale;
 import net.runelite.api.Client;
 import net.runelite.api.Skill;
 
@@ -12,6 +10,8 @@ final class Session
 	private long started;
 	private int startXp = -1;
 	private long last;
+	/** Set when another account logs in: its first tick starts the session over. */
+	private boolean startOver;
 
 	Session(Skill skill)
 	{
@@ -40,7 +40,8 @@ final class Session
 	 */
 	boolean tick(int xp, boolean loaded, long now)
 	{
-		boolean restart = restarts(started, last, now);
+		boolean restart = restarts(started, last, now) || startOver && started != 0;
+		startOver = false;
 		if (started == 0 || restart)
 		{
 			started = now;
@@ -63,6 +64,21 @@ final class Session
 	boolean begun()
 	{
 		return started > 0;
+	}
+
+	/**
+	 * Another account has logged in. A session otherwise carries on through a short logout, and
+	 * would give the new account the last one's counts, hourly pace and best visit.
+	 */
+	void startOver()
+	{
+		startOver = true;
+	}
+
+	/** When this session began, or 0 before it has; a new one after a break begins again. */
+	long startedAt()
+	{
+		return started;
 	}
 
 	/** How long the session has run, to its last tick. */
@@ -99,16 +115,9 @@ final class Session
 		return minutes < 60 ? minutes + "m" : (minutes / 60) + "h " + (minutes % 60) + "m";
 	}
 
+	/** A count written as every card writes it: "68,040", "142K", "1.2M". */
 	static String format(long n)
 	{
-		if (n >= 10_000_000)
-		{
-			return (n / 1_000_000) + "M";
-		}
-		if (n >= 100_000)
-		{
-			return (n / 1000) + "K";
-		}
-		return NumberFormat.getIntegerInstance(Locale.ENGLISH).format(n);
+		return com.codex.minigamepilot.core.Figures.count(n);
 	}
 }

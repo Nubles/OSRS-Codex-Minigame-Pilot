@@ -254,6 +254,10 @@ public class PilotPanel extends PluginPanel
 				{
 					text.add(Ui.wrapped(b.status, Theme.small(), Theme.TEXT, WIDTH - 30));
 				}
+				if (b.best != null)
+				{
+					text.add(Ui.wrapped(b.best, Theme.small(), Theme.GOLD, WIDTH - 30));
+				}
 				if (b.how != null)
 				{
 					text.add(Ui.wrapped(b.how, Theme.small(), Theme.TEXT_MUTED, WIDTH - 30));
@@ -269,7 +273,11 @@ public class PilotPanel extends PluginPanel
 		repaint();
 	}
 
-	/** A goal: how far along it is, how far off in rounds and time, and its pieces ticked off. */
+	/**
+	 * A goal: how far along it is, how far off in rounds and time, and its pieces ticked off.
+	 * A goal of one piece is all in its gauge ("Coal bag 64 / 100"), so a list of that one piece
+	 * would only say its cost twice.
+	 */
 	private static Card goalCard(View.GoalCard goal, boolean named)
 	{
 		Card card = new Card(new BorderLayout());
@@ -287,7 +295,7 @@ public class PilotPanel extends PluginPanel
 		{
 			stack.add(Ui.wrapped(goal.aside, Theme.small(), Theme.TEAL, WIDTH - 30));
 		}
-		if (!goal.pieces.isEmpty())
+		if (goal.pieces.size() > 1)
 		{
 			StackPanel lines = new StackPanel(1, 0);
 			for (View.Line line : goal.pieces)

@@ -628,11 +628,11 @@ public final class GoalWatch
 			{
 				left -= reward.getCost();
 			}
-			lines.add(new View.Line(reward.getName(), String.valueOf(reward.getCost()),
+			lines.add(new View.Line(reward.getName(), com.codex.minigamepilot.core.Figures.count(reward.getCost()),
 				affordable ? View.Line.Mark.NEXT : View.Line.Mark.TODO));
 		}
 		String note = balanceKnown ? goal.describe()
-			: "Finish a contract and the Pilot reads your points from the message. " + goal.getNeed() + " points for all of it";
+			: "Finish a contract and the Pilot reads your points from the message. " + com.codex.minigamepilot.core.Figures.count(goal.getNeed()) + " points for all of it";
 		if (activity == View.Activity.HOMES && balanceKnown && !goal.getPieces().isEmpty() && points.getMeaning() == Points.Meaning.UNKNOWN && ownedCost > 0)
 		{
 			// Until the Pilot knows whether the message's total is a balance or every point ever
