@@ -346,8 +346,8 @@ public class CodexMinigamePilotPlugin extends Plugin
 		if (config.showGoals() && goals != null)
 		{
 			goals.tick(client, f.view, new GoalWatch.Choices(
-				config.motherlode() ? config.motherlodeGoal() : Goals.Choice.OFF,
-				config.homes() ? config.homesGoal() : Goals.Choice.OFF,
+				config.motherlode() ? config.motherlodeGoal().choice() : Goals.Choice.OFF,
+				config.homes() ? config.homesGoal().choice() : Goals.Choice.OFF,
 				config.furnace() ? config.furnaceGoal() : -1),
 				f.activity == View.Activity.HOMES || f.activity == View.Activity.NONE ? loadContract() : null);
 		}

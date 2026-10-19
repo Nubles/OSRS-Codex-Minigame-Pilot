@@ -139,4 +139,14 @@ public class GoalTest
 		assertEquals("2h 10m", Goal.duration(130));
 		assertEquals("120h", Goal.duration(7200));
 	}
+
+	@Test
+	public void aChosenRewardYouOwnSaysSo()
+	{
+		Goals.Input in = owning(12019);
+		in.balance = 500;
+		Goal g = Goals.motherlode(Goals.Choice.COAL_BAG, in);
+		assertTrue(g.done());
+		assertEquals("All owned. Pick another goal in the settings", g.describe());
+	}
 }

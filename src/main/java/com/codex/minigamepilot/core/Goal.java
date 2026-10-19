@@ -261,6 +261,10 @@ public final class Goal
 	/** "143 nuggets to go · 36 contracts · about 2h 10m" */
 	public String describe()
 	{
+		if (need == 0 && !pieces.isEmpty())
+		{
+			return "All owned. Pick another goal in the settings";
+		}
 		if (done())
 		{
 			return pieces.isEmpty() ? "Reached" : "You have enough: off to the shop";

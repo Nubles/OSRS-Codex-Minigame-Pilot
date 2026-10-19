@@ -38,6 +38,68 @@ public interface CodexMinigamePilotConfig extends Config
 		}
 	}
 
+	/** What Motherlode nuggets are saved for. */
+	enum MotherlodeGoal
+	{
+		NEXT_REWARD(Goals.Choice.NEXT_REWARD),
+		PROSPECTOR_KIT(Goals.Choice.PROSPECTOR_KIT),
+		COAL_BAG(Goals.Choice.COAL_BAG),
+		GEM_BAG(Goals.Choice.GEM_BAG),
+		BIGGER_SACK(Goals.Choice.BIGGER_SACK),
+		EVERY_REWARD(Goals.Choice.EVERY_REWARD),
+		NEXT_LEVEL(Goals.Choice.NEXT_LEVEL),
+		OFF(Goals.Choice.OFF);
+
+		private final Goals.Choice choice;
+
+		MotherlodeGoal(Goals.Choice choice)
+		{
+			this.choice = choice;
+		}
+
+		public Goals.Choice choice()
+		{
+			return choice;
+		}
+
+		@Override
+		public String toString()
+		{
+			return choice.toString();
+		}
+	}
+
+	/** What Mahogany Homes points are saved for. */
+	enum HomesGoal
+	{
+		NEXT_REWARD(Goals.Choice.NEXT_REWARD),
+		PLANK_SACK(Goals.Choice.PLANK_SACK),
+		CARPENTERS_OUTFIT(Goals.Choice.CARPENTERS_OUTFIT),
+		AMYS_SAW(Goals.Choice.AMYS_SAW),
+		HOSIDIUS_BLUEPRINTS(Goals.Choice.HOSIDIUS_BLUEPRINTS),
+		EVERY_REWARD(Goals.Choice.EVERY_REWARD),
+		NEXT_LEVEL(Goals.Choice.NEXT_LEVEL),
+		OFF(Goals.Choice.OFF);
+
+		private final Goals.Choice choice;
+
+		HomesGoal(Goals.Choice choice)
+		{
+			this.choice = choice;
+		}
+
+		public Goals.Choice choice()
+		{
+			return choice;
+		}
+
+		@Override
+		public String toString()
+		{
+			return choice.toString();
+		}
+	}
+
 	@ConfigSection(name = "Minigames", description = "Which minigames the Pilot guides", position = 0)
 	String MINIGAMES = "minigames";
 
@@ -142,9 +204,9 @@ public interface CodexMinigamePilotConfig extends Config
 		section = GOALS,
 		position = 0
 	)
-	default Goals.Choice motherlodeGoal()
+	default MotherlodeGoal motherlodeGoal()
 	{
-		return Goals.Choice.NEXT_REWARD;
+		return MotherlodeGoal.NEXT_REWARD;
 	}
 
 	@ConfigItem(
@@ -154,9 +216,9 @@ public interface CodexMinigamePilotConfig extends Config
 		section = GOALS,
 		position = 1
 	)
-	default Goals.Choice homesGoal()
+	default HomesGoal homesGoal()
 	{
-		return Goals.Choice.NEXT_REWARD;
+		return HomesGoal.NEXT_REWARD;
 	}
 
 	@ConfigItem(
