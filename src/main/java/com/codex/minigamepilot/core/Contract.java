@@ -122,6 +122,27 @@ public final class Contract
 	}
 
 	/** Whether a hotspot value still needs work. */
+	/**
+	 * The contract saved as "home:tier" (the tier left off while not known), or null when there
+	 * is none or it names no home.
+	 */
+	public static Contract decode(String saved)
+	{
+		if (saved == null || saved.isEmpty())
+		{
+			return null;
+		}
+		String[] parts = saved.split(":");
+		// ":" alone splits to nothing at all.
+		Home home = parts.length == 0 ? null : Home.byName(parts[0]);
+		if (home == null)
+		{
+			return null;
+		}
+		Tier tier = parts.length > 1 ? Tier.byName(parts[1]) : null;
+		return new Contract(home, tier);
+	}
+
 	public static boolean needsWork(int value)
 	{
 		return value == 1 || value == 3 || value == 4;

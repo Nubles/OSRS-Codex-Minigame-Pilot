@@ -41,8 +41,10 @@ public final class BankStock
 
 	BankStock(Map<Integer, Long> items, long savedAt, Source source)
 	{
+		// No stack in the bank passes 2,147,483,647: a bigger saved figure is damage, held there.
+		items.replaceAll((id, n) -> Math.min(n, Integer.MAX_VALUE));
 		this.items = Collections.unmodifiableMap(items);
-		this.savedAt = savedAt;
+		this.savedAt = Math.max(0, savedAt);
 		this.source = source;
 	}
 
@@ -133,6 +135,15 @@ public final class BankStock
 	/** The newer of two stocks, either of which may be null. The Pilot's own wins a tie. */
 	public static BankStock newest(BankStock own, BankStock steward)
 	{
+		return newest(own, steward, Long.MAX_VALUE);
+	}
+
+	/**
+	 * The newer of two stocks as of {@code now}. A time more than a day past now (a clock set
+	 * wrong when it was saved) counts as unknown, so that stock does not win for ever.
+	 */
+	public static BankStock newest(BankStock own, BankStock steward, long now)
+	{
 		if (own == null)
 		{
 			return steward;
@@ -141,7 +152,13 @@ public final class BankStock
 		{
 			return own;
 		}
-		return steward.savedAt > own.savedAt ? steward : own;
+		return seenBy(steward.savedAt, now) > seenBy(own.savedAt, now) ? steward : own;
+	}
+
+	/** A saved time, or 0 when it is more than a day past now. */
+	private static long seenBy(long savedAt, long now)
+	{
+		return now != Long.MAX_VALUE && savedAt > now + 86_400_000L ? 0 : savedAt;
 	}
 
 	public long count(int id)
@@ -223,9 +240,19 @@ public final class BankStock
 		}
 		try
 		{
-			return e.getAsLong();
+			// Past what a long holds reads as the most it holds, not wrapped round.
+			java.math.BigDecimal d = e.getAsBigDecimal();
+			if (d.compareTo(java.math.BigDecimal.valueOf(Long.MAX_VALUE)) > 0)
+			{
+				return Long.MAX_VALUE;
+			}
+			if (d.compareTo(java.math.BigDecimal.valueOf(Long.MIN_VALUE)) < 0)
+			{
+				return Long.MIN_VALUE;
+			}
+			return d.longValue();
 		}
-		catch (NumberFormatException ex)
+		catch (NumberFormatException | ArithmeticException ex)
 		{
 			return null;
 		}

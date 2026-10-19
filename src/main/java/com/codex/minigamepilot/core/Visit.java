@@ -62,7 +62,7 @@ public final class Visit
 		return minutes < 60 ? minutes + "m" : (minutes / 60) + "h " + (minutes % 60) + "m";
 	}
 
-	/** "1h 12m: 318 pay-dirt, 21,400 Mining xp and ore worth 48K." */
+	/** "1h 12m: 318 pay-dirt, 21,400 Mining xp and ore worth 48k." */
 	public String line()
 	{
 		return duration() + ": " + counts() + ".";
@@ -120,7 +120,22 @@ public final class Visit
 		return endedAt + "|" + minutes + "|" + String.join(";", parts);
 	}
 
-	/** A saved summary, or null when there is none or it cannot be read. */
+	private static final java.util.regex.Pattern DAMAGED = java.util.regex.Pattern.compile("NaN|Infinity|(^|\\s)-\\d");
+
+	/** True when no count in a summary is below zero or not a number, as no visit writes one. */
+	private static boolean plain(List<String> parts)
+	{
+		for (String p : parts)
+		{
+			if (DAMAGED.matcher(p).find())
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/** A saved summary, or null when there is none, it cannot be read or it is damaged. */
 	public static Visit decode(String saved)
 	{
 		if (saved == null || saved.isEmpty())
@@ -139,7 +154,7 @@ public final class Visit
 			List<String> parts = new ArrayList<>();
 			Collections.addAll(parts, f[2].split(";"));
 			Visit v = new Visit(ended, minutes, parts);
-			return ended <= 0 || v.parts.isEmpty() ? null : v;
+			return ended <= 0 || v.parts.isEmpty() || !plain(v.parts) ? null : v;
 		}
 		catch (NumberFormatException e)
 		{

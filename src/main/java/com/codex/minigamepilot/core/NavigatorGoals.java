@@ -1,5 +1,6 @@
 package com.codex.minigamepilot.core;
 
+import com.google.gson.Gson;
 import java.util.List;
 import java.util.Map;
 
@@ -63,6 +64,25 @@ public final class NavigatorGoals
 
 	private NavigatorGoals()
 	{
+	}
+
+	/** Navigator's saved board, or null when there is none or this version cannot read it. */
+	public static Board read(Gson gson, String json)
+	{
+		if (json == null || json.isEmpty())
+		{
+			return null;
+		}
+		try
+		{
+			return gson.fromJson(json, Board.class);
+		}
+		catch (RuntimeException e)
+		{
+			// Gson lets a NumberFormatException through unwrapped for "x" in a number field.
+			// A board this version cannot read is left alone: goals work as without Navigator.
+			return null;
+		}
 	}
 
 	/**

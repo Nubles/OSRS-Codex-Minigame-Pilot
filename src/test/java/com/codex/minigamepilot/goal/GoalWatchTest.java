@@ -113,4 +113,18 @@ public class GoalWatchTest
 		assertEquals(0, GoalWatch.nuggetsEarned(-1, -1, false));
 		assertEquals(2, GoalWatch.nuggetsEarned(40, 42, false));
 	}
+
+	@Test
+	public void aDamagedBankCopyKeepsWhatReads()
+	{
+		// goal.bank damaged every way the suite's fuzz test damages a save: no throw, no count below one.
+		for (String saved : com.codex.minigamepilot.core.SavedKeysFuzzTest.damaged("12012=5000;12013=1;25549=1"))
+		{
+			for (Integer n : GoalWatch.decode(saved).values())
+			{
+				assertTrue(saved, n > 0);
+			}
+			GoalWatch.decode(GoalWatch.encode(GoalWatch.decode(saved)));
+		}
+	}
 }

@@ -21,7 +21,6 @@ import com.codex.minigamepilot.ui.View;
 import com.codex.minigamepilot.pilot.FieldNotes;
 import com.codex.minigamepilot.pilot.LoginSettle;
 import com.google.gson.Gson;
-import com.google.gson.JsonParseException;
 import com.google.inject.Provides;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -425,7 +424,7 @@ public class CodexMinigamePilotPlugin extends Plugin
 			stewardJson = json;
 			stewardStock = BankStock.steward(gson, json);
 		}
-		return BankStock.newest(ownStock, stewardStock);
+		return BankStock.newest(ownStock, stewardStock, System.currentTimeMillis());
 	}
 
 	@Subscribe
@@ -670,34 +669,14 @@ public class CodexMinigamePilotPlugin extends Plugin
 		if (!json.equals(navigatorJson))
 		{
 			navigatorJson = json;
-			try
-			{
-				navigatorBoard = gson.fromJson(json, NavigatorGoals.Board.class);
-			}
-			catch (JsonParseException | IllegalStateException e)
-			{
-				// A board this version cannot read is left alone: goals work as without Navigator.
-				navigatorBoard = null;
-			}
+			navigatorBoard = NavigatorGoals.read(gson, json);
 		}
 		return navigatorBoard;
 	}
 
 	private Contract loadContract()
 	{
-		String saved = configManager.getRSProfileConfiguration(CodexMinigamePilotConfig.GROUP, CONTRACT_KEY);
-		if (saved == null || saved.isEmpty())
-		{
-			return null;
-		}
-		String[] parts = saved.split(":");
-		Home home = Home.byName(parts[0]);
-		if (home == null)
-		{
-			return null;
-		}
-		Contract.Tier tier = parts.length > 1 ? Contract.Tier.byName(parts[1]) : null;
-		return new Contract(home, tier);
+		return Contract.decode(configManager.getRSProfileConfiguration(CodexMinigamePilotConfig.GROUP, CONTRACT_KEY));
 	}
 
 	private void saveContract(Contract contract)
