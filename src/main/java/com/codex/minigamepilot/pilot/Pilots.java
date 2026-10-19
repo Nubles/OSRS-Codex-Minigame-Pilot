@@ -37,6 +37,8 @@ public final class Pilots
 	private final BiConsumer<String, String> saveKey;
 	/** A summary of the visit just ended, for the chat, or null. */
 	private String note;
+	/** The visit last said in the chat for each minigame, so stepping out again says nothing new. */
+	private final java.util.Map<View.Activity, Visit> said = new java.util.EnumMap<>(View.Activity.class);
 	/** Where the summary of each minigame's last visit is kept: this and the minigame's name. */
 	static final String VISIT_KEY = "visit.";
 
@@ -245,9 +247,12 @@ public final class Pilots
 		{
 			saveKey.accept(VISIT_KEY + activity.name(), visit.encode());
 		}
-		if (say)
+		// A session carries on when you step out and back in, so leaving again with nothing more
+		// done would say the same counts twice.
+		if (say && !visit.sameCounts(said.get(activity)))
 		{
 			note = activity.getTitle() + ", " + visit.line();
+			said.put(activity, visit);
 		}
 	}
 

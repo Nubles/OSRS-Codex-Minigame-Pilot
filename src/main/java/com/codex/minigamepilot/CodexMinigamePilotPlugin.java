@@ -19,6 +19,7 @@ import com.codex.minigamepilot.ui.PilotPanel;
 import com.codex.minigamepilot.ui.Sigil;
 import com.codex.minigamepilot.ui.View;
 import com.codex.minigamepilot.pilot.FieldNotes;
+import com.codex.minigamepilot.pilot.LoginSettle;
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 import com.google.inject.Provides;
@@ -127,12 +128,11 @@ public class CodexMinigamePilotPlugin extends Plugin
 	/** Whether lastInventory holds this login's inventory yet; the first one seen is only a base. */
 	private boolean inventoryKnown;
 	/**
-	 * Ticks to wait after logging in or hopping before reading the minigames: the inventory,
-	 * skills and varbits arrive over the first ticks, and a pack read as empty then full would
-	 * look like a haul. RuneLite's own XP tracker waits the same.
+	 * The ticks after logging in or hopping before reading the minigames: the inventory, skills
+	 * and varbits arrive over the first ticks, and a pack read as empty then full would look like
+	 * a haul.
 	 */
-	private static final int LOGIN_GRACE = 2;
-	private int loginGrace;
+	private final LoginSettle settle = new LoginSettle();
 	private GoalWatch goals;
 	private String navigatorJson;
 	private NavigatorGoals.Board navigatorBoard;
@@ -185,7 +185,8 @@ public class CodexMinigamePilotPlugin extends Plugin
 		{
 			if (client.getGameState() == GameState.LOGGED_IN)
 			{
-				seedInventory(client.getItemContainer(InventoryID.INV));
+				// Started while logged in: no inventory from the game by now means an empty one.
+				seedInventory(client.getItemContainer(InventoryID.INV), true);
 				pilots.rescan();
 				goals.reload();
 				pilots.loadContract(loadContract());
@@ -263,7 +264,7 @@ public class CodexMinigamePilotPlugin extends Plugin
 		if (!inventoryKnown)
 		{
 			// The inventory as it arrives after logging in: a base, not a change.
-			seedInventory(event.getItemContainer());
+			seedInventory(event.getItemContainer(), false);
 			return;
 		}
 		Map<Integer, Integer> now = new HashMap<>();
@@ -295,13 +296,17 @@ public class CodexMinigamePilotPlugin extends Plugin
 		pilots.inventory(changes);
 	}
 
-	/** Takes an inventory as the base later changes are measured from. */
-	private void seedInventory(ItemContainer container)
+	/**
+	 * Takes an inventory as the base later changes are measured from.
+	 *
+	 * @param nullIsEmpty whether a missing inventory is an empty one, rather than one still to come
+	 */
+	private void seedInventory(ItemContainer container, boolean nullIsEmpty)
 	{
 		lastInventory.clear();
 		if (container == null)
 		{
-			inventoryKnown = false;
+			inventoryKnown = nullIsEmpty;
 			return;
 		}
 		for (Item item : container.getItems())
@@ -333,15 +338,16 @@ public class CodexMinigamePilotPlugin extends Plugin
 				}
 				lastInventory.clear();
 				inventoryKnown = false;
-				loginGrace = LOGIN_GRACE;
-				// The game drops its hint arrow with the scene; set it again once back.
-				arrow = null;
+				settle.relog();
+				// Take the Pilot's arrow down (only if it is still ours) and set it again once
+				// back, so none is left pointing at a house the next login has no business with.
+				clearArrow();
 				flight = null;
 				plaque.show(null);
 				publish();
 				break;
 			case LOGGING_IN:
-				loginGrace = LOGIN_GRACE;
+				settle.relog();
 				break;
 			default:
 				break;
@@ -484,10 +490,16 @@ public class CodexMinigamePilotPlugin extends Plugin
 		{
 			return;
 		}
-		if (loginGrace > 0 || client.getItemContainer(InventoryID.INV) == null)
+		ItemContainer inv = client.getItemContainer(InventoryID.INV);
+		if (settle.tick(inv != null))
 		{
-			loginGrace = Math.max(0, loginGrace - 1);
 			return;
+		}
+		if (!inventoryKnown)
+		{
+			// Settled with no inventory from the game: take what there is (nothing) as the base,
+			// so the first real change is noted as one rather than taken as the base.
+			seedInventory(inv, true);
 		}
 		Bar bar = config.bar() == CodexMinigamePilotConfig.BarChoice.AUTO ? null : Bar.valueOf(config.bar().name());
 		Flight f = pilots.fly(config.motherlode(), config.furnace(), config.homes(), bar, config.cofferLow(), System.currentTimeMillis());

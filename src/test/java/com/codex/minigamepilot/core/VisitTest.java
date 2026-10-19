@@ -42,4 +42,17 @@ public class VisitTest
 		assertNull(Visit.decode("100|3"));
 		assertNull(Visit.decode("100|3|"));
 	}
+
+	@Test
+	public void steppingOutAgainWithNothingMoreDoneIsTheSameVisit()
+	{
+		Visit first = Visit.of(NOW, 40 * 60_000L, Arrays.asList("318 pay-dirt", "ore worth 48K"));
+		// Out for two minutes and back in: the session carries on, so leaving again reads the
+		// same counts with a longer time, and the chat should not say it twice.
+		Visit again = Visit.of(NOW + 180_000L, 43 * 60_000L, Arrays.asList("318 pay-dirt", "ore worth 48K"));
+		Visit more = Visit.of(NOW + 900_000L, 55 * 60_000L, Arrays.asList("410 pay-dirt", "ore worth 61K"));
+		org.junit.Assert.assertTrue(again.sameCounts(first));
+		org.junit.Assert.assertFalse(more.sameCounts(first));
+		org.junit.Assert.assertFalse(first.sameCounts(null));
+	}
 }

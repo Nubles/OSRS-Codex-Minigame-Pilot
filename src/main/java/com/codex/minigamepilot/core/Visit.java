@@ -109,6 +109,12 @@ public final class Visit
 		return (h / 24) + " days ago";
 	}
 
+	/** Whether this came to the same counts as another, however long each ran. */
+	public boolean sameCounts(Visit other)
+	{
+		return other != null && parts.equals(other.parts);
+	}
+
 	public String encode()
 	{
 		return endedAt + "|" + minutes + "|" + String.join(";", parts);
