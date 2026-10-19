@@ -2,6 +2,7 @@ package com.codex.minigamepilot;
 
 import com.codex.minigamepilot.core.Bar;
 import com.codex.minigamepilot.core.Goals;
+import com.codex.minigamepilot.core.NavigatorGoals;
 import com.codex.minigamepilot.goal.GoalWatch;
 import com.codex.minigamepilot.core.Contract;
 import com.codex.minigamepilot.core.Home;
@@ -18,6 +19,7 @@ import com.codex.minigamepilot.ui.Sigil;
 import com.codex.minigamepilot.ui.View;
 import com.codex.minigamepilot.pilot.FieldNotes;
 import com.google.gson.Gson;
+import com.google.gson.JsonParseException;
 import com.google.inject.Provides;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -48,6 +50,7 @@ import net.runelite.client.RuneLite;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.game.ItemManager;
 import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.events.RuneScapeProfileChanged;
 import net.runelite.client.plugins.Plugin;
@@ -69,6 +72,9 @@ public class CodexMinigamePilotPlugin extends Plugin
 	private static final String CONTRACT_KEY = "contract";
 	private static final String PACE_KEY = "pace.";
 	private static final String VERSION = "1.1";
+	/** Where Codex Navigator saves its goal board for companion plugins. */
+	static final String NAVIGATOR_GROUP = "codexnavigator";
+	static final String NAVIGATOR_BOARD_KEY = "goalBoard";
 
 	@Inject
 	private Client client;
@@ -94,6 +100,9 @@ public class CodexMinigamePilotPlugin extends Plugin
 	@Inject
 	private Gson gson;
 
+	@Inject
+	private ItemManager itemManager;
+
 	private final StepPlaque plaque = new StepPlaque();
 	private volatile Flight flight;
 	private Pilots pilots;
@@ -108,6 +117,8 @@ public class CodexMinigamePilotPlugin extends Plugin
 	private FieldNotes notes;
 	private final Map<Integer, Integer> lastInventory = new HashMap<>();
 	private GoalWatch goals;
+	private String navigatorJson;
+	private NavigatorGoals.Board navigatorBoard;
 
 	@Provides
 	CodexMinigamePilotConfig provideConfig(ConfigManager configManager)
@@ -123,9 +134,10 @@ public class CodexMinigamePilotPlugin extends Plugin
 		{
 			notes.open(VERSION);
 		}
-		pilots = new Pilots(client, loadContract(), this::saveContract, notes, this::loadBests, this::saveBests);
+		pilots = new Pilots(client, loadContract(), this::saveContract, notes, this::loadBests, this::saveBests, id -> (int) Math.min(Integer.MAX_VALUE, itemManager.getItemPrice(id)));
 		goals = new GoalWatch(key -> configManager.getRSProfileConfiguration(CodexMinigamePilotConfig.GROUP, key),
-			(key, value) -> configManager.setRSProfileConfiguration(CodexMinigamePilotConfig.GROUP, key, value));
+			(key, value) -> configManager.setRSProfileConfiguration(CodexMinigamePilotConfig.GROUP, key, value),
+			this::navigatorBoard);
 		panel = new PilotPanel();
 		navButton = NavigationButton.builder()
 			.tooltip("Codex Minigame Pilot")
@@ -457,6 +469,36 @@ public class CodexMinigamePilotPlugin extends Plugin
 	private void saveBests(View.Activity activity, String bests)
 	{
 		configManager.setRSProfileConfiguration(CodexMinigamePilotConfig.GROUP, PACE_KEY + activity.name(), bests);
+	}
+
+	/**
+	 * Codex Navigator's goal board for this account, read from where Navigator saves it for
+	 * companion plugins, or null when Navigator is not installed or has nothing pinned. It is
+	 * parsed again only when it changes.
+	 */
+	private NavigatorGoals.Board navigatorBoard()
+	{
+		String json = configManager.getRSProfileConfiguration(NAVIGATOR_GROUP, NAVIGATOR_BOARD_KEY);
+		if (json == null || json.isEmpty())
+		{
+			navigatorJson = null;
+			navigatorBoard = null;
+			return null;
+		}
+		if (!json.equals(navigatorJson))
+		{
+			navigatorJson = json;
+			try
+			{
+				navigatorBoard = gson.fromJson(json, NavigatorGoals.Board.class);
+			}
+			catch (JsonParseException | IllegalStateException e)
+			{
+				// A board this version cannot read is left alone: goals work as without Navigator.
+				navigatorBoard = null;
+			}
+		}
+		return navigatorBoard;
 	}
 
 	private Contract loadContract()

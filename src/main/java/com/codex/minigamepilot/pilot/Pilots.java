@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.IntUnaryOperator;
 import net.runelite.api.Client;
 import net.runelite.api.GameObject;
 import net.runelite.api.NPC;
@@ -26,6 +27,7 @@ public final class Pilots
 	private final HomesPilot homes;
 	private final Coach coach;
 	private final Recorder recorder;
+	private final IntUnaryOperator price;
 	private View.Activity last = View.Activity.NONE;
 
 	/**
@@ -33,9 +35,10 @@ public final class Pilots
 	 * @param saveBests saves them again when a round beats one
 	 */
 	public Pilots(Client client, Contract saved, Consumer<Contract> save, FieldNotes notes,
-		Function<View.Activity, String> loadBests, BiConsumer<View.Activity, String> saveBests)
+		Function<View.Activity, String> loadBests, BiConsumer<View.Activity, String> saveBests, IntUnaryOperator price)
 	{
 		this.client = client;
+		this.price = price;
 		this.coach = new Coach(loadBests, saveBests);
 		this.recorder = new Recorder(notes);
 		this.scene = new SceneIndex(client, id -> MotherlodePilot.isWatched(id) || FurnacePilot.isWatched(id) || HomesPilot.isWatched(id));
@@ -167,8 +170,31 @@ public final class Pilots
 		}
 		Pace.Round round = coach.tick(client, flight, units, kind);
 		coach.decorate(flight.view, activity);
+		if (activity == View.Activity.FURNACE && price != null)
+		{
+			flight.view.pick(furnace.pick(client, price, typicalTicks(coach.pace(View.Activity.FURNACE)) * 0.6));
+		}
 		recorder.tick(client, scene, flight, state, round);
 		return flight;
+	}
+
+	/** The median of this session's timed rounds, of any kind, or 0 before there are three. */
+	static int typicalTicks(Pace pace)
+	{
+		List<Integer> t = new ArrayList<>();
+		for (Pace.Round r : pace.rounds())
+		{
+			if (!r.hadBreak)
+			{
+				t.add(r.ticks);
+			}
+		}
+		if (t.size() < 3)
+		{
+			return 0;
+		}
+		java.util.Collections.sort(t);
+		return t.get(t.size() / 2);
 	}
 
 	/** The panel away from the minigames: each one, and what is waiting there. */

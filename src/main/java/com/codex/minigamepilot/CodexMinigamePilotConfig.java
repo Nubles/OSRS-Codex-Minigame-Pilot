@@ -224,7 +224,7 @@ public interface CodexMinigamePilotConfig extends Config
 	@ConfigItem(
 		keyName = "furnaceGoal",
 		name = "Blast Furnace level",
-		description = "The Smithing level to work toward at the Blast Furnace. 0 means the next level",
+		description = "The Smithing level to work toward at the Blast Furnace. 0 means the next level, or the level your Codex Navigator goals need when that plugin is installed",
 		section = GOALS,
 		position = 2
 	)

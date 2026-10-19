@@ -4,6 +4,8 @@ import com.codex.minigamepilot.core.Contract;
 import com.codex.minigamepilot.core.Goal;
 import com.codex.minigamepilot.core.Goals;
 import com.codex.minigamepilot.core.ItemIds;
+import com.codex.minigamepilot.core.NavigatorGoals;
+import com.codex.minigamepilot.core.Points;
 import com.codex.minigamepilot.ui.View;
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -13,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.runelite.api.Client;
@@ -26,14 +29,18 @@ import net.runelite.api.gameval.VarbitID;
  * Keeps the goals planner's books: the nuggets and reward pieces in your bank (seen whenever it
  * is open, remembered per account), your Mahogany Homes points (read from the message after each
  * contract), and how fast you earn nuggets, points and experience in each minigame. From those
- * it adds a goal card to the panel. It only reads the game, and stays out of the guidance and
- * the field notes.
+ * it adds a goal card to the panel. When Codex Navigator is installed, a level goal follows the
+ * level your pinned goals need. It only reads the game, and stays out of the guidance and the
+ * field notes.
  */
 public final class GoalWatch
 {
 	static final String BANK_KEY = "goal.bank";
+	/** The last points total read, as a plain number, as older versions saved it. */
 	static final String POINTS_KEY = "goal.points";
-	private static final Pattern POINTS = Pattern.compile("You have completed [\\d,]+ contracts? with a total of ([\\d,]+) points?");
+	/** The points book: total, contracts, what the total means and points spent since. */
+	static final String POINTS_BOOK_KEY = "goal.pointsBook";
+	private static final Pattern POINTS = Pattern.compile("You have completed ([\\d,]+) contracts? with a total of ([\\d,]+) points?");
 	/** Time in a minigame before an hourly rate is trusted. */
 	private static final int RATE_TICKS = 300;
 	private static final double TICK_HOURS = 0.6 / 3600;
@@ -74,7 +81,15 @@ public final class GoalWatch
 	private final BiConsumer<String, String> save;
 	private final Map<Integer, Integer> bank = new HashMap<>();
 	private final Map<View.Activity, Rate> rates = new EnumMap<>(View.Activity.class);
-	private long points = -1;
+	private final Supplier<NavigatorGoals.Board> navigator;
+	private Points points = new Points();
+	/** Points rewards carried or worn on the last tick, or null when not seen yet. */
+	private EnumSet<Goal.Reward> carried;
+	/** What the points rewards you own cost, as of the last tick. */
+	private long ownedCost;
+	private boolean bankWasOpen;
+	/** The game tick the books were last kept on, or -1. */
+	private int lastTick = -1;
 	private View.Activity last = View.Activity.NONE;
 	private long lastXp = -1;
 	private int lastNuggets = -1;
@@ -82,11 +97,13 @@ public final class GoalWatch
 	/**
 	 * @param load reads a key of this account's saved settings
 	 * @param save writes one
+	 * @param navigator Codex Navigator's goal board, or null when it is not installed
 	 */
-	public GoalWatch(Function<String, String> load, BiConsumer<String, String> save)
+	public GoalWatch(Function<String, String> load, BiConsumer<String, String> save, Supplier<NavigatorGoals.Board> navigator)
 	{
 		this.load = load;
 		this.save = save;
+		this.navigator = navigator;
 	}
 
 	private static int[] tracked()
@@ -113,7 +130,16 @@ public final class GoalWatch
 	{
 		bank.clear();
 		bank.putAll(decode(load.apply(BANK_KEY)));
-		points = parse(load.apply(POINTS_KEY));
+		points = Points.decode(load.apply(POINTS_BOOK_KEY));
+		if (!points.known())
+		{
+			// Saved by an older version: just the total, nothing known about what it means.
+			points = Points.decode(load.apply(POINTS_KEY));
+		}
+		carried = null;
+		ownedCost = 0;
+		bankWasOpen = false;
+		lastTick = -1;
 		rates.clear();
 		last = View.Activity.NONE;
 		lastXp = -1;
@@ -159,28 +185,97 @@ public final class GoalWatch
 	/** A game message: the line after a finished contract gives your points. */
 	public void chat(String message)
 	{
-		long read = readPoints(message);
-		if (read < 0)
+		long[] read = readPoints(message);
+		if (read == null)
 		{
 			return;
 		}
-		if (points >= 0 && read > points)
+		long earned = points.message(read[0], read[1], ownedCost);
+		if (earned > 0)
 		{
-			rate(View.Activity.HOMES).currency += read - points;
+			rate(View.Activity.HOMES).currency += earned;
 		}
-		points = read;
-		save.accept(POINTS_KEY, String.valueOf(points));
+		savePoints();
 	}
 
-	/** Your points from the message after a contract, or -1 when the message is not that one. */
-	static long readPoints(String message)
+	private void savePoints()
+	{
+		save.accept(POINTS_BOOK_KEY, points.encode());
+		save.accept(POINTS_KEY, String.valueOf(points.getTotal()));
+	}
+
+	/**
+	 * The contracts and points from the message after a contract, or null when the message is not
+	 * that one.
+	 */
+	static long[] readPoints(String message)
 	{
 		Matcher m = message == null ? null : POINTS.matcher(message);
 		if (m == null || !m.find())
 		{
-			return -1;
+			return null;
 		}
-		return parse(m.group(1).replace(",", ""));
+		long count = parse(m.group(1).replace(",", ""));
+		long total = parse(m.group(2).replace(",", ""));
+		return count < 0 || total < 0 ? null : new long[]{count, total};
+	}
+
+	/**
+	 * The points rewards that turned up carried since the last tick from nowhere you had them:
+	 * not carried or worn a tick ago, not in the bank as last seen, and not with the bank open
+	 * (taking one out of a bank that changed since it was last seen is not buying it). Those
+	 * were just bought from Amy.
+	 *
+	 * @param before points rewards carried or worn on the last tick, or null when not seen yet
+	 */
+	static List<Goal.Reward> bought(EnumSet<Goal.Reward> before, EnumSet<Goal.Reward> now, EnumSet<Goal.Reward> inInventory,
+		Map<Integer, Integer> bank, boolean bankOpen)
+	{
+		List<Goal.Reward> out = new ArrayList<>();
+		if (before == null || bankOpen)
+		{
+			return out;
+		}
+		for (Goal.Reward r : inInventory)
+		{
+			if (!before.contains(r) && now.contains(r) && !r.ownedBy(id -> bank.getOrDefault(id, 0) > 0))
+			{
+				out.add(r);
+			}
+		}
+		return out;
+	}
+
+	/** The points rewards among what a container holds. */
+	private static EnumSet<Goal.Reward> pointsRewards(ItemContainer c)
+	{
+		EnumSet<Goal.Reward> set = EnumSet.noneOf(Goal.Reward.class);
+		if (c == null)
+		{
+			return set;
+		}
+		for (Goal.Reward r : Goal.Reward.values())
+		{
+			if (r.getCurrency() == Goal.Currency.POINTS && r.ownedBy(c::contains))
+			{
+				set.add(r);
+			}
+		}
+		return set;
+	}
+
+	/** What the points rewards you have anywhere cost: all of them were bought with points. */
+	static long ownedCost(Have have)
+	{
+		long cost = 0;
+		for (Goal.Reward r : Goal.Reward.values())
+		{
+			if (r.getCurrency() == Goal.Currency.POINTS && r.ownedBy(have::has))
+			{
+				cost += r.getCost();
+			}
+		}
+		return cost;
 	}
 
 	/**
@@ -214,7 +309,37 @@ public final class GoalWatch
 		lastXp = xp;
 		lastNuggets = heldNuggets;
 
+		int tickCount = client.getTickCount();
+		if (tickCount != lastTick + 1)
+		{
+			// Ticks went by unwatched (goals hidden, say): what was carried then tells nothing now.
+			carried = null;
+			bankWasOpen = false;
+		}
+		lastTick = tickCount;
+		if (inv != null)
+		{
+			EnumSet<Goal.Reward> inInventory = pointsRewards(inv);
+			EnumSet<Goal.Reward> now = EnumSet.copyOf(inInventory);
+			now.addAll(pointsRewards(worn));
+			boolean bankOpen = com.codex.minigamepilot.pilot.FurnacePilot.bankOpen(client);
+			// Taking a reward out and closing the bank on one tick shows it carried with the bank
+			// shut, and the bank as last seen already without it: the open bank a tick ago tells.
+			List<Goal.Reward> bought = bought(carried, now, inInventory, bank, bankOpen || bankWasOpen);
+			bankWasOpen = bankOpen;
+			for (Goal.Reward r : bought)
+			{
+				points.bought(r.getCost());
+			}
+			if (!bought.isEmpty() && points.known())
+			{
+				savePoints();
+			}
+			carried = now;
+		}
+
 		Have have = new Have(inv, worn, bank);
+		ownedCost = ownedCost(have);
 		if (activity == View.Activity.NONE)
 		{
 			for (View.Activity a : new View.Activity[]{View.Activity.MOTHERLODE, View.Activity.FURNACE, View.Activity.HOMES})
@@ -230,19 +355,70 @@ public final class GoalWatch
 
 	private void addCard(Client client, View view, View.Activity activity, Choices choices, Contract contract, Have have, int nuggets)
 	{
-		Goal goal = plan(client, activity, choices, contract, have, nuggets);
+		NavigatorGoals.Target target = navigatorTarget(client, activity, choices);
+		Goal goal = plan(client, activity, choices, contract, have, nuggets, target);
 		if (goal != null)
 		{
-			view.goal(card(activity, goal, balanceKnown(activity)));
+			View.GoalCard card = card(activity, goal, balanceKnown(activity));
+			if (target != null && goal.getPieces().isEmpty())
+			{
+				card.aside(aside(target, skillOf(activity)));
+			}
+			view.goal(card);
 		}
+	}
+
+	/**
+	 * The level Navigator's goals need in this minigame's skill, when the level goal is left to
+	 * the Pilot to pick: the next level at the Blast Furnace, or next level or next reward
+	 * elsewhere (which turns to a level once every reward is owned).
+	 */
+	private NavigatorGoals.Target navigatorTarget(Client client, View.Activity activity, Choices choices)
+	{
+		Skill skill = skillOf(activity);
+		if (navigator == null || skill == null)
+		{
+			return null;
+		}
+		boolean pilotPicks;
+		switch (activity)
+		{
+			case FURNACE:
+				pilotPicks = choices.furnaceLevel == 0;
+				break;
+			case MOTHERLODE:
+				pilotPicks = picksLevel(choices.motherlode);
+				break;
+			case HOMES:
+				pilotPicks = picksLevel(choices.homes);
+				break;
+			default:
+				pilotPicks = false;
+		}
+		if (!pilotPicks)
+		{
+			return null;
+		}
+		return NavigatorGoals.target(navigator.get(), skill.getName(), Goals.levelFor(client.getSkillExperience(skill)));
+	}
+
+	private static boolean picksLevel(Goals.Choice choice)
+	{
+		return choice == Goals.Choice.NEXT_LEVEL || choice == Goals.Choice.NEXT_REWARD;
+	}
+
+	/** "Dragon Slayer II needs Smithing 70", from your Navigator goals. */
+	static String aside(NavigatorGoals.Target target, Skill skill)
+	{
+		return target.getGoal() + " needs " + (skill == null ? "level" : skill.getName()) + " " + target.getLevel();
 	}
 
 	private boolean balanceKnown(View.Activity activity)
 	{
-		return activity != View.Activity.HOMES || points >= 0;
+		return activity != View.Activity.HOMES || points.known();
 	}
 
-	Goal plan(Client client, View.Activity activity, Choices choices, Contract contract, Have have, int nuggets)
+	Goal plan(Client client, View.Activity activity, Choices choices, Contract contract, Have have, int nuggets, NavigatorGoals.Target target)
 	{
 		Skill skill = skillOf(activity);
 		Goals.Input in = new Goals.Input();
@@ -251,6 +427,10 @@ public final class GoalWatch
 		in.xp = skill == null ? 0 : client.getSkillExperience(skill);
 		Rate r = rate(activity);
 		in.xpPerHour = r.perHour(r.xp, 1);
+		if (target != null)
+		{
+			in.targetLevel = target.getLevel();
+		}
 		switch (activity)
 		{
 			case MOTHERLODE:
@@ -262,7 +442,7 @@ public final class GoalWatch
 				in.currencyPerHour = r.perHour(r.currency, 2);
 				return Goals.motherlode(choices.motherlode, in);
 			case HOMES:
-				in.balance = points;
+				in.balance = points.balance(ownedCost);
 				in.currencyPerHour = r.perHour(r.currency, 2);
 				Contract.Tier tier = contract != null && contract.getTier() != null ? contract.getTier()
 					: Contract.Tier.forLevel(client.getRealSkillLevel(Skill.CONSTRUCTION));
@@ -274,7 +454,10 @@ public final class GoalWatch
 				{
 					return null;
 				}
-				in.targetLevel = choices.furnaceLevel;
+				if (choices.furnaceLevel > 0)
+				{
+					in.targetLevel = choices.furnaceLevel;
+				}
 				return Goals.furnace(in);
 			default:
 				return null;
@@ -304,6 +487,12 @@ public final class GoalWatch
 		}
 		String note = balanceKnown ? goal.describe()
 			: "Finish a contract and the Pilot reads your points from the message. " + goal.getNeed() + " points for all of it";
+		if (activity == View.Activity.HOMES && balanceKnown && !goal.getPieces().isEmpty() && points.getMeaning() == Points.Meaning.UNKNOWN && ownedCost > 0)
+		{
+			// Until the Pilot knows whether the message's total is a balance or every point ever
+			// earned, it takes the lower reading, so a reward is never lit before you can buy it.
+			note += ". Rewards you own are taken off until a purchase shows whether the total is a balance";
+		}
 		return new View.GoalCard(activity, goal.getTitle(), balanceKnown ? goal.getHave() : 0, goal.getNeed(), goal.getUnit(), note, lines,
 			balanceKnown && goal.done());
 	}

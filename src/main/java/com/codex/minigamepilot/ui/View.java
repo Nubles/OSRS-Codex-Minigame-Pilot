@@ -172,6 +172,8 @@ public final class View
 		final String note;
 		final List<Line> pieces;
 		final boolean done;
+		/** A line on what Codex Navigator's goals need from this minigame's skill, or null. */
+		String aside;
 
 		/**
 		 * @param have how much of the goal you hold, against need
@@ -189,6 +191,54 @@ public final class View
 			this.pieces = pieces == null ? Collections.emptyList() : pieces;
 			this.done = done;
 		}
+
+		/** Adds a line on what your Navigator goals need. */
+		public GoalCard aside(String text)
+		{
+			aside = text;
+			return this;
+		}
+	}
+
+	/** One bar in the ranking of what pays at the Blast Furnace. */
+	public static final class Pick
+	{
+		final String name;
+		/** The big figure on the right: coins an hour, or a bar when the trip time is not known. */
+		final String figure;
+		/** A quieter line: coins a bar, coal trips, experience, or the level it needs. */
+		final String detail;
+		final boolean unlocked;
+		final boolean current;
+		/** How it compares with the best bar you can make, 0 to 1, for the bar under it. */
+		final double share;
+		final boolean loss;
+
+		public Pick(String name, String figure, String detail, boolean unlocked, boolean current, double share, boolean loss)
+		{
+			this.name = name;
+			this.figure = figure;
+			this.detail = detail;
+			this.unlocked = unlocked;
+			this.current = current;
+			this.share = share;
+			this.loss = loss;
+		}
+	}
+
+	/** What each bar pays at today's prices, best first. */
+	public static final class PickCard
+	{
+		final String trailing;
+		final String note;
+		final List<Pick> picks;
+
+		public PickCard(String trailing, String note, List<Pick> picks)
+		{
+			this.trailing = trailing;
+			this.note = note;
+			this.picks = picks == null ? Collections.emptyList() : picks;
+		}
 	}
 
 	final boolean loggedIn;
@@ -205,6 +255,7 @@ public final class View
 	final List<Brief> briefs = new ArrayList<>();
 	PaceCard pace;
 	final List<GoalCard> goals = new ArrayList<>();
+	PickCard pick;
 
 	/**
 	 * @param place where, such as "Falador" or "Lower level", or null
@@ -235,6 +286,12 @@ public final class View
 	public String[] loopNames()
 	{
 		return loop == null ? null : loop.clone();
+	}
+
+	public View pick(PickCard p)
+	{
+		pick = p;
+		return this;
 	}
 
 	public View goal(GoalCard g)
@@ -297,7 +354,7 @@ public final class View
 		}
 		for (GoalCard g : goals)
 		{
-			b.append("|goal").append(g.activity).append(g.title).append(g.have).append('/').append(g.need).append(g.note);
+			b.append("|goal").append(g.activity).append(g.title).append(g.have).append('/').append(g.need).append(g.note).append(g.aside);
 			for (Line l : g.pieces)
 			{
 				b.append(l.mark);
@@ -306,6 +363,14 @@ public final class View
 		for (Brief r : briefs)
 		{
 			b.append('|').append(r.activity).append(r.status);
+		}
+		if (pick != null)
+		{
+			b.append("|pick").append(pick.trailing).append(pick.note);
+			for (Pick p : pick.picks)
+			{
+				b.append(p.name).append(p.figure).append(p.detail).append(p.current);
+			}
 		}
 		return b.toString();
 	}

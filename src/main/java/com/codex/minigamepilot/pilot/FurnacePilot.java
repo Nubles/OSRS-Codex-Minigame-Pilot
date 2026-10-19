@@ -1,12 +1,16 @@
 package com.codex.minigamepilot.pilot;
 
 import com.codex.minigamepilot.core.Bar;
+import com.codex.minigamepilot.core.BarPick;
 import com.codex.minigamepilot.core.FurnaceCycle;
 import com.codex.minigamepilot.core.ItemIds;
 import com.codex.minigamepilot.core.Step;
 import com.codex.minigamepilot.ui.Theme;
 import com.codex.minigamepilot.ui.View;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.function.IntUnaryOperator;
 import net.runelite.api.Client;
 import net.runelite.api.Player;
 import net.runelite.api.Skill;
@@ -179,6 +183,105 @@ public final class FurnacePilot
 		view.stat(new View.Stat(Session.format(xp), "Smithing xp", session.perHour(xp, now), Theme.GREEN));
 		view.stat(new View.Stat(session.elapsed(now), "Time", "At the furnace", Theme.TEXT_MUTED));
 		return new Flight(View.Activity.FURNACE, step, view).to(way);
+	}
+
+	/**
+	 * What each bar pays at today's prices, for the furnace as you run it: your coal bag, the ore
+	 * a trip carries and, once a few trips are timed, your trip time.
+	 *
+	 * @param tripSeconds your usual trip this session, or 0 before one is timed
+	 * @return the card, or null when prices are not loaded
+	 */
+	View.PickCard pick(Client client, IntUnaryOperator price, double tripSeconds)
+	{
+		FurnaceCycle.Snapshot s = lastState instanceof FurnaceCycle.Snapshot ? (FurnaceCycle.Snapshot) lastState : null;
+		BarPick.Setup setup = new BarPick.Setup();
+		setup.level = client.getRealSkillLevel(Skill.SMITHING);
+		setup.coalBag = s == null || s.coalBag;
+		setup.bagCapacity = s == null ? 27 : s.bagCapacity;
+		setup.oreSlots = s == null ? 27 : FurnaceCycle.load(s);
+		setup.tripSeconds = tripSeconds;
+		setup.goldsmith = s != null && (s.goldsmithWorn || s.goldsmithCarried);
+		return card(BarPick.rank(price, setup), last, tripSeconds, setup.level);
+	}
+
+	/** The ranking as the panel shows it. */
+	static View.PickCard card(List<BarPick.Row> rows, Bar making, double tripSeconds, int level)
+	{
+		if (rows.isEmpty())
+		{
+			return null;
+		}
+		double top = 0;
+		for (BarPick.Row r : rows)
+		{
+			if (r.isUnlocked())
+			{
+				top = Math.max(top, r.getPerTrip());
+			}
+		}
+		boolean timed = tripSeconds > 0;
+		List<View.Pick> picks = new ArrayList<>();
+		for (BarPick.Row r : rows)
+		{
+			String figure;
+			String detail;
+			if (!r.isUnlocked())
+			{
+				figure = signed(r.getPerBar());
+				detail = "Needs Smithing " + r.getLevel();
+			}
+			else
+			{
+				figure = timed ? compact(r.getPerHour()) + "/h" : signed(r.getPerBar());
+				String trips = r.getCoalTrips() <= 0 ? "no coal trips" : coalTrips(r.getCoalTrips());
+				detail = timed ? signed(r.getPerBar()) + "/bar · " + trips + " · " + compact(Math.round(r.getXpPerHour())).substring(1) + " xp"
+					: "a bar · " + trips + (r.getCoalTrips() > 0 ? " a load" : "");
+			}
+			double share = top <= 0 ? 0 : Math.max(0, r.getPerTrip() / top);
+			picks.add(new View.Pick(r.getBar().getName(), figure, detail, r.isUnlocked(), r.getBar() == making, share,
+				timed ? r.getPerHour() < 0 : r.getPerBar() < 0));
+		}
+		String fee = "the coffer's " + Session.format(BarPick.COFFER_PER_HOUR) + " an hour"
+			+ (level < BarPick.FOREMAN_FREE_LEVEL ? " and the foreman's " + Session.format(BarPick.FOREMAN_PER_HOUR) : "");
+		String note = timed
+			? "Grand Exchange prices, at your usual trip of " + clock(tripSeconds) + ", after " + fee + "."
+			: "Grand Exchange prices, after ore and coal. Time a few trips and this turns into coins an hour, after " + fee + ".";
+		return new View.PickCard(timed ? "an hour" : "a bar", note, picks);
+	}
+
+	private static String signed(long n)
+	{
+		return (n >= 0 ? "+" : "-") + Session.format(Math.abs(n));
+	}
+
+	private static String coalTrips(double trips)
+	{
+		double rounded = Math.round(trips * 2) / 2.0;
+		String n = rounded == Math.floor(rounded) ? String.valueOf((long) rounded) : String.valueOf(rounded);
+		return n + (rounded == 1 ? " coal trip" : " coal trips");
+	}
+
+	/** Coins with their sign, shortened past ten thousand: "+71K", "-104K", "+9,870". */
+	static String compact(long n)
+	{
+		long a = Math.abs(n);
+		String sign = n < 0 ? "-" : "+";
+		if (a >= 10_000_000)
+		{
+			return sign + Math.round(a / 1_000_000.0) + "M";
+		}
+		if (a >= 10_000)
+		{
+			return sign + Math.round(a / 1000.0) + "K";
+		}
+		return sign + Session.format(a);
+	}
+
+	private static String clock(double seconds)
+	{
+		long s = Math.round(seconds);
+		return s / 60 + ":" + (s % 60 < 10 ? "0" : "") + s % 60;
 	}
 
 	/** The bar being made: ore carried first, then ore in the furnace, then the last one seen. */

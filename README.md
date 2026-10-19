@@ -71,11 +71,24 @@ Each minigame works toward something, chosen in the settings: a reward from its 
 - **Mahogany Homes** saves points for the plank sack, the carpenter's outfit, Amy's saw or the Hosidius blueprints, and counts the contracts left at your tier.
 - **Blast Furnace** has no shop, so its goal is a Smithing level, the next one unless you pick another.
 
-Pieces you already own are ticked off wherever they are: carried, worn, or in your bank as it was the last time you opened it. Nuggets in the bank count toward the total. Your Mahogany Homes points are read from the message after each contract. The card shows how much is left, what that comes to in contracts and time at the pace you have kept this session, and lights any piece you can already pay for. Once every reward is owned, the goal moves to the next level. Away from the minigames, the panel lists every goal at once.
+Pieces you already own are ticked off wherever they are: carried, worn, or in your bank as it was the last time you opened it. Nuggets in the bank count toward the total. Your Mahogany Homes points are read from the message after each contract.
+
+Whether that message's total is what you can spend or everything you have ever earned, the Pilot works out as you play rather than guessing. A total that drops can only be a balance; so can a total smaller than what the rewards you own cost. Buy a reward between two contracts and the next total settles it: a balance falls by the price, a lifetime total keeps climbing by a contract's few points. A reward that turns up in your pack from nowhere you had it (not carried, worn or in the bank a moment ago) counts as bought. Until it is settled, the card takes the lower of the two readings, so it never lights a reward you cannot afford yet.
+
+**With Codex Navigator.** If you use [Codex Navigator](https://github.com/Nubles/OSRS-Codex-Navigator), a level goal the Pilot picks (the Blast Furnace level left at 0, or Next level and Next reward once the rewards are owned) follows the level your pinned goals need: your focus goal's first, otherwise the nearest one up. The card says which goal it is for, such as "Dragon Slayer II needs Smithing 70". Without Navigator nothing changes. The card shows how much is left, what that comes to in contracts and time at the pace you have kept this session, and lights any piece you can already pay for. Once every reward is owned, the goal moves to the next level. Away from the minigames, the panel lists every goal at once.
 
 <p align="center">
   <img src="docs/screenshots/goal-motherlode.png" width="225" alt="Goal and stage splits at the Motherlode Mine">
   <img src="docs/screenshots/goals-idle.png" width="225" alt="Every goal away from the minigames">
+  <img src="docs/screenshots/goals-navigator.png" width="225" alt="A points goal and a level goal for a Navigator goal">
+</p>
+
+## What pays at the Blast Furnace
+
+At the furnace the panel ranks every bar by what it makes at today's Grand Exchange prices: the bar's price less its ore and the coal it burns. Coal trips are counted in, since a bar that burns more coal than the coal bag brings along needs extra trips (half a trip a load for mithril with the bag, one and a half for runite), so a richer bar can still make less an hour. Once a few trips are timed it turns into coins and experience an hour at your own trip time, after the coffer and, under level 60, the foreman. The bar you are making is lit, bars your level does not reach yet are dimmed at the bottom, and a loss is shown in red. Goldsmith gauntlets are counted for gold.
+
+<p align="center">
+  <img src="docs/screenshots/what-pays.png" width="225" alt="What each bar pays">
 </p>
 
 ## Field notes

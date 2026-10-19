@@ -96,6 +96,20 @@ public class PilotPanel extends PluginPanel
 			}
 		}
 
+		if (v.pick != null && !v.pick.picks.isEmpty())
+		{
+			body.add(new SectionHeader("What pays", v.pick.trailing));
+			Card card = new Card(new BorderLayout(0, 4));
+			StackPanel rows = new StackPanel(2, 0);
+			for (View.Pick p : v.pick.picks)
+			{
+				rows.add(new PickRow(p));
+			}
+			card.add(rows, BorderLayout.CENTER);
+			card.add(Ui.wrapped(v.pick.note, Theme.small(), Theme.TEXT_FAINT, WIDTH - 30), BorderLayout.SOUTH);
+			body.add(card);
+		}
+
 		if (v.pace != null)
 		{
 			body.add(new SectionHeader("Pace"));
@@ -171,6 +185,10 @@ public class PilotPanel extends PluginPanel
 		int need = (int) Math.min(Integer.MAX_VALUE, goal.need);
 		stack.add(new GaugeBar(new View.Gauge(goal.title, have, 0, need, null, goal.done ? Theme.GREEN : Theme.progressColor(need == 0 ? 1 : have / (double) need))));
 		stack.add(Ui.wrapped(goal.note, Theme.small(), goal.done ? Theme.GREEN : Theme.TEXT_MUTED, WIDTH - 30));
+		if (goal.aside != null)
+		{
+			stack.add(Ui.wrapped(goal.aside, Theme.small(), Theme.TEAL, WIDTH - 30));
+		}
 		if (!goal.pieces.isEmpty())
 		{
 			StackPanel lines = new StackPanel(1, 0);
