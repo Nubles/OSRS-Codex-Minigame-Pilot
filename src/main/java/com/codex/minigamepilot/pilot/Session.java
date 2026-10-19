@@ -18,15 +18,31 @@ final class Session
 		this.skill = skill;
 	}
 
-	/** Starts the clock on the first tick in the minigame, and again after a long break. */
-	void tick(Client client, long now)
+	/** A break longer than this starts a new session. */
+	static final long BREAK_MS = 30 * 60_000L;
+
+	/**
+	 * Starts the clock on the first tick in the minigame, and again after a long break.
+	 *
+	 * @return true when a session already under way was started over after a break, so the
+	 *     counts kept alongside it should start over too
+	 */
+	boolean tick(Client client, long now)
 	{
-		if (started == 0 || now - last > 30 * 60_000L)
+		boolean restart = restarts(started, last, now);
+		if (started == 0 || restart)
 		{
 			started = now;
 			startXp = client.getSkillExperience(skill);
 		}
 		last = now;
+		return restart;
+	}
+
+	/** Whether a session begun at {@code started}, last seen at {@code last}, starts over now. */
+	static boolean restarts(long started, long last, long now)
+	{
+		return started != 0 && now - last > BREAK_MS;
 	}
 
 	boolean begun()

@@ -37,6 +37,8 @@ public final class MotherlodePilot
 	private int lastSack = -1;
 	private int collected;
 	private int sacks;
+	/** Pay-dirt deposited before this session began, left out of its count. */
+	private int depositedBefore;
 	private final com.codex.minigamepilot.core.OreHaul haul = new com.codex.minigamepilot.core.OreHaul();
 	/** Grand Exchange prices, or null when not set. */
 	private java.util.function.IntUnaryOperator price;
@@ -82,6 +84,12 @@ public final class MotherlodePilot
 		haul.forget();
 	}
 
+	/** Pay-dirt deposited this session. */
+	private int deposited()
+	{
+		return Math.max(0, cycle.getDeposited() - depositedBefore);
+	}
+
 	void setPrice(java.util.function.IntUnaryOperator price)
 	{
 		this.price = price;
@@ -90,14 +98,21 @@ public final class MotherlodePilot
 	/** Brief for the panel when the player is elsewhere. */
 	View.Brief brief()
 	{
-		String status = session.begun() ? Session.format(cycle.getDeposited()) + " pay-dirt deposited this session" : null;
+		String status = session.begun() ? Session.format(deposited()) + " pay-dirt deposited this session" : null;
 		return new View.Brief(View.Activity.MOTHERLODE, status,
 			"Under Falador, through the Dwarven Mine or the Falador mining guild. Bring a pickaxe; a hammer helps.");
 	}
 
 	Flight fly(Client client, SceneIndex scene, long now)
 	{
-		session.tick(client, now);
+		if (session.tick(client, now))
+		{
+			// A new session after a break: counts from the last one would inflate its hourly rates.
+			collected = 0;
+			sacks = 0;
+			depositedBefore = cycle.getDeposited();
+			haul.clear();
+		}
 		Pack pack = Pack.read(client);
 		Collection<TileObject> rockfalls = scene.get(ROCKFALLS);
 		Ground ground = Ground.read(client, rockfalls, ROCKFALL_COST);
@@ -194,7 +209,7 @@ public final class MotherlodePilot
 			view.gauge(new View.Gauge("Struts working", 2 - Math.min(2, s.brokenStruts), 0, 2,
 				s.brokenStruts >= 2 ? "The wheel has stopped" : "One broken: the wheel still turns", s.brokenStruts >= 2 ? Theme.BLOOD : Theme.EMBER));
 		}
-		view.stat(new View.Stat(Session.format(cycle.getDeposited()), "Pay-dirt", session.perHour(cycle.getDeposited(), now), Theme.GOLD));
+		view.stat(new View.Stat(Session.format(deposited()), "Pay-dirt", session.perHour(deposited(), now), Theme.GOLD));
 		view.stat(new View.Stat(Session.format(collected), "Ore", sacks + (sacks == 1 ? " sack emptied" : " sacks emptied"), Theme.TEAL));
 		int xp = session.xp(client);
 		view.stat(new View.Stat(Session.format(xp), "Mining xp", session.perHour(xp, now), Theme.GREEN));

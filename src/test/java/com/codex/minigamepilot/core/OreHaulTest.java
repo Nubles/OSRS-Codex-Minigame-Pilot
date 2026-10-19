@@ -49,4 +49,18 @@ public class OreHaulTest
 		h.observe(new int[]{28, 1, 0, 0, 0}, true);
 		assertEquals(1, h.count());
 	}
+
+	@Test
+	public void aNewSessionStartsTheHaulAgain()
+	{
+		OreHaul h = new OreHaul();
+		h.observe(new int[]{0, 0, 0, 0, 0}, false);
+		h.observe(new int[]{0, 0, 0, 0, 5}, true);
+		h.clear();
+		assertEquals(0, h.count());
+		assertEquals(0, h.worth(id -> 10_000));
+		// What is carried still stands as the base for the next payout.
+		h.observe(new int[]{0, 0, 0, 0, 7}, true);
+		assertEquals(2, h.count());
+	}
 }

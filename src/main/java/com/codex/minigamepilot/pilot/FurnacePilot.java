@@ -38,6 +38,8 @@ public final class FurnacePilot
 	private Bar last;
 	private int lastBars = -1;
 	private int barsTaken;
+	/** Bars taken before this session began, left out of its count. */
+	private int barsBefore;
 	/** The last snapshot planned from, for the field notes. */
 	Object lastState;
 	private int loads;
@@ -70,7 +72,7 @@ public final class FurnacePilot
 
 	View.Brief brief()
 	{
-		String status = session.begun() ? barsTaken + " bars this session" : null;
+		String status = session.begun() ? (barsTaken - barsBefore) + " bars this session" : null;
 		return new View.Brief(View.Activity.FURNACE, status,
 			"In Keldagrim. Bring coins for the coffer, ice gloves, and a coal bag for steel and up.");
 	}
@@ -80,7 +82,11 @@ public final class FurnacePilot
 	 */
 	Flight fly(Client client, SceneIndex scene, Bar choice, int cofferLow, long now)
 	{
-		session.tick(client, now);
+		if (session.tick(client, now))
+		{
+			// A new session after a break: bars from the last one would inflate its hourly rate.
+			barsBefore = barsTaken;
+		}
 		Pack pack = Pack.read(client);
 		Bar bar = choice != null ? choice : detect(client, pack);
 		last = bar;
@@ -179,7 +185,7 @@ public final class FurnacePilot
 			minutes >= 60 ? (minutes / 60) + "h " + (minutes % 60) + "m of smelting" : minutes + " minutes of smelting",
 			s.coffer < cofferLow ? Theme.BLOOD : Theme.GOLD));
 
-		view.stat(new View.Stat(Session.format(barsTaken), "Bars", session.perHour(barsTaken, now), Theme.GOLD));
+		view.stat(new View.Stat(Session.format(barsTaken - barsBefore), "Bars", session.perHour(barsTaken - barsBefore, now), Theme.GOLD));
 		view.stat(new View.Stat(Session.format(loads), "Ore loads", FurnaceCycle.coalRunNext(s) ? "Next: coal" : "Next: ore", Theme.TEAL));
 		int xp = session.xp(client);
 		view.stat(new View.Stat(Session.format(xp), "Smithing xp", session.perHour(xp, now), Theme.GREEN));

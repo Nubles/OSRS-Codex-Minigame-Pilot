@@ -80,4 +80,18 @@ public class BankStockTest
 		assertEquals(4, damaged.count(8780));
 		assertFalse(damaged.sameItems(own));
 	}
+
+	@Test
+	public void readsBankStewardsOwnFixtureUnchanged()
+	{
+		// osrs-codex-bank-steward src/test/resources/com/codex/steward/core/bank-steward-bankV1.json,
+		// byte for byte: a bank with no minigame supplies in it reads as an empty stock, not as none.
+		String fixture = "{\"version\":1,\"savedAt\":1760000000000,\"items\":{\"385\":240,\"995\":1234567,\"2434\":30,"
+			+ "\"8839\":1,\"11666\":1,\"26950\":1},\"truncated\":false}";
+		BankStock s = BankStock.steward(GSON, fixture);
+		assertSame(BankStock.Source.BANK_STEWARD, s.getSource());
+		assertEquals(1_760_000_000_000L, s.getSavedAt());
+		assertEquals(0, s.count(Bar.COAL));
+		assertEquals(0, s.count(Contract.STEEL_BAR));
+	}
 }

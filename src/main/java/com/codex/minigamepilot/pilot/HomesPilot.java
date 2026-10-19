@@ -71,6 +71,9 @@ public final class HomesPilot
 	private Contract.Tier asked;
 	private String lastDialog;
 	private int contracts;
+	/** Contracts and points from before this session began, left out of its counts. */
+	private int contractsBefore;
+	private int pointsBefore;
 	/** The last snapshot planned from, for the field notes. */
 	Object lastState;
 	/** The contract tier's planks carried, plank sack included, as of the last tick flown. */
@@ -393,9 +396,11 @@ public final class HomesPilot
 		lastPlanks = s.planks;
 		Home home = contract == null ? null : contract.getHome();
 		s.atHome = home != null && home.contains(at.getX(), at.getY());
-		if (contract != null)
+		if (contract != null && session.tick(client, now))
 		{
-			session.tick(client, now);
+			// A new session after a break: contracts from the last one would inflate its hourly rate.
+			contractsBefore = contracts;
+			pointsBefore = points;
 		}
 
 		Step step = Contract.next(contract, s);
@@ -526,8 +531,8 @@ public final class HomesPilot
 		}
 		if (session.begun())
 		{
-			view.stat(new View.Stat(String.valueOf(contracts), "Contracts", session.perHour(contracts, now), Theme.GOLD));
-			view.stat(new View.Stat(String.valueOf(points), "Points", "From finished contracts", Theme.TEAL));
+			view.stat(new View.Stat(String.valueOf(contracts - contractsBefore), "Contracts", session.perHour(contracts - contractsBefore, now), Theme.GOLD));
+			view.stat(new View.Stat(String.valueOf(points - pointsBefore), "Points", "From finished contracts", Theme.TEAL));
 			int xp = session.xp(client);
 			view.stat(new View.Stat(Session.format(xp), "Con xp", session.perHour(xp, now), Theme.GREEN));
 			view.stat(new View.Stat(session.elapsed(now), "Time", "On contracts", Theme.TEXT_MUTED));

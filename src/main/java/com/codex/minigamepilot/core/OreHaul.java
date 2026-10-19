@@ -50,6 +50,12 @@ public final class OreHaul
 		window = 0;
 	}
 
+	/** A new session: the haul starts again from nothing. */
+	public void clear()
+	{
+		java.util.Arrays.fill(haul, 0);
+	}
+
 	public long count()
 	{
 		long n = 0;
