@@ -1,5 +1,6 @@
 package com.codex.minigamepilot;
 
+import com.codex.minigamepilot.core.Goals;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
@@ -43,7 +44,10 @@ public interface CodexMinigamePilotConfig extends Config
 	@ConfigSection(name = "Guidance", description = "How the next step is shown", position = 1)
 	String GUIDANCE = "guidance";
 
-	@ConfigSection(name = "Field notes", description = "A local record of what the Pilot saw, for checking its guidance", position = 2, closedByDefault = true)
+	@ConfigSection(name = "Goals", description = "What each minigame is working toward: a reward from its shop or a level", position = 2)
+	String GOALS = "goals";
+
+	@ConfigSection(name = "Field notes", description = "A local record of what the Pilot saw, for checking its guidance", position = 3, closedByDefault = true)
 	String NOTES = "notes";
 
 	@ConfigItem(keyName = "motherlode", name = "Motherlode Mine", description = "Guide the Motherlode Mine loop", section = MINIGAMES, position = 0)
@@ -127,6 +131,55 @@ public interface CodexMinigamePilotConfig extends Config
 
 	@ConfigItem(keyName = "worldMap", name = "World map marker", description = "Mark a Mahogany Homes client's house on the world map", section = GUIDANCE, position = 6)
 	default boolean worldMap()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "motherlodeGoal",
+		name = "Motherlode goal",
+		description = "What to save nuggets for. Next reward goes prospector kit, coal bag, gem bag, bigger sack, then the next Mining level. Pieces you own anywhere, the bank included, are ticked off",
+		section = GOALS,
+		position = 0
+	)
+	default Goals.Choice motherlodeGoal()
+	{
+		return Goals.Choice.NEXT_REWARD;
+	}
+
+	@ConfigItem(
+		keyName = "homesGoal",
+		name = "Mahogany Homes goal",
+		description = "What to save points for. Next reward goes plank sack, carpenter's outfit, Amy's saw, Hosidius blueprints, then the next Construction level",
+		section = GOALS,
+		position = 1
+	)
+	default Goals.Choice homesGoal()
+	{
+		return Goals.Choice.NEXT_REWARD;
+	}
+
+	@ConfigItem(
+		keyName = "furnaceGoal",
+		name = "Blast Furnace level",
+		description = "The Smithing level to work toward at the Blast Furnace. 0 means the next level",
+		section = GOALS,
+		position = 2
+	)
+	@Range(max = 99)
+	default int furnaceGoal()
+	{
+		return 0;
+	}
+
+	@ConfigItem(
+		keyName = "showGoals",
+		name = "Show goals",
+		description = "Show the goal card on the panel",
+		section = GOALS,
+		position = 3
+	)
+	default boolean showGoals()
 	{
 		return true;
 	}

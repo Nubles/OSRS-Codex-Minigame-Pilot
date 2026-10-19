@@ -57,8 +57,25 @@ The helm at the top holds the next action as one large gilt word and the full in
 
 Every time the loop comes back to its start (a load of pay-dirt in the hopper, a trip to the furnace, a finished contract) the round is timed and compared with your best round of the same kind. The panel shows the time, how far it was over or under your best, and the one thing that cost the most: ticks spent standing still with something to do (the bank, dialogue and menus don't count) or tiles walked beyond the shortest way. Your bests are kept per account, so they carry over to the next session. Rounds with a break in them are left out.
 
+Each round is also split into the stages of its loop (Mine, Hopper, Sack, Bank; Bank, Belt, Bars; Job, Planks, Go, Fix, Report), drawn as one bar in proportion to the time each stage took. Every stage keeps its own best, so even a slow round can set a best bank trip. The stage that lost the most against its best is lit in ember and named: "Bank took 0:29, 0:10 over your best for it".
+
 <p align="center">
   <img src="docs/screenshots/pace.png" width="225" alt="Pace coach">
+</p>
+
+## Goals
+
+Each minigame works toward something, chosen in the settings: a reward from its shop or a level.
+
+- **Motherlode Mine** saves nuggets for the prospector kit, the coal bag, the gem bag or the bigger sack. Next reward walks that order and picks the first set you have not finished.
+- **Mahogany Homes** saves points for the plank sack, the carpenter's outfit, Amy's saw or the Hosidius blueprints, and counts the contracts left at your tier.
+- **Blast Furnace** has no shop, so its goal is a Smithing level, the next one unless you pick another.
+
+Pieces you already own are ticked off wherever they are: carried, worn, or in your bank as it was the last time you opened it. Nuggets in the bank count toward the total. Your Mahogany Homes points are read from the message after each contract. The card shows how much is left, what that comes to in contracts and time at the pace you have kept this session, and lights any piece you can already pay for. Once every reward is owned, the goal moves to the next level. Away from the minigames, the panel lists every goal at once.
+
+<p align="center">
+  <img src="docs/screenshots/goal-motherlode.png" width="225" alt="Goal and stage splits at the Motherlode Mine">
+  <img src="docs/screenshots/goals-idle.png" width="225" alt="Every goal away from the minigames">
 </p>
 
 ## Field notes

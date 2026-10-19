@@ -87,6 +87,15 @@ public class PilotPanel extends PluginPanel
 			body.add(card);
 		}
 
+		if (!v.goals.isEmpty())
+		{
+			body.add(new SectionHeader(v.goals.size() == 1 ? "Goal" : "Goals", v.goals.size() == 1 ? v.goals.get(0).unit : null));
+			for (View.GoalCard goal : v.goals)
+			{
+				body.add(goalCard(goal, v.goals.size() > 1));
+			}
+		}
+
 		if (v.pace != null)
 		{
 			body.add(new SectionHeader("Pace"));
@@ -95,6 +104,14 @@ public class PilotPanel extends PluginPanel
 			StackPanel stack = new StackPanel(4, 0);
 			stack.add(new PaceDial(v.pace));
 			stack.add(Ui.wrapped(v.pace.advice, Theme.small(), v.pace.costly ? Theme.EMBER : Theme.GREEN, WIDTH - 30));
+			if (v.pace.splits.size() > 1)
+			{
+				stack.add(new StageStrip(v.pace.splits));
+				if (v.pace.splitNote != null)
+				{
+					stack.add(Ui.wrapped(v.pace.splitNote, Theme.small(), Theme.mix(Theme.TEXT_MUTED, Theme.EMBER, 0.5), WIDTH - 30));
+				}
+			}
 			stack.add(Ui.wrapped(v.pace.tail, Theme.small(), Theme.TEXT_FAINT, WIDTH - 30));
 			card.add(stack, BorderLayout.CENTER);
 			body.add(card);
@@ -138,5 +155,32 @@ public class PilotPanel extends PluginPanel
 		body.repaint();
 		revalidate();
 		repaint();
+	}
+
+	/** A goal: how far along it is, how far off in rounds and time, and its pieces ticked off. */
+	private static Card goalCard(View.GoalCard goal, boolean named)
+	{
+		Card card = new Card(new BorderLayout());
+		card.accent(goal.done ? Theme.GREEN : Theme.GOLD);
+		StackPanel stack = new StackPanel(4, 0);
+		if (named)
+		{
+			stack.add(Ui.label(goal.activity.getTitle(), Theme.small(), Theme.GOLD_DIM));
+		}
+		int have = (int) Math.min(Integer.MAX_VALUE, goal.have);
+		int need = (int) Math.min(Integer.MAX_VALUE, goal.need);
+		stack.add(new GaugeBar(new View.Gauge(goal.title, have, 0, need, null, goal.done ? Theme.GREEN : Theme.progressColor(need == 0 ? 1 : have / (double) need))));
+		stack.add(Ui.wrapped(goal.note, Theme.small(), goal.done ? Theme.GREEN : Theme.TEXT_MUTED, WIDTH - 30));
+		if (!goal.pieces.isEmpty())
+		{
+			StackPanel lines = new StackPanel(1, 0);
+			for (View.Line line : goal.pieces)
+			{
+				lines.add(new LineRow(line));
+			}
+			stack.add(lines);
+		}
+		card.add(stack, BorderLayout.CENTER);
+		return card;
 	}
 }

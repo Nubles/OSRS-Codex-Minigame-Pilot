@@ -1,6 +1,8 @@
 package com.codex.minigamepilot;
 
 import com.codex.minigamepilot.core.Bar;
+import com.codex.minigamepilot.core.Goals;
+import com.codex.minigamepilot.goal.GoalWatch;
 import com.codex.minigamepilot.core.Contract;
 import com.codex.minigamepilot.core.Home;
 import com.codex.minigamepilot.core.ItemIds;
@@ -105,6 +107,7 @@ public class CodexMinigamePilotPlugin extends Plugin
 	private WorldMapPoint mapPoint;
 	private FieldNotes notes;
 	private final Map<Integer, Integer> lastInventory = new HashMap<>();
+	private GoalWatch goals;
 
 	@Provides
 	CodexMinigamePilotConfig provideConfig(ConfigManager configManager)
@@ -121,6 +124,8 @@ public class CodexMinigamePilotPlugin extends Plugin
 			notes.open(VERSION);
 		}
 		pilots = new Pilots(client, loadContract(), this::saveContract, notes, this::loadBests, this::saveBests);
+		goals = new GoalWatch(key -> configManager.getRSProfileConfiguration(CodexMinigamePilotConfig.GROUP, key),
+			(key, value) -> configManager.setRSProfileConfiguration(CodexMinigamePilotConfig.GROUP, key, value));
 		panel = new PilotPanel();
 		navButton = NavigationButton.builder()
 			.tooltip("Codex Minigame Pilot")
@@ -142,6 +147,7 @@ public class CodexMinigamePilotPlugin extends Plugin
 			if (client.getGameState() == GameState.LOGGED_IN)
 			{
 				pilots.rescan();
+				goals.reload();
 			}
 			publish();
 		});
@@ -162,6 +168,7 @@ public class CodexMinigamePilotPlugin extends Plugin
 		});
 		flight = null;
 		pilots = null;
+		goals = null;
 		panel = null;
 		shown = null;
 		notes.shutdown();
@@ -198,6 +205,11 @@ public class CodexMinigamePilotPlugin extends Plugin
 	@Subscribe
 	public void onItemContainerChanged(ItemContainerChanged event)
 	{
+		if (event.getContainerId() == InventoryID.BANK && goals != null)
+		{
+			goals.bank(event.getItemContainer());
+			return;
+		}
 		if (event.getContainerId() != InventoryID.INV || pilots == null)
 		{
 			return;
@@ -250,6 +262,10 @@ public class CodexMinigamePilotPlugin extends Plugin
 	public void onRuneScapeProfileChanged(RuneScapeProfileChanged event)
 	{
 		pilots.loadContract(loadContract());
+		if (goals != null)
+		{
+			goals.reload();
+		}
 	}
 
 	@Subscribe
@@ -295,6 +311,10 @@ public class CodexMinigamePilotPlugin extends Plugin
 		if (type == ChatMessageType.GAMEMESSAGE || type == ChatMessageType.SPAM || type == ChatMessageType.MESBOX)
 		{
 			pilots.chat(type.name(), Text.removeTags(event.getMessage()));
+			if (goals != null)
+			{
+				goals.chat(Text.removeTags(event.getMessage()));
+			}
 		}
 	}
 
@@ -323,6 +343,14 @@ public class CodexMinigamePilotPlugin extends Plugin
 		}
 		Bar bar = config.bar() == CodexMinigamePilotConfig.BarChoice.AUTO ? null : Bar.valueOf(config.bar().name());
 		Flight f = pilots.fly(config.motherlode(), config.furnace(), config.homes(), bar, config.cofferLow(), System.currentTimeMillis());
+		if (config.showGoals() && goals != null)
+		{
+			goals.tick(client, f.view, new GoalWatch.Choices(
+				config.motherlode() ? config.motherlodeGoal() : Goals.Choice.OFF,
+				config.homes() ? config.homesGoal() : Goals.Choice.OFF,
+				config.furnace() ? config.furnaceGoal() : -1),
+				f.activity == View.Activity.HOMES || f.activity == View.Activity.NONE ? loadContract() : null);
+		}
 		flight = f;
 		plaque.show(config.plaque() && f.step != null ? f.step : null);
 		updateArrow(f);

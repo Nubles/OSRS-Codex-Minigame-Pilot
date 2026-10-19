@@ -107,6 +107,23 @@ public final class View
 		}
 	}
 
+	/** One stage of the last round against your best for it. */
+	public static final class Split
+	{
+		final String name;
+		final int ticks;
+		final int best;
+		final boolean slowest;
+
+		public Split(String name, int ticks, int best, boolean slowest)
+		{
+			this.name = name;
+			this.ticks = ticks;
+			this.best = best;
+			this.slowest = slowest;
+		}
+	}
+
 	/** The pace coach's verdict on the last round. */
 	public static final class PaceCard
 	{
@@ -119,6 +136,10 @@ public final class View
 		final String advice;
 		final boolean costly;
 		final String tail;
+		/** Each stage of the loop this round: its name, ticks, and your best for it (0 for none). */
+		final List<Split> splits = new ArrayList<>();
+		/** The stage that cost the most against its best, in a sentence, or null. */
+		String splitNote;
 
 		public PaceCard(int lastTicks, int bestTicks, boolean isBest, int againstBest, String advice, boolean costly, String tail)
 		{
@@ -129,6 +150,44 @@ public final class View
 			this.advice = advice;
 			this.costly = costly;
 			this.tail = tail;
+		}
+
+		/** Adds the round's stages and the line on the slowest one. */
+		public PaceCard splits(List<Split> list, String note)
+		{
+			splits.addAll(list);
+			splitNote = note;
+			return this;
+		}
+	}
+
+	/** A goal being worked toward in a minigame: a reward from its shop, or a level. */
+	public static final class GoalCard
+	{
+		final Activity activity;
+		final String title;
+		final long have;
+		final long need;
+		final String unit;
+		final String note;
+		final List<Line> pieces;
+		final boolean done;
+
+		/**
+		 * @param have how much of the goal you hold, against need
+		 * @param note how far off it is, in a sentence
+		 * @param pieces the rewards it covers, ticked when owned, or empty for a level
+		 */
+		public GoalCard(Activity activity, String title, long have, long need, String unit, String note, List<Line> pieces, boolean done)
+		{
+			this.activity = activity;
+			this.title = title;
+			this.have = have;
+			this.need = need;
+			this.unit = unit;
+			this.note = note;
+			this.pieces = pieces == null ? Collections.emptyList() : pieces;
+			this.done = done;
 		}
 	}
 
@@ -145,6 +204,7 @@ public final class View
 	String linesNote;
 	final List<Brief> briefs = new ArrayList<>();
 	PaceCard pace;
+	final List<GoalCard> goals = new ArrayList<>();
 
 	/**
 	 * @param place where, such as "Falador" or "Lower level", or null
@@ -169,6 +229,23 @@ public final class View
 	public int loopAt()
 	{
 		return loopAt;
+	}
+
+	/** The names of the loop's stages, or null. */
+	public String[] loopNames()
+	{
+		return loop == null ? null : loop.clone();
+	}
+
+	public View goal(GoalCard g)
+	{
+		goals.add(g);
+		return this;
+	}
+
+	public Activity getActivity()
+	{
+		return activity;
 	}
 
 	public View pace(PaceCard p)
@@ -216,7 +293,15 @@ public final class View
 		}
 		if (pace != null)
 		{
-			b.append("|pace").append(pace.lastTicks).append(pace.bestTicks).append(pace.advice).append(pace.tail);
+			b.append("|pace").append(pace.lastTicks).append(pace.bestTicks).append(pace.advice).append(pace.tail).append(pace.splitNote);
+		}
+		for (GoalCard g : goals)
+		{
+			b.append("|goal").append(g.activity).append(g.title).append(g.have).append('/').append(g.need).append(g.note);
+			for (Line l : g.pieces)
+			{
+				b.append(l.mark);
+			}
 		}
 		for (Brief r : briefs)
 		{
