@@ -359,7 +359,7 @@ public final class FurnacePilot
 		return n + (rounded == 1 ? " coal trip" : " coal trips");
 	}
 
-	/** Coins with their sign, shortened past ten thousand: "+71K", "-104K", "+9,870". */
+	/** Coins with their sign, shortened past ten thousand: "+71k", "-104k", "+9,870". */
 	static String compact(long n)
 	{
 		return com.codex.minigamepilot.core.Figures.signed(n);

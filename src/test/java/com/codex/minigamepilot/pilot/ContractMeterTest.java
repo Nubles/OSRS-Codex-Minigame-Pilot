@@ -90,8 +90,8 @@ public class ContractMeterTest
 		String sig = new com.codex.minigamepilot.ui.View(true, com.codex.minigamepilot.ui.View.Activity.HOMES, null, null, null, 0)
 			.pick(card).signature();
 		assertTrue(sig, sig.contains("What it costs"));
-		assertTrue(sig, sig.contains("Expert12.0 gp2,000 xp · 24K gp · 24K xp/hfalse"));
-		assertTrue(sig, sig.contains("Adept15.5 gp1,000 xp · 16K gp · 15K xp/htrue"));
+		assertTrue(sig, sig.contains("Expert12.0 gp2,000 xp · 24k gp · 24k xp/hfalse"));
+		assertTrue(sig, sig.contains("Adept15.5 gp1,000 xp · 16k gp · 15k xp/htrue"));
 		assertTrue(sig, sig.contains("NoviceFinish one to learn what it costs"));
 	}
 

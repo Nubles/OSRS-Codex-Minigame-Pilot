@@ -49,10 +49,10 @@ public class BestVisitTest
 	{
 		long end = T + 72 * MIN;
 		BestVisit b = BestVisit.of(T, end, 72 * MIN, 1_944, 97_200);
-		assertEquals("Best visit 3 days ago: 1,620 pay-dirt and 81,000 Mining xp an hour over 1h 12m.",
+		assertEquals("Best visit 3 days ago: 1,620 pay-dirt and 81k Mining xp an hour over 1h 12m.",
 			b.status("pay-dirt", "Mining", null, end + 72 * 3_600_000L));
 		Visit last = Visit.of(end, 72 * MIN, Collections.singletonList("1,944 pay-dirt"));
-		assertEquals("Your best visit yet, at 1,620 pay-dirt and 81,000 Mining xp an hour.",
+		assertEquals("Your best visit yet, at 1,620 pay-dirt and 81k Mining xp an hour.",
 			b.status("pay-dirt", "Mining", last, end + MIN));
 		BestVisit noXp = BestVisit.of(T, end, 20 * MIN, 300, 0);
 		assertEquals("Best visit 3 days ago: 900 bars an hour over 20m.", noXp.status("bars", "Smithing", null, end + 72 * 3_600_000L));

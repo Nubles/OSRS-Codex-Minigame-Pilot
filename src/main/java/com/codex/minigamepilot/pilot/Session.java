@@ -116,7 +116,7 @@ final class Session
 		return minutes < 60 ? minutes + "m" : (minutes / 60) + "h " + (minutes % 60) + "m";
 	}
 
-	/** A count written as every card writes it: "68,040", "142K", "1.2M". */
+	/** A count written as every card writes it: "68,040", "142k", "1.2M". */
 	static String format(long n)
 	{
 		return com.codex.minigamepilot.core.Figures.count(n);

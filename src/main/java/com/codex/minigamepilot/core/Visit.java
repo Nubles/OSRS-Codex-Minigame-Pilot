@@ -74,7 +74,7 @@ public final class Visit
 		return "Last visit " + ago(endedAt, now) + ": " + duration() + " for " + counts() + ".";
 	}
 
-	/** "318 pay-dirt, 21,400 Mining xp and ore worth 48K" */
+	/** "318 pay-dirt, 21,400 Mining xp and ore worth 48k" */
 	private String counts()
 	{
 		StringBuilder b = new StringBuilder();

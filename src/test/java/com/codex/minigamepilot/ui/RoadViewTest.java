@@ -39,9 +39,9 @@ public class RoadViewTest
 		assertEquals("36 to go, 1h 43m", RoadView.status(r.get(1), true));
 		assertEquals("100 nuggets, in 6h 29m", RoadView.status(r.get(2), false));
 		assertEquals("In 6h 29m", RoadView.status(r.get(2), false, true));
-		assertEquals("162K xp, in 3h 57m", RoadView.status(r.get(4), false));
+		assertEquals("162k xp, in 3h 57m", RoadView.status(r.get(4), false));
 		assertEquals("Mining 72 is for Dragon Slayer II, a Codex Navigator goal.", RoadView.footnote(r));
-		assertEquals("Mining 72: 162K xp, in 3h 57m. Dragon Slayer II needs it", RoadView.tip(r.get(4)));
+		assertEquals("Mining 72: 162k xp, in 3h 57m. Dragon Slayer II needs it", RoadView.tip(r.get(4)));
 		assertEquals("Gem bag: 100 nuggets, in 6h 29m, counting the stops above it first", RoadView.tip(r.get(2)));
 		// A goal's level that is already a stop on the furnace road is named as the level.
 		Goals.Input f = new Goals.Input();

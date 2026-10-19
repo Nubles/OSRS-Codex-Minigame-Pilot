@@ -13,9 +13,9 @@ public class VisitTest
 	@Test
 	public void saysWhatASessionCameTo()
 	{
-		Visit v = Visit.of(NOW, 72 * 60_000L, Arrays.asList("318 pay-dirt", "21,400 Mining xp", "ore worth 48K"));
-		assertEquals("1h 12m: 318 pay-dirt, 21,400 Mining xp and ore worth 48K.", v.line());
-		assertEquals("Last visit 3 hours ago: 1h 12m for 318 pay-dirt, 21,400 Mining xp and ore worth 48K.",
+		Visit v = Visit.of(NOW, 72 * 60_000L, Arrays.asList("318 pay-dirt", "21,400 Mining xp", "ore worth 48k"));
+		assertEquals("1h 12m: 318 pay-dirt, 21,400 Mining xp and ore worth 48k.", v.line());
+		assertEquals("Last visit 3 hours ago: 1h 12m for 318 pay-dirt, 21,400 Mining xp and ore worth 48k.",
 			v.status(NOW + 3 * 3_600_000L));
 		assertEquals("52m: 400 bars.", Visit.of(NOW, 52 * 60_000L, Collections.singletonList("400 bars")).line());
 	}
@@ -46,11 +46,11 @@ public class VisitTest
 	@Test
 	public void steppingOutAgainWithNothingMoreDoneIsTheSameVisit()
 	{
-		Visit first = Visit.of(NOW, 40 * 60_000L, Arrays.asList("318 pay-dirt", "ore worth 48K"));
+		Visit first = Visit.of(NOW, 40 * 60_000L, Arrays.asList("318 pay-dirt", "ore worth 48k"));
 		// Out for two minutes and back in: the session carries on, so leaving again reads the
 		// same counts with a longer time, and the chat should not say it twice.
-		Visit again = Visit.of(NOW + 180_000L, 43 * 60_000L, Arrays.asList("318 pay-dirt", "ore worth 48K"));
-		Visit more = Visit.of(NOW + 900_000L, 55 * 60_000L, Arrays.asList("410 pay-dirt", "ore worth 61K"));
+		Visit again = Visit.of(NOW + 180_000L, 43 * 60_000L, Arrays.asList("318 pay-dirt", "ore worth 48k"));
+		Visit more = Visit.of(NOW + 900_000L, 55 * 60_000L, Arrays.asList("410 pay-dirt", "ore worth 61k"));
 		org.junit.Assert.assertTrue(again.sameCounts(first));
 		org.junit.Assert.assertFalse(more.sameCounts(first));
 		org.junit.Assert.assertFalse(first.sameCounts(null));
