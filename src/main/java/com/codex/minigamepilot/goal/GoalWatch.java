@@ -7,6 +7,7 @@ import com.codex.minigamepilot.core.ItemIds;
 import com.codex.minigamepilot.core.NavigatorGoals;
 import com.codex.minigamepilot.core.Owned;
 import com.codex.minigamepilot.core.Points;
+import com.codex.minigamepilot.core.RewardRoad;
 import com.codex.minigamepilot.ui.View;
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -59,13 +60,21 @@ public final class GoalWatch
 		final Goals.Choice homes;
 		/** The Smithing level to reach, 0 for the next one, or -1 for no goal. */
 		final int furnaceLevel;
+		/** Whether the minigame you are in shows its whole shop as a road. */
+		final boolean road;
 
 		/** @param furnaceLevel the Smithing level to reach, 0 for the next one, -1 for none */
 		public Choices(Goals.Choice motherlode, Goals.Choice homes, int furnaceLevel)
 		{
+			this(motherlode, homes, furnaceLevel, true);
+		}
+
+		public Choices(Goals.Choice motherlode, Goals.Choice homes, int furnaceLevel, boolean road)
+		{
 			this.motherlode = motherlode;
 			this.homes = homes;
 			this.furnaceLevel = furnaceLevel;
+			this.road = road;
 		}
 	}
 
@@ -449,6 +458,44 @@ public final class GoalWatch
 			}
 			view.goal(card);
 		}
+		if (activity != View.Activity.NONE && choices.road)
+		{
+			view.road(road(client, activity, contract, have, nuggets));
+		}
+	}
+
+	/**
+	 * The whole shop of the minigame you are in as one road (at the Blast Furnace, which has no
+	 * shop, the Smithing levels that open its bars), with the level your Navigator goals need in
+	 * its skill when there is one.
+	 */
+	List<RewardRoad.Stop> road(Client client, View.Activity activity, Contract contract, Have have, int nuggets)
+	{
+		Goals.Input in = input(client, activity, contract, have, nuggets, null);
+		List<RewardRoad.Stop> road;
+		switch (activity)
+		{
+			case MOTHERLODE:
+				road = RewardRoad.motherlode(in);
+				break;
+			case HOMES:
+				road = RewardRoad.homes(in);
+				break;
+			case FURNACE:
+				road = RewardRoad.furnace(in);
+				break;
+			default:
+				road = new ArrayList<>();
+		}
+		Skill skill = skillOf(activity);
+		NavigatorGoals.Target target = navigator == null || skill == null ? null
+			: NavigatorGoals.target(navigator.get(), skill.getName(), Goals.levelFor(in.xp));
+		if (target != null)
+		{
+			road = RewardRoad.withLevel(road, skill.getName(), target.getLevel(), target.getGoal(), in);
+		}
+		// A road of one level alone says no more than the goal card does.
+		return road.size() > 1 ? road : new ArrayList<>();
 	}
 
 	/**
@@ -503,6 +550,31 @@ public final class GoalWatch
 
 	Goal plan(Client client, View.Activity activity, Choices choices, Contract contract, Have have, int nuggets, NavigatorGoals.Target target)
 	{
+		Goals.Input in = input(client, activity, contract, have, nuggets, target);
+		switch (activity)
+		{
+			case MOTHERLODE:
+				return Goals.motherlode(choices.motherlode, in);
+			case HOMES:
+				return Goals.homes(choices.homes, in);
+			case FURNACE:
+				if (choices.furnaceLevel < 0)
+				{
+					return null;
+				}
+				if (choices.furnaceLevel > 0)
+				{
+					in.targetLevel = choices.furnaceLevel;
+				}
+				return Goals.furnace(in);
+			default:
+				return null;
+		}
+	}
+
+	/** What a minigame's goal and reward road are worked out from: what you own and hold, and your pace. */
+	private Goals.Input input(Client client, View.Activity activity, Contract contract, Have have, int nuggets, NavigatorGoals.Target target)
+	{
 		Skill skill = skillOf(activity);
 		Goals.Input in = new Goals.Input();
 		in.have = have::has;
@@ -523,7 +595,7 @@ public final class GoalWatch
 				}
 				in.balance = nuggets + bank.getOrDefault(ItemIds.GOLDEN_NUGGET, 0);
 				in.currencyPerHour = r.perHour(r.currency, 2);
-				return Goals.motherlode(choices.motherlode, in);
+				break;
 			case HOMES:
 				in.balance = points.balance(ownedCost);
 				in.currencyPerHour = r.perHour(r.currency, 2);
@@ -531,20 +603,11 @@ public final class GoalWatch
 					: Contract.Tier.forLevel(client.getRealSkillLevel(Skill.CONSTRUCTION));
 				in.currencyPerRound = tier.points();
 				in.roundName = tier.getName().toLowerCase() + " contract";
-				return Goals.homes(choices.homes, in);
-			case FURNACE:
-				if (choices.furnaceLevel < 0)
-				{
-					return null;
-				}
-				if (choices.furnaceLevel > 0)
-				{
-					in.targetLevel = choices.furnaceLevel;
-				}
-				return Goals.furnace(in);
+				break;
 			default:
-				return null;
+				break;
 		}
+		return in;
 	}
 
 	private View.GoalCard card(View.Activity activity, Goal goal, boolean balanceKnown)

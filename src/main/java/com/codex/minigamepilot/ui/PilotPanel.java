@@ -20,6 +20,11 @@ public class PilotPanel extends PluginPanel
 	private final Helm helm = new Helm();
 	private final StackPanel body = new StackPanel(8, 8);
 	private View view = View.loggedOut();
+	/** An item's picture by its id, for the reward road; null draws bare medallions. */
+	private java.util.function.IntFunction<java.awt.image.BufferedImage> icons;
+	/** Whether the panel is open in the sidebar; the plugin skips rebuilding it while it is not. */
+	private volatile boolean open;
+	private Runnable onOpen;
 
 	public PilotPanel()
 	{
@@ -37,6 +42,41 @@ public class PilotPanel extends PluginPanel
 		scroll.getVerticalScrollBar().setPreferredSize(new Dimension(8, 0));
 		add(scroll, BorderLayout.CENTER);
 		rebuild();
+	}
+
+	/** Where the reward road gets each item's picture. */
+	public void icons(java.util.function.IntFunction<java.awt.image.BufferedImage> source)
+	{
+		icons = source;
+	}
+
+	/** Called when the panel is opened, so the plugin can bring it up to date. */
+	public void onOpen(Runnable action)
+	{
+		onOpen = action;
+	}
+
+	/** True while the panel is open in the sidebar. Safe to read from any thread. */
+	public boolean isOpen()
+	{
+		return open || isShowing();
+	}
+
+	@Override
+	public void onActivate()
+	{
+		open = true;
+		Runnable r = onOpen;
+		if (r != null)
+		{
+			r.run();
+		}
+	}
+
+	@Override
+	public void onDeactivate()
+	{
+		open = false;
 	}
 
 	/** Called on the Swing thread whenever anything shown changes. */
@@ -94,6 +134,25 @@ public class PilotPanel extends PluginPanel
 			{
 				body.add(goalCard(goal, v.goals.size() > 1));
 			}
+		}
+
+		if (!v.road.isEmpty())
+		{
+			int owned = 0;
+			for (com.codex.minigamepilot.core.RewardRoad.Stop s : v.road)
+			{
+				owned += s.isOwned() ? 1 : 0;
+			}
+			body.add(new SectionHeader(v.activity == View.Activity.FURNACE ? "Smithing road" : "Reward road", owned + " of " + v.road.size() + " done"));
+			Card card = new Card(new BorderLayout());
+			card.setBorder(new javax.swing.border.EmptyBorder(4, 8, 4, 8));
+			card.add(new RoadView(v.road, icons), BorderLayout.CENTER);
+			String why = RoadView.footnote(v.road);
+			if (why != null)
+			{
+				card.add(Ui.wrapped(why, Theme.small(), Theme.TEAL, WIDTH - 30), BorderLayout.SOUTH);
+			}
+			body.add(card);
 		}
 
 		if (v.pick != null && !v.pick.picks.isEmpty())

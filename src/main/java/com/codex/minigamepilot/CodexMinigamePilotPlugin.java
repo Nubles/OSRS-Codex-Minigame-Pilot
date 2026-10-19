@@ -166,6 +166,13 @@ public class CodexMinigamePilotPlugin extends Plugin
 			(key, value) -> configManager.setRSProfileConfiguration(CodexMinigamePilotConfig.GROUP, key, value),
 			this::navigatorBoard);
 		panel = new PilotPanel();
+		panel.icons(itemManager::getImage);
+		// The panel is only rebuilt while it is open, so bring it up to date as it opens.
+		panel.onOpen(() -> clientThread.invokeLater(() ->
+		{
+			shown = null;
+			publish();
+		}));
 		navButton = NavigationButton.builder()
 			.tooltip("Codex Minigame Pilot")
 			.icon(Sigil.icon(16))
@@ -508,7 +515,7 @@ public class CodexMinigamePilotPlugin extends Plugin
 			goals.tick(client, f.view, new GoalWatch.Choices(
 				config.motherlode() ? config.motherlodeGoal().choice() : Goals.Choice.OFF,
 				config.homes() ? config.homesGoal().choice() : Goals.Choice.OFF,
-				config.furnace() ? config.furnaceGoal() : -1),
+				config.furnace() ? config.furnaceGoal() : -1, config.rewardRoad()),
 				f.activity == View.Activity.HOMES || f.activity == View.Activity.NONE ? loadContract() : null);
 		}
 		flight = f;
@@ -581,9 +588,16 @@ public class CodexMinigamePilotPlugin extends Plugin
 		}
 	}
 
-	/** Hands the panel a new view when anything on it has changed. */
+	/** Hands the panel a new view when anything on it has changed, and only while it is open. */
 	private void publish()
 	{
+		PilotPanel p = panel;
+		if (p == null || !p.isOpen())
+		{
+			// Closed: nothing to redraw. Opening it forgets what was shown, so it is drawn afresh.
+			shown = null;
+			return;
+		}
 		Flight f = flight;
 		View view;
 		if (client.getGameState() != GameState.LOGGED_IN || pilots == null)
@@ -604,14 +618,7 @@ public class CodexMinigamePilotPlugin extends Plugin
 			return;
 		}
 		shown = signature;
-		PilotPanel p = panel;
-		SwingUtilities.invokeLater(() ->
-		{
-			if (p != null)
-			{
-				p.update(view);
-			}
-		});
+		SwingUtilities.invokeLater(() -> p.update(view));
 	}
 
 	private void chat(String text)

@@ -197,7 +197,7 @@ public final class Goals
 		return null;
 	}
 
-	private static String titleOf(List<Goal.Reward> set)
+	static String titleOf(List<Goal.Reward> set)
 	{
 		if (set.contains(Goal.Reward.PROSPECTOR_HELMET))
 		{

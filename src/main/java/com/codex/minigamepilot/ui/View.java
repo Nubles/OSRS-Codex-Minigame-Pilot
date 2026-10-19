@@ -1,5 +1,6 @@
 package com.codex.minigamepilot.ui;
 
+import com.codex.minigamepilot.core.RewardRoad;
 import com.codex.minigamepilot.core.Step;
 import java.awt.Color;
 import java.util.ArrayList;
@@ -287,6 +288,8 @@ public final class View
 	final List<Brief> briefs = new ArrayList<>();
 	PaceCard pace;
 	final List<GoalCard> goals = new ArrayList<>();
+	/** The minigame's whole shop as a road, or empty. */
+	final List<RewardRoad.Stop> road = new ArrayList<>();
 	PickCard pick;
 	Supply supply;
 
@@ -344,6 +347,17 @@ public final class View
 	public View goal(GoalCard g)
 	{
 		goals.add(g);
+		return this;
+	}
+
+	/** Sets the reward road for the minigame you are in. */
+	public View road(List<RewardRoad.Stop> stops)
+	{
+		road.clear();
+		if (stops != null)
+		{
+			road.addAll(stops);
+		}
 		return this;
 	}
 
@@ -406,6 +420,12 @@ public final class View
 			{
 				b.append(l.mark);
 			}
+		}
+		for (RewardRoad.Stop r : road)
+		{
+			// Time to a stop moves in steps of five minutes, so the road does not redraw every tick.
+			b.append("|road").append(r.getName()).append(r.isOwned()).append(r.isAffordable()).append(r.getLeft())
+				.append('/').append(r.getMinutesAway() < 0 ? -1 : r.getMinutesAway() / 5).append('/').append(r.getRoundsAway());
 		}
 		for (Brief r : briefs)
 		{

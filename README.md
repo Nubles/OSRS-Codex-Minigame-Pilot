@@ -81,12 +81,15 @@ Pieces you already own are ticked off wherever they are: carried, worn, or in yo
 
 Whether that message's total is what you can spend or everything you have ever earned, the Pilot works out as you play rather than guessing. A total that drops can only be a balance; so can a total smaller than what the rewards you own cost. Buy a reward between two contracts and the next total settles it: a balance falls by the price, a lifetime total keeps climbing by a contract's few points. A reward counts as bought only when it turns up in your pack at the reward shop, from nowhere you had it (not carried, worn or in the bank a moment ago). A carpenter's piece taken out of group storage or your house's costume room is not a purchase. A reward you have once carried, worn or banked stays counted as owned after you store it in the costume room, so the goal card does not ask you to buy it again; one only borrowed from group storage is not remembered as yours. Until it is settled, the card takes the lower of the two readings, so it never lights a reward you cannot afford yet.
 
+**Reward road.** In the Motherlode Mine and at Mahogany Homes the panel lays the whole reward shop out as a road, in the order players usually buy: a column of medallions, each holding the reward's own item, joined by a gilt thread that is solid as far as you own and dotted beyond. Owned rewards are rimmed in gold and ticked. The next one is ringed by how much of it you already hold and says what is left ("36 to go, 1h 43m"); the ones after it say what they cost and when they are yours at your pace, the stops before them counted first ("100 nuggets, in 6h 29m", or "500 points, in 472 contracts" before there is an hourly pace). Anything you can already pay for is lit gold. If a Codex Navigator goal needs a higher level in the minigame's skill, the road ends on that level, timed at your experience an hour, with a line naming the goal. It can be turned off under Goals.
+
 **With Codex Navigator.** If you use [Codex Navigator](https://github.com/Nubles/OSRS-Codex-Navigator), a level goal the Pilot picks (the Blast Furnace level left at 0, or Next level and Next reward once the rewards are owned) follows the level your pinned goals need: your focus goal's first, otherwise the nearest one up. The card says which goal it is for, such as "Dragon Slayer II needs Smithing 70". Without Navigator nothing changes.
 
 <p align="center">
   <img src="docs/screenshots/goal-motherlode.png" width="225" alt="Goal and stage splits at the Motherlode Mine">
   <img src="docs/screenshots/goals-idle.png" width="225" alt="Every goal away from the minigames">
   <img src="docs/screenshots/goals-navigator.png" width="225" alt="A points goal and a level goal for a Navigator goal">
+  <img src="docs/screenshots/road.png" width="225" alt="The reward road at the Motherlode Mine">
 </p>
 
 ## What pays at the Blast Furnace

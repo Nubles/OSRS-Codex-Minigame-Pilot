@@ -253,6 +253,18 @@ public interface CodexMinigamePilotConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = "rewardRoad",
+		name = "Reward road",
+		description = "In the Motherlode Mine and at Mahogany Homes, show the whole reward shop as a road: what you own, what you can buy now, and how far off the rest is at your pace, closed by any level your Codex Navigator goals need",
+		section = GOALS,
+		position = 4
+	)
+	default boolean rewardRoad()
+	{
+		return true;
+	}
+
+	@ConfigItem(
 		keyName = "fieldNotes",
 		name = "Keep field notes",
 		description = "While in a minigame, write what the Pilot sees and decides (steps, objects nearby, varbits, game messages, rounds) to .runelite/codex-minigame-pilot. Stays on your computer; nothing is sent anywhere",

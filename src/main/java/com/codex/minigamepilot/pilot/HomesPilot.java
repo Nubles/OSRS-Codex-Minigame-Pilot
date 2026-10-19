@@ -532,7 +532,7 @@ public final class HomesPilot
 		if (session.begun())
 		{
 			view.stat(new View.Stat(String.valueOf(contracts - contractsBefore), "Contracts", session.perHour(contracts - contractsBefore, now), Theme.GOLD));
-			view.stat(new View.Stat(String.valueOf(points - pointsBefore), "Points", "From finished contracts", Theme.TEAL));
+			view.stat(new View.Stat(String.valueOf(points - pointsBefore), "Points", "From contracts", Theme.TEAL));
 			int xp = session.xp(client);
 			view.stat(new View.Stat(Session.format(xp), "Con xp", session.perHour(xp, now), Theme.GREEN));
 			view.stat(new View.Stat(session.elapsed(now), "Time", "On contracts", Theme.TEXT_MUTED));
