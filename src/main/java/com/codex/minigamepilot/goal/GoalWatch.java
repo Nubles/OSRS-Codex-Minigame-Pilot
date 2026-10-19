@@ -190,7 +190,9 @@ public final class GoalWatch
 			{
 				r.xp += xp - lastXp;
 			}
-			if (activity == View.Activity.MOTHERLODE && last == activity && lastNuggets >= 0 && nuggets > lastNuggets)
+			// Nuggets taken out of the bank are not nuggets earned.
+			if (activity == View.Activity.MOTHERLODE && last == activity && lastNuggets >= 0 && nuggets > lastNuggets
+				&& !com.codex.minigamepilot.pilot.FurnacePilot.bankOpen(client))
 			{
 				r.currency += nuggets - lastNuggets;
 			}
