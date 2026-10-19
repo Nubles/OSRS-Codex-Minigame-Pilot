@@ -121,7 +121,6 @@ public final class Contract
 		return tier;
 	}
 
-	/** Whether a hotspot value still needs work. */
 	/**
 	 * The contract saved as "home:tier" (the tier left off while not known), or null when there
 	 * is none or it names no home.
@@ -143,6 +142,7 @@ public final class Contract
 		return new Contract(home, tier);
 	}
 
+	/** Whether a hotspot value still needs work. */
 	public static boolean needsWork(int value)
 	{
 		return value == 1 || value == 3 || value == 4;

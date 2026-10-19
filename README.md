@@ -102,6 +102,8 @@ At the furnace the panel ranks every bar by what it makes at today's Grand Excha
   <img src="docs/screenshots/what-pays.png" width="225" alt="What each bar pays">
 </p>
 
+<sub>The picture is drawn with example prices, not live ones. In game every figure comes from the Grand Exchange prices RuneLite has at the time, so the order of the bars moves with the market.</sub>
+
 ## Works with other Codex plugins
 
 Both are read only, never written, and everything works without them.

@@ -40,7 +40,7 @@ public class OwnedTest
 	}
 
 	@Test
-	public void savesNamesAndDropsTheUnknown()
+	public void savesNamesAndKeepsTheUnknownForTheVersionThatWroteThem()
 	{
 		Owned o = new Owned();
 		o.see(EnumSet.of(Goal.Reward.PLANK_SACK, Goal.Reward.PROSPECTOR_HELMET, Goal.Reward.BIGGER_SACK), NONE, false);
@@ -48,6 +48,7 @@ public class OwnedTest
 		Owned read = Owned.decode("PLANK_SACK,NOT_A_REWARD,,bigger_sack");
 		assertTrue(read.has(Goal.Reward.PLANK_SACK));
 		assertFalse(read.has(Goal.Reward.BIGGER_SACK));
-		assertEquals("PLANK_SACK", read.encode());
+		// A name this version does not know counts for nothing, but is saved again as it was.
+		assertEquals("PLANK_SACK,NOT_A_REWARD", read.encode());
 	}
 }
