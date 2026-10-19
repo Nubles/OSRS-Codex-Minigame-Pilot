@@ -112,19 +112,19 @@ public interface CodexMinigamePilotConfig extends Config
 	@ConfigSection(name = "Field notes", description = "A local record of what the Pilot saw, for checking its guidance", position = 3, closedByDefault = true)
 	String NOTES = "notes";
 
-	@ConfigItem(keyName = "motherlode", name = "Motherlode Mine", description = "Guide the Motherlode Mine loop", section = MINIGAMES, position = 0)
+	@ConfigItem(keyName = "motherlode", name = "Motherlode Mine", description = "Guide the Motherlode Mine loop: mine pay-dirt, deposit it, hammer broken struts, search the sack and bank", section = MINIGAMES, position = 0)
 	default boolean motherlode()
 	{
 		return true;
 	}
 
-	@ConfigItem(keyName = "furnace", name = "Blast Furnace", description = "Guide the Blast Furnace loop", section = MINIGAMES, position = 1)
+	@ConfigItem(keyName = "furnace", name = "Blast Furnace", description = "Guide the Blast Furnace loop: top up the coffer, load the belt, take the bars and bank them", section = MINIGAMES, position = 1)
 	default boolean furnace()
 	{
 		return true;
 	}
 
-	@ConfigItem(keyName = "homes", name = "Mahogany Homes", description = "Guide Mahogany Homes contracts", section = MINIGAMES, position = 2)
+	@ConfigItem(keyName = "homes", name = "Mahogany Homes", description = "Guide Mahogany Homes contracts: get one, go to the house, fix up the furniture and tell the client", section = MINIGAMES, position = 2)
 	default boolean homes()
 	{
 		return true;
@@ -133,7 +133,7 @@ public interface CodexMinigamePilotConfig extends Config
 	@ConfigItem(
 		keyName = "bar",
 		name = "Blast Furnace bar",
-		description = "The bar to plan for. Work it out picks it from the ore you carry, the ore in the furnace or the ore in your bank",
+		description = "The bar the Blast Furnace pilot plans for, or Work it out to pick it from the ore you carry, the ore in the furnace or the ore in your bank",
 		section = MINIGAMES,
 		position = 3
 	)
@@ -161,13 +161,13 @@ public interface CodexMinigamePilotConfig extends Config
 		return true;
 	}
 
-	@ConfigItem(keyName = "route", name = "Path", description = "Draw the walk to the next step as a trail on the ground", section = GUIDANCE, position = 1)
+	@ConfigItem(keyName = "route", name = "Path on the ground", description = "Draw the walk to the next step as a trail on the ground", section = GUIDANCE, position = 1)
 	default boolean route()
 	{
 		return true;
 	}
 
-	@ConfigItem(keyName = "minimap", name = "Path on minimap", description = "Draw the walk on the minimap too", section = GUIDANCE, position = 2)
+	@ConfigItem(keyName = "minimap", name = "Path on minimap", description = "Draw the walk to the next step on the minimap", section = GUIDANCE, position = 2)
 	default boolean minimap()
 	{
 		return true;
@@ -179,7 +179,7 @@ public interface CodexMinigamePilotConfig extends Config
 		return true;
 	}
 
-	@ConfigItem(keyName = "others", name = "Mark what comes after", description = "Quietly outline the next vein, and furniture still to fix", section = GUIDANCE, position = 4)
+	@ConfigItem(keyName = "others", name = "Mark what comes after", description = "Quietly outline what comes after the next step: the next vein, and furniture still to fix", section = GUIDANCE, position = 4)
 	default boolean others()
 	{
 		return true;
@@ -197,7 +197,7 @@ public interface CodexMinigamePilotConfig extends Config
 		return true;
 	}
 
-	@ConfigItem(keyName = "visitChat", name = "Visit summary in chat", description = "When you leave the Motherlode Mine or the Blast Furnace, say in the chat what the session came to", section = GUIDANCE, position = 7)
+	@ConfigItem(keyName = "visitChat", name = "Visit summary in chat", description = "When you leave the Motherlode Mine or the Blast Furnace, say in the chat what the visit came to", section = GUIDANCE, position = 7)
 	default boolean visitChat()
 	{
 		return true;
@@ -206,7 +206,7 @@ public interface CodexMinigamePilotConfig extends Config
 	@ConfigItem(
 		keyName = "motherlodeGoal",
 		name = "Motherlode goal",
-		description = "What to save nuggets for. Next reward goes prospector kit, coal bag, gem bag, bigger sack, then the next Mining level. Pieces you own anywhere, the bank included, are ticked off",
+		description = "What to save nuggets for, with pieces you own anywhere ticked off; Next reward goes prospector kit, coal bag, gem bag, bigger sack, then the next Mining level",
 		section = GOALS,
 		position = 0
 	)
@@ -218,7 +218,7 @@ public interface CodexMinigamePilotConfig extends Config
 	@ConfigItem(
 		keyName = "homesGoal",
 		name = "Mahogany Homes goal",
-		description = "What to save points for. Next reward goes plank sack, carpenter's outfit, Amy's saw, Hosidius blueprints, then the next Construction level",
+		description = "What to save points for; Next reward goes plank sack, carpenter's outfit, Amy's saw, Hosidius blueprints, then the next Construction level",
 		section = GOALS,
 		position = 1
 	)
@@ -230,7 +230,7 @@ public interface CodexMinigamePilotConfig extends Config
 	@ConfigItem(
 		keyName = "furnaceGoal",
 		name = "Blast Furnace level",
-		description = "The Smithing level to work toward at the Blast Furnace. 0 means the next level, or the level your Codex Navigator goals need when that plugin is installed",
+		description = "The Smithing level to work toward at the Blast Furnace, with 0 for the next level (or the level your Codex Navigator goals need)",
 		section = GOALS,
 		position = 2
 	)
@@ -255,7 +255,7 @@ public interface CodexMinigamePilotConfig extends Config
 	@ConfigItem(
 		keyName = "rewardRoad",
 		name = "Reward road",
-		description = "In the Motherlode Mine and at Mahogany Homes, show the whole reward shop as a road: what you own, what you can buy now, and how far off the rest is at your pace, closed by any level your Codex Navigator goals need",
+		description = "In each minigame, show its rewards as a road (at the Blast Furnace, the bars each Smithing level opens): what you own, what you can have now and how far off the rest is at your pace",
 		section = GOALS,
 		position = 4
 	)
@@ -267,7 +267,7 @@ public interface CodexMinigamePilotConfig extends Config
 	@ConfigItem(
 		keyName = "fieldNotes",
 		name = "Keep field notes",
-		description = "While in a minigame, write what the Pilot sees and decides (steps, objects nearby, varbits, game messages, rounds) to .runelite/codex-minigame-pilot. Stays on your computer; nothing is sent anywhere",
+		description = "While in a minigame, write what the Pilot sees and decides to .runelite/codex-minigame-pilot on your computer, for checking its guidance; nothing is sent anywhere",
 		section = NOTES,
 		position = 0
 	)
