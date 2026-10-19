@@ -515,7 +515,7 @@ public class CodexMinigamePilotPlugin extends Plugin
 			goals.tick(client, f.view, new GoalWatch.Choices(
 				config.motherlode() ? config.motherlodeGoal().choice() : Goals.Choice.OFF,
 				config.homes() ? config.homesGoal().choice() : Goals.Choice.OFF,
-				config.furnace() ? config.furnaceGoal() : -1, config.rewardRoad()),
+				config.furnace() ? config.furnaceGoal() : -1, config.rewardRoad() && panelOpen()),
 				f.activity == View.Activity.HOMES || f.activity == View.Activity.NONE ? loadContract() : null);
 		}
 		flight = f;
@@ -586,6 +586,13 @@ public class CodexMinigamePilotPlugin extends Plugin
 			worldMapPointManager.remove(mapPoint);
 			mapPoint = null;
 		}
+	}
+
+	/** True while the panel is open; the reward road is only worked out for it then. */
+	private boolean panelOpen()
+	{
+		PilotPanel p = panel;
+		return p != null && p.isOpen();
 	}
 
 	/** Hands the panel a new view when anything on it has changed, and only while it is open. */

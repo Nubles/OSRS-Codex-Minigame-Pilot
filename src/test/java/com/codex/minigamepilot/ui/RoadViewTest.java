@@ -48,7 +48,8 @@ public class RoadViewTest
 		f.skill = "Smithing";
 		f.xp = Goals.xpFor(52);
 		List<RewardRoad.Stop> bars = RewardRoad.withLevel(RewardRoad.furnace(f), "Smithing", 70, "Monkey Madness II", f);
-		assertEquals("Smithing 70 is for Monkey Madness II, a Codex Navigator goal.", RoadView.footnote(bars));
+		// The stop it lands on is named too, or nothing on the road says which one Smithing 70 is.
+		assertEquals("Smithing 70 (Adamantite bars) is for Monkey Madness II, a Codex Navigator goal.", RoadView.footnote(bars));
 		assertTrue(RoadView.tip(bars.get(2)).startsWith("Adamantite bars: "));
 		assertTrue(RoadView.tip(bars.get(2)).endsWith(". Monkey Madness II needs Smithing 70"));
 	}

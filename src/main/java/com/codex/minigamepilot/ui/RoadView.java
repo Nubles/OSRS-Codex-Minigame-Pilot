@@ -144,7 +144,9 @@ class RoadView extends JComponent
 		{
 			if (s.getReason() != null && !s.isOwned())
 			{
-				return s.getLevelName() + " is for " + s.getReason() + ", a Codex Navigator goal.";
+				// A level that lands on a stop of another name says which stop it is.
+				String level = s.getLevelName().equals(s.getName()) ? s.getName() : s.getLevelName() + " (" + s.getName() + ")";
+				return level + " is for " + s.getReason() + ", a Codex Navigator goal.";
 			}
 		}
 		return null;
