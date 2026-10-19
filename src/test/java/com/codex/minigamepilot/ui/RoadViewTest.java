@@ -43,6 +43,14 @@ public class RoadViewTest
 		assertEquals("Mining 72 is for Dragon Slayer II, a Codex Navigator goal.", RoadView.footnote(r));
 		assertEquals("Mining 72: 162K xp, in 3h 57m. Dragon Slayer II needs it", RoadView.tip(r.get(4)));
 		assertEquals("Gem bag: 100 nuggets, in 6h 29m, counting the stops above it first", RoadView.tip(r.get(2)));
+		// A goal's level that is already a stop on the furnace road is named as the level.
+		Goals.Input f = new Goals.Input();
+		f.skill = "Smithing";
+		f.xp = Goals.xpFor(52);
+		List<RewardRoad.Stop> bars = RewardRoad.withLevel(RewardRoad.furnace(f), "Smithing", 70, "Monkey Madness II", f);
+		assertEquals("Smithing 70 is for Monkey Madness II, a Codex Navigator goal.", RoadView.footnote(bars));
+		assertTrue(RoadView.tip(bars.get(2)).startsWith("Adamantite bars: "));
+		assertTrue(RoadView.tip(bars.get(2)).endsWith(". Monkey Madness II needs Smithing 70"));
 	}
 
 	@Test

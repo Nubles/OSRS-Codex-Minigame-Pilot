@@ -144,7 +144,7 @@ class RoadView extends JComponent
 		{
 			if (s.getReason() != null && !s.isOwned())
 			{
-				return s.getName() + " is for " + s.getReason() + ", a Codex Navigator goal.";
+				return s.getLevelName() + " is for " + s.getReason() + ", a Codex Navigator goal.";
 			}
 		}
 		return null;
@@ -155,7 +155,7 @@ class RoadView extends JComponent
 		String tip = s.getName() + ": " + status(s, false);
 		if (s.getReason() != null)
 		{
-			tip += ". " + s.getReason() + " needs it";
+			tip += ". " + s.getReason() + " needs " + (s.getLevelName().equals(s.getName()) ? "it" : s.getLevelName());
 		}
 		else if (!s.isOwned() && !s.isAffordable() && s.getCost() != s.getLeft())
 		{

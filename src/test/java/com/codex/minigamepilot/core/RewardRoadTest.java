@@ -146,6 +146,9 @@ public class RewardRoadTest
 		List<RewardRoad.Stop> same = RewardRoad.withLevel(road, "Smithing", 70, "Dragon Slayer II", in);
 		assertEquals(4, same.size());
 		assertEquals("Dragon Slayer II", same.get(2).getReason());
+		assertEquals("Adamantite bars", same.get(2).getName());
+		assertEquals("Smithing 70", same.get(2).getLevelName());
+		assertEquals("Smithing 68", withGoal.get(2).getLevelName());
 		// Past runite only the last level is left, a road of one.
 		in.xp = Goals.xpFor(90);
 		assertEquals(Arrays.asList("Runite bars"), names(RewardRoad.furnace(in)));

@@ -29,10 +29,18 @@ public final class RewardRoad
 		private final Goal.Currency currency;
 		private final String roundName;
 		private final boolean known;
+		private final String skill;
 
 		Stop(String name, int icon, int level, long cost, long left, boolean owned, boolean affordable, long minutesAway, long roundsAway, String reason,
 			Goal.Currency currency, String roundName, boolean known)
 		{
+			this(name, icon, level, cost, left, owned, affordable, minutesAway, roundsAway, reason, currency, roundName, known, null);
+		}
+
+		Stop(String name, int icon, int level, long cost, long left, boolean owned, boolean affordable, long minutesAway, long roundsAway, String reason,
+			Goal.Currency currency, String roundName, boolean known, String skill)
+		{
+			this.skill = skill;
 			this.known = known;
 			this.currency = currency;
 			this.roundName = roundName;
@@ -118,6 +126,12 @@ public final class RewardRoad
 			return roundName;
 		}
 
+		/** For a level stop, the skill and level, such as "Smithing 70", whatever the stop is called; otherwise its name. */
+		public String getLevelName()
+		{
+			return level > 0 && skill != null ? skill + " " + level : name;
+		}
+
 		/** For a level stop, whose goal needs it, such as "Dragon Slayer II"; otherwise null. */
 		public String getReason()
 		{
@@ -157,10 +171,10 @@ public final class RewardRoad
 		{
 			if (!foreman && f.level > BarPick.FOREMAN_FREE_LEVEL)
 			{
-				all.add(level("No foreman fee", 0, BarPick.FOREMAN_FREE_LEVEL, null, in));
+				all.add(level("No foreman fee", 0, "Smithing", BarPick.FOREMAN_FREE_LEVEL, null, in));
 				foreman = true;
 			}
-			all.add(level(f.bar.getName() + " bars", f.bar.getBar(), f.level, null, in));
+			all.add(level(f.bar.getName() + " bars", f.bar.getBar(), "Smithing", f.level, null, in));
 		}
 		// Only the last level reached, then everything ahead of it.
 		int from = 0;
@@ -174,12 +188,12 @@ public final class RewardRoad
 		return new ArrayList<>(all.subList(from, all.size()));
 	}
 
-	private static Stop level(String name, int icon, int level, String reason, Goals.Input in)
+	private static Stop level(String name, int icon, String skill, int level, String reason, Goals.Input in)
 	{
 		boolean reached = Goals.levelFor(in.xp) >= level;
 		long left = reached ? 0 : Math.max(0, Goals.xpFor(level) - in.xp);
 		return new Stop(name, icon, level, left, left, reached, false, reached ? 0 : minutes(left, in.xpPerHour),
-			reached ? 0 : rounds(left, in.xpPerRound), reason, null, in.roundName, true);
+			reached ? 0 : rounds(left, in.xpPerRound), reason, null, in.roundName, true, skill);
 	}
 
 	/**
@@ -248,16 +262,16 @@ public final class RewardRoad
 			if (s.getLevel() == level)
 			{
 				out.set(i, new Stop(s.name, s.icon, s.level, s.cost, s.left, s.owned, s.affordable, s.minutesAway, s.roundsAway, goal,
-					s.currency, s.roundName, s.known));
+					s.currency, s.roundName, s.known, s.skill));
 				return out;
 			}
 			if (s.getLevel() > level)
 			{
-				out.add(i, level(skill + " " + level, 0, level, goal, in));
+				out.add(i, level(skill + " " + level, 0, skill, level, goal, in));
 				return out;
 			}
 		}
-		out.add(level(skill + " " + level, 0, level, goal, in));
+		out.add(level(skill + " " + level, 0, skill, level, goal, in));
 		return out;
 	}
 
