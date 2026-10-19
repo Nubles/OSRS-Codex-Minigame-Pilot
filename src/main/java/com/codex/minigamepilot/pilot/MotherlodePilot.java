@@ -278,7 +278,7 @@ public final class MotherlodePilot
 		if (worth > 0)
 		{
 			String rate = session.perHour(worth, now);
-			view.stat(new View.Stat(Session.format(worth), "Ore worth", rate.isEmpty() ? "Grand Exchange prices" : rate, Theme.GOLD_BRIGHT));
+			view.stat(new View.Stat(Session.format(worth), "Ore worth", rate.isEmpty() ? "At GE prices" : rate, Theme.GOLD_BRIGHT));
 		}
 
 		Flight flight = new Flight(View.Activity.MOTHERLODE, step, view).to(way);
