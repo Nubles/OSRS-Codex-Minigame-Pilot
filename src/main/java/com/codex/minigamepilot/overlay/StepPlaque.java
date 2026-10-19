@@ -9,7 +9,6 @@ import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.GradientPaint;
 import java.awt.Graphics2D;
-import java.awt.geom.RoundRectangle2D;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayPosition;
 
@@ -22,7 +21,19 @@ public class StepPlaque extends Overlay
 	private static final int PAD = 7;
 	private static final int MAX_WIDTH = 300;
 
+	private static final java.awt.image.BufferedImage MARK = Sigil.icon(16);
+	private static final Color GOLD_RIM = Theme.alpha(Theme.GOLD, 170);
+	private static final Color GOLD_BAR = Theme.alpha(Theme.GOLD, 200);
+	private static final Color TEAL_RIM = Theme.alpha(Theme.TEAL, 170);
+	private static final Color TEAL_BAR = Theme.alpha(Theme.TEAL, 200);
+
 	private volatile Step step;
+	/** The step's capitalised verb, worked out once per step rather than every frame. */
+	private Step verbOf;
+	private String verb;
+	/** The backdrop, made again only when the plaque's height changes. */
+	private GradientPaint backdrop;
+	private int backdropHeight;
 
 	public StepPlaque()
 	{
@@ -50,23 +61,33 @@ public class StepPlaque extends Overlay
 		FontMetrics small = g.getFontMetrics();
 
 		int icon = 16;
-		String verb = s.getVerb().toUpperCase();
+		if (s != verbOf)
+		{
+			verbOf = s;
+			verb = s.getVerb().toUpperCase();
+		}
+		String verb = this.verb;
 		int textX = PAD + icon + 7;
 		int line1 = bold.stringWidth(verb) + 8 + small.stringWidth(s.getTitle());
 		int line2 = s.getDetail().isEmpty() ? 0 : small.stringWidth(s.getDetail());
 		int width = Math.min(MAX_WIDTH, textX + Math.max(line1, line2) + PAD + 2);
 		int height = PAD * 2 + bold.getAscent() + (line2 > 0 ? small.getHeight() : 0) + 1;
 
-		Color tone = s.isWaiting() ? Theme.TEAL : Theme.GOLD;
-		RoundRectangle2D shape = new RoundRectangle2D.Float(0.5f, 0.5f, width - 1, height - 1, 10, 10);
-		g.setPaint(new GradientPaint(0, 0, Theme.alpha(Theme.CARD_TOP, 235), 0, height, Theme.alpha(Theme.INK_DEEP, 235)));
-		g.fill(shape);
-		g.setColor(Theme.alpha(tone, 170));
-		g.draw(shape);
-		g.setColor(Theme.alpha(tone, 200));
+		boolean teal = s.isWaiting();
+		Color tone = teal ? Theme.TEAL : Theme.GOLD;
+		if (backdrop == null || backdropHeight != height)
+		{
+			backdrop = new GradientPaint(0, 0, Theme.alpha(Theme.CARD_TOP, 235), 0, height, Theme.alpha(Theme.INK_DEEP, 235));
+			backdropHeight = height;
+		}
+		g.setPaint(backdrop);
+		g.fillRoundRect(0, 0, width - 1, height - 1, 10, 10);
+		g.setColor(teal ? TEAL_RIM : GOLD_RIM);
+		g.drawRoundRect(0, 0, width - 1, height - 1, 10, 10);
+		g.setColor(teal ? TEAL_BAR : GOLD_BAR);
 		g.fillRect(1, 6, 2, height - 12);
 
-		Sigil.paint(g, PAD, PAD, icon);
+		g.drawImage(MARK, PAD, PAD, null);
 		int base = PAD + bold.getAscent();
 		g.setFont(Theme.title());
 		Ui.shadowed(g, verb, textX, base, tone);

@@ -2,8 +2,6 @@ package com.codex.minigamepilot.overlay;
 
 import com.codex.minigamepilot.pilot.Flight;
 import com.codex.minigamepilot.ui.Theme;
-import java.awt.BasicStroke;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.geom.Ellipse2D;
@@ -24,6 +22,8 @@ public class MinimapGuide extends Overlay
 	private final Client client;
 	private final Supplier<Flight> flight;
 	private final Supplier<Boolean> enabled;
+	/** Reused for every dot, so a frame allocates nothing. */
+	private final Ellipse2D.Float dot = new Ellipse2D.Float();
 
 	public MinimapGuide(Client client, Supplier<Flight> flight, Supplier<Boolean> enabled)
 	{
@@ -57,8 +57,9 @@ public class MinimapGuide extends Overlay
 			{
 				continue;
 			}
-			g.setColor(Theme.alpha(Theme.TEAL, 200));
-			g.fill(new Ellipse2D.Float(p.getX() - 1.5f, p.getY() - 1.5f, 3, 3));
+			g.setColor(Ink.MINIMAP_BEAD);
+			dot.setFrame(p.getX() - 1.5f, p.getY() - 1.5f, 3, 3);
+			g.fill(dot);
 		}
 		Point target = null;
 		if (f.object != null)
@@ -75,11 +76,13 @@ public class MinimapGuide extends Overlay
 		}
 		if (target != null)
 		{
-			g.setStroke(new BasicStroke(2f));
-			g.setColor(Theme.alpha(Color.BLACK, 140));
-			g.draw(new Ellipse2D.Float(target.getX() - 3.5f, target.getY() - 3.5f, 9, 9));
+			g.setStroke(Ink.THICK);
+			g.setColor(Ink.MINIMAP_SHADOW);
+			dot.setFrame(target.getX() - 3.5f, target.getY() - 3.5f, 9, 9);
+			g.draw(dot);
 			g.setColor(Theme.GOLD_BRIGHT);
-			g.draw(new Ellipse2D.Float(target.getX() - 4.5f, target.getY() - 4.5f, 9, 9));
+			dot.setFrame(target.getX() - 4.5f, target.getY() - 4.5f, 9, 9);
+			g.draw(dot);
 		}
 		return null;
 	}

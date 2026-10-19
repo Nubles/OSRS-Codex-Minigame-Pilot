@@ -47,7 +47,18 @@ public class PilotPanel extends PluginPanel
 	/** Where the reward road gets each item's picture. */
 	public void icons(java.util.function.IntFunction<java.awt.image.BufferedImage> source)
 	{
-		icons = source;
+		java.util.Map<Integer, java.awt.image.BufferedImage> kept = new java.util.HashMap<>();
+		// Each picture is asked for once and kept, and the panel repaints once as it arrives,
+		// however often the road is rebuilt.
+		icons = source == null ? null : id -> kept.computeIfAbsent(id, k ->
+		{
+			java.awt.image.BufferedImage img = source.apply(k);
+			if (img instanceof net.runelite.client.util.AsyncBufferedImage)
+			{
+				((net.runelite.client.util.AsyncBufferedImage) img).onLoaded(() -> javax.swing.SwingUtilities.invokeLater(this::repaint));
+			}
+			return img;
+		});
 	}
 
 	/** Called when the panel is opened, so the plugin can bring it up to date. */

@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.function.IntFunction;
 import javax.swing.JComponent;
-import javax.swing.SwingUtilities;
 
 /**
  * The reward road: a minigame's whole shop as a column of medallions joined by a gilt thread,
@@ -41,7 +40,7 @@ class RoadView extends JComponent
 	private final List<RewardRoad.Stop> stops;
 	private final BufferedImage[] icons;
 
-	/** @param icons an item's picture by its id, or null to draw the medallions bare */
+	/** @param icons an item's picture by its id (the panel keeps them, and repaints as they load), or null to draw the medallions bare */
 	RoadView(List<RewardRoad.Stop> stops, IntFunction<BufferedImage> icons)
 	{
 		this.stops = stops;
@@ -49,12 +48,7 @@ class RoadView extends JComponent
 		for (int i = 0; i < stops.size(); i++)
 		{
 			int id = stops.get(i).getIcon();
-			BufferedImage img = icons == null || id <= 0 ? null : icons.apply(id);
-			this.icons[i] = img;
-			if (img instanceof net.runelite.client.util.AsyncBufferedImage)
-			{
-				((net.runelite.client.util.AsyncBufferedImage) img).onLoaded(() -> SwingUtilities.invokeLater(this::repaint));
-			}
+			this.icons[i] = icons == null || id <= 0 ? null : icons.apply(id);
 		}
 		setOpaque(false);
 		setPreferredSize(new Dimension(10, stops.size() * ROW));
