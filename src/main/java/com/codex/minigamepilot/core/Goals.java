@@ -243,6 +243,29 @@ public final class Goals
 	/** The experience a level takes, by the game's own table. */
 	public static long xpFor(int level)
 	{
+		if (XP != null && level >= 1 && level < XP.length)
+		{
+			return XP[level];
+		}
+		return worked(level);
+	}
+
+	/** Experience at each level 1 to 99, worked out once: a level is looked up every tick. */
+	private static final long[] XP = table();
+
+	private static long[] table()
+	{
+		long[] t = new long[100];
+		for (int level = 1; level < t.length; level++)
+		{
+			t[level] = worked(level);
+		}
+		return t;
+	}
+
+	/** The game's experience formula for a level. */
+	private static long worked(int level)
+	{
 		long points = 0;
 		for (int i = 1; i < level; i++)
 		{
