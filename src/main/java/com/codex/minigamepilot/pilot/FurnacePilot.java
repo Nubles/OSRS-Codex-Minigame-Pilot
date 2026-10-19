@@ -44,6 +44,8 @@ public final class FurnacePilot
 	Object lastState;
 	private int loads;
 	private int lastOre = -1;
+	/** This session's experience as last shown, for its summary when you leave. */
+	private int xpSeen;
 
 	/** A running count of what rounds produce, for the pace coach. */
 	int units()
@@ -70,9 +72,39 @@ public final class FurnacePilot
 		lastOre = -1;
 	}
 
-	View.Brief brief()
+	/** What this session came to, for when you leave the furnace, or null when it was too short or idle. */
+	com.codex.minigamepilot.core.Visit visit(long now)
 	{
-		String status = session.begun() ? (barsTaken - barsBefore) + " bars this session" : null;
+		if (!session.begun())
+		{
+			return null;
+		}
+		java.util.List<String> parts = new java.util.ArrayList<>();
+		int bars = barsTaken - barsBefore;
+		if (bars > 0)
+		{
+			parts.add(Session.format(bars) + (bars == 1 ? " bar" : " bars"));
+		}
+		if (xpSeen > 0)
+		{
+			parts.add(Session.format(xpSeen) + " Smithing xp");
+		}
+		return com.codex.minigamepilot.core.Visit.of(now, session.activeMs(), parts);
+	}
+
+	/** @param lastVisit the summary saved when you last left the furnace, or null */
+	/** Logged in again or hopped: readings start afresh, ore on the belt stays on the belt. */
+	void relogged()
+	{
+		cycle.relog();
+		lastBars = -1;
+		lastOre = -1;
+	}
+
+	View.Brief brief(com.codex.minigamepilot.core.Visit lastVisit, long now)
+	{
+		String status = lastVisit != null ? lastVisit.status(now)
+			: session.begun() ? (barsTaken - barsBefore) + " bars this session" : null;
 		return new View.Brief(View.Activity.FURNACE, status,
 			"In Keldagrim. Bring coins for the coffer, ice gloves, and a coal bag for steel and up.");
 	}
@@ -188,6 +220,7 @@ public final class FurnacePilot
 		view.stat(new View.Stat(Session.format(barsTaken - barsBefore), "Bars", session.perHour(barsTaken - barsBefore, now), Theme.GOLD));
 		view.stat(new View.Stat(Session.format(loads), "Ore loads", FurnaceCycle.coalRunNext(s) ? "Next: coal" : "Next: ore", Theme.TEAL));
 		int xp = session.xp(client);
+		xpSeen = xp;
 		view.stat(new View.Stat(Session.format(xp), "Smithing xp", session.perHour(xp, now), Theme.GREEN));
 		view.stat(new View.Stat(session.elapsed(now), "Time", "At the furnace", Theme.TEXT_MUTED));
 		return new Flight(View.Activity.FURNACE, step, view).to(way);

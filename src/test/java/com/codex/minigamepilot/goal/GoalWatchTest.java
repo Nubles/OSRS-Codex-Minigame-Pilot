@@ -91,4 +91,26 @@ public class GoalWatchTest
 		assertEquals(0, GoalWatch.nuggetsEarned(10, 50, true));
 		assertEquals(0, GoalWatch.nuggetsEarned(-1, 50, false));
 	}
+
+	@Test
+	public void experienceBeforeTheSkillsArriveIsNoBaseForAGain()
+	{
+		// Just logged in: no Hitpoints experience means nothing has loaded.
+		assertEquals(-1, GoalWatch.known(0, 0));
+		assertEquals(-1, GoalWatch.known(13_034_431, 0));
+		assertEquals(13_034_431, GoalWatch.known(13_034_431, 1_154));
+		// From not known to your whole total is no gain; a real tick's gain is.
+		assertEquals(0, GoalWatch.xpGained(-1, 13_034_431));
+		assertEquals(0, GoalWatch.xpGained(13_034_431, -1));
+		assertEquals(35, GoalWatch.xpGained(13_034_431, 13_034_466));
+	}
+
+	@Test
+	public void nuggetsAreNotEarnedFromAnInventoryNotYetLoaded()
+	{
+		assertEquals(0, GoalWatch.nuggetsEarned(-1, 40, false));
+		assertEquals(0, GoalWatch.nuggetsEarned(40, -1, false));
+		assertEquals(0, GoalWatch.nuggetsEarned(-1, -1, false));
+		assertEquals(2, GoalWatch.nuggetsEarned(40, 42, false));
+	}
 }

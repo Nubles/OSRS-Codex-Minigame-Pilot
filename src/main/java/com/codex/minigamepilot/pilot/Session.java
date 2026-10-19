@@ -29,11 +29,26 @@ final class Session
 	 */
 	boolean tick(Client client, long now)
 	{
+		// Every account has some Hitpoints experience: none at all means the skills have not
+		// arrived yet (just logged in), and a start taken then would count your whole total.
+		return tick(client.getSkillExperience(skill), client.getSkillExperience(Skill.HITPOINTS) > 0, now);
+	}
+
+	/**
+	 * @param xp experience in the session's skill now
+	 * @param loaded whether the skills have arrived from the game yet
+	 */
+	boolean tick(int xp, boolean loaded, long now)
+	{
 		boolean restart = restarts(started, last, now);
 		if (started == 0 || restart)
 		{
 			started = now;
-			startXp = client.getSkillExperience(skill);
+			startXp = -1;
+		}
+		if (startXp < 0 && loaded)
+		{
+			startXp = xp;
 		}
 		last = now;
 		return restart;
@@ -50,9 +65,21 @@ final class Session
 		return started > 0;
 	}
 
+	/** How long the session has run, to its last tick. */
+	long activeMs()
+	{
+		return started == 0 ? 0 : Math.max(0, last - started);
+	}
+
 	int xp(Client client)
 	{
-		return startXp < 0 ? 0 : Math.max(0, client.getSkillExperience(skill) - startXp);
+		return xp(client.getSkillExperience(skill));
+	}
+
+	/** Experience gained this session, from the skill's experience now; 0 while it is not loaded. */
+	int xp(int now)
+	{
+		return startXp < 0 || now <= 0 ? 0 : Math.max(0, now - startXp);
 	}
 
 	/** A count as an hourly pace, once there has been enough time to make it mean something. */

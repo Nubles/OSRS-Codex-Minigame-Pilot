@@ -197,6 +197,12 @@ public interface CodexMinigamePilotConfig extends Config
 		return true;
 	}
 
+	@ConfigItem(keyName = "visitChat", name = "Visit summary in chat", description = "When you leave the Motherlode Mine or the Blast Furnace, say in the chat what the session came to", section = GUIDANCE, position = 7)
+	default boolean visitChat()
+	{
+		return true;
+	}
+
 	@ConfigItem(
 		keyName = "motherlodeGoal",
 		name = "Motherlode goal",

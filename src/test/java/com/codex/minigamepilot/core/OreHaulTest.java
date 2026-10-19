@@ -63,4 +63,45 @@ public class OreHaulTest
 		h.observe(new int[]{0, 0, 0, 0, 7}, true);
 		assertEquals(2, h.count());
 	}
+
+	@Test
+	public void coalThatGoesStraightIntoAnOpenCoalBagStillCounts()
+	{
+		OreHaul h = new OreHaul();
+		h.observe(new int[]{0, 0, 0, 0, 0}, 0, 0, true);
+		// The sack gives 40: 27 coal fills the open bag, and 9 coal, 3 gold and 1 nugget land in the pack.
+		h.observe(new int[]{9, 3, 0, 0, 0}, 1, 40, true);
+		h.observe(new int[]{9, 3, 0, 0, 0}, 1, 0, true);
+		assertEquals(39, h.count());
+		assertEquals(36 * 150 + 3 * 160, h.worth(id -> id == 453 ? 150 : id == 444 ? 160 : 0));
+	}
+
+	@Test
+	public void withoutAnOpenBagNothingIsGuessed()
+	{
+		OreHaul h = new OreHaul();
+		h.observe(new int[]{0, 0, 0, 0, 0}, 0, 0, false);
+		// A closed bag takes nothing: the sack's 20 all land, or stay in the sack.
+		h.observe(new int[]{12, 0, 0, 0, 0}, 0, 20, false);
+		h.observe(new int[]{12, 0, 0, 0, 0}, 0, 0, false);
+		assertEquals(12, h.count());
+	}
+
+	@Test
+	public void aPayoutLandingOverTwoTicksIsNotCountedTwice()
+	{
+		OreHaul h = new OreHaul();
+		h.observe(new int[]{0, 0, 0, 0, 0}, 0, 0, true);
+		// The sack's count drops a tick before the pack fills.
+		h.observe(new int[]{0, 0, 0, 0, 0}, 0, 30, true);
+		h.observe(new int[]{3, 0, 0, 0, 0}, 0, 0, true);
+		assertEquals("27 in the bag, 3 in the pack", 30, h.count());
+		h.observe(new int[]{3, 0, 0, 0, 0}, 0, 0, true);
+		assertEquals(30, h.count());
+		// The first look in the mine is no base for a guess either.
+		OreHaul fresh = new OreHaul();
+		fresh.observe(new int[]{0, 0, 0, 0, 0}, 0, 30, true);
+		fresh.observe(new int[]{0, 0, 0, 0, 0}, 0, 0, true);
+		assertEquals(0, fresh.count());
+	}
 }

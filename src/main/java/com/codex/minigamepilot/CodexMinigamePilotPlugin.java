@@ -49,6 +49,10 @@ import net.runelite.api.events.WallObjectSpawned;
 import net.runelite.api.gameval.InventoryID;
 import net.runelite.client.RuneLite;
 import net.runelite.client.callback.ClientThread;
+import net.runelite.client.chat.ChatColorType;
+import net.runelite.client.chat.ChatMessageBuilder;
+import net.runelite.client.chat.ChatMessageManager;
+import net.runelite.client.chat.QueuedMessage;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.game.ItemManager;
@@ -104,6 +108,9 @@ public class CodexMinigamePilotPlugin extends Plugin
 	@Inject
 	private ItemManager itemManager;
 
+	@Inject
+	private ChatMessageManager chatMessageManager;
+
 	private final StepPlaque plaque = new StepPlaque();
 	private volatile Flight flight;
 	private Pilots pilots;
@@ -117,6 +124,15 @@ public class CodexMinigamePilotPlugin extends Plugin
 	private WorldMapPoint mapPoint;
 	private FieldNotes notes;
 	private final Map<Integer, Integer> lastInventory = new HashMap<>();
+	/** Whether lastInventory holds this login's inventory yet; the first one seen is only a base. */
+	private boolean inventoryKnown;
+	/**
+	 * Ticks to wait after logging in or hopping before reading the minigames: the inventory,
+	 * skills and varbits arrive over the first ticks, and a pack read as empty then full would
+	 * look like a haul. RuneLite's own XP tracker waits the same.
+	 */
+	private static final int LOGIN_GRACE = 2;
+	private int loginGrace;
 	private GoalWatch goals;
 	private String navigatorJson;
 	private NavigatorGoals.Board navigatorBoard;
@@ -169,6 +185,7 @@ public class CodexMinigamePilotPlugin extends Plugin
 		{
 			if (client.getGameState() == GameState.LOGGED_IN)
 			{
+				seedInventory(client.getItemContainer(InventoryID.INV));
 				pilots.rescan();
 				goals.reload();
 				pilots.loadContract(loadContract());
@@ -243,6 +260,12 @@ public class CodexMinigamePilotPlugin extends Plugin
 		{
 			return;
 		}
+		if (!inventoryKnown)
+		{
+			// The inventory as it arrives after logging in: a base, not a change.
+			seedInventory(event.getItemContainer());
+			return;
+		}
 		Map<Integer, Integer> now = new HashMap<>();
 		for (Item item : event.getItemContainer().getItems())
 		{
@@ -272,18 +295,56 @@ public class CodexMinigamePilotPlugin extends Plugin
 		pilots.inventory(changes);
 	}
 
+	/** Takes an inventory as the base later changes are measured from. */
+	private void seedInventory(ItemContainer container)
+	{
+		lastInventory.clear();
+		if (container == null)
+		{
+			inventoryKnown = false;
+			return;
+		}
+		for (Item item : container.getItems())
+		{
+			if (item.getId() > 0)
+			{
+				lastInventory.merge(item.getId(), item.getQuantity(), Integer::sum);
+			}
+		}
+		inventoryKnown = true;
+	}
+
 	@Subscribe
 	public void onGameStateChanged(GameStateChanged event)
 	{
-		if (event.getGameState() == GameState.LOADING)
+		switch (event.getGameState())
 		{
-			pilots.clearScene();
-		}
-		else if (event.getGameState() == GameState.LOGIN_SCREEN)
-		{
-			flight = null;
-			plaque.show(null);
-			publish();
+			case LOADING:
+				pilots.clearScene();
+				break;
+			case LOGIN_SCREEN:
+			case HOPPING:
+				// What was seen before is no base for what comes after: the next login may be
+				// another account, and this one may have played elsewhere in between.
+				pilots.relogged(System.currentTimeMillis());
+				if (goals != null)
+				{
+					goals.relog();
+				}
+				lastInventory.clear();
+				inventoryKnown = false;
+				loginGrace = LOGIN_GRACE;
+				// The game drops its hint arrow with the scene; set it again once back.
+				arrow = null;
+				flight = null;
+				plaque.show(null);
+				publish();
+				break;
+			case LOGGING_IN:
+				loginGrace = LOGIN_GRACE;
+				break;
+			default:
+				break;
 		}
 	}
 
@@ -423,6 +484,11 @@ public class CodexMinigamePilotPlugin extends Plugin
 		{
 			return;
 		}
+		if (loginGrace > 0 || client.getItemContainer(InventoryID.INV) == null)
+		{
+			loginGrace = Math.max(0, loginGrace - 1);
+			return;
+		}
 		Bar bar = config.bar() == CodexMinigamePilotConfig.BarChoice.AUTO ? null : Bar.valueOf(config.bar().name());
 		Flight f = pilots.fly(config.motherlode(), config.furnace(), config.homes(), bar, config.cofferLow(), System.currentTimeMillis());
 		if (config.showGoals() && goals != null)
@@ -434,6 +500,11 @@ public class CodexMinigamePilotPlugin extends Plugin
 				f.activity == View.Activity.HOMES || f.activity == View.Activity.NONE ? loadContract() : null);
 		}
 		flight = f;
+		String note = pilots.takeNote();
+		if (note != null && config.visitChat())
+		{
+			chat(note);
+		}
 		plaque.show(config.plaque() && f.step != null ? f.step : null);
 		updateArrow(f);
 		updateMapPoint(f);
@@ -529,6 +600,17 @@ public class CodexMinigamePilotPlugin extends Plugin
 				p.update(view);
 			}
 		});
+	}
+
+	private void chat(String text)
+	{
+		chatMessageManager.queue(QueuedMessage.builder()
+			.type(ChatMessageType.CONSOLE)
+			.runeLiteFormattedMessage(new ChatMessageBuilder()
+				.append(ChatColorType.HIGHLIGHT).append("Codex Pilot: ")
+				.append(ChatColorType.NORMAL).append(text)
+				.build())
+			.build());
 	}
 
 	private String loadBests(View.Activity activity)

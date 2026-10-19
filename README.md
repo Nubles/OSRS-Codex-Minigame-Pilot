@@ -18,7 +18,7 @@ It is part of the **Codex** suite, alongside [Codex Navigator](https://github.co
 - **The nearest vein on foot.** Distances are walked over the game's own collision map, so a vein around a corner beats one behind a wall. Veins with another player standing at them count as further away. The next vein after this one is quietly outlined too.
 - **Rockfalls and struts.** When the quickest way runs through a rockfall, the step becomes mining it. When both struts are broken and pay-dirt is held up, the step is hammering one.
 - **Either level.** It tells the upper and lower levels apart and sends you to the ladder when what you need is on the other.
-- **What the sack pays.** Every ore the sack hands you is counted and priced at today's Grand Exchange prices, with coins an hour beside your experience. Only what comes out of the sack counts, not ore taken from the bank.
+- **What the sack pays.** Every ore the sack hands you is counted and priced at today's Grand Exchange prices, with coins an hour beside your experience. Only what comes out of the sack counts, not ore taken from the bank. With an open coal bag the sack's coal goes straight into the bag; the sack says how many pieces it gave, so what never reached your pack is counted as coal in the bag.
 
 ### Blast Furnace
 - **Coal trips worked out ahead.** At the bank it compares the coal in the furnace, plus a full coal bag, with what a load of ore will burn, and calls a coal trip only when the ore would otherwise sit unsmelted. Steel with a coal bag never needs one, mithril needs one every other ore trip, and runite about one and a half to each ore trip.
@@ -55,7 +55,9 @@ It is part of the **Codex** suite, alongside [Codex Navigator](https://github.co
 
 ## The panel
 
-The helm at the top holds the next action as one large gilt word and the full instruction under it, and flares when the step changes. Under it, the minigame's loop with your place in it, its gauges (the sack with pay-dirt in flight, the furnace's coal against what the next load needs, the planks the job still takes), the furniture checklist, and the session so far: pay-dirt, ore, bars, contracts, points and experience, with hourly pace. Away from the minigames it lists all three and what is waiting at each, such as an open contract.
+The helm at the top holds the next action as one large gilt word and the full instruction under it, and flares when the step changes. Under it, the minigame's loop with your place in it, its gauges (the sack with pay-dirt in flight, the furnace's coal against what the next load needs, the planks the job still takes), the furniture checklist, and the session so far: pay-dirt, ore, bars, contracts, points and experience, with hourly pace. Away from the minigames it lists all three and what is waiting at each, such as an open contract, and what your last visit to the Motherlode Mine and the Blast Furnace came to: "Last visit 3 hours ago: 1h 12m for 1,134 pay-dirt, 972 ore, 68,040 Mining xp and ore worth 142K."
+
+When you walk out of the Motherlode Mine or the Blast Furnace after a session of five minutes or more, a line in the chat says what it came to. Logging in, or hopping, starts every count from what the game shows once it has settled, so a pack that reads empty for a tick and then full is never counted as a haul, and experience is only counted once your skills have arrived.
 
 ## Pace coach
 
@@ -109,7 +111,7 @@ Codex Minigame Pilot is guidance only. It reads what the game already shows you 
 
 ## Settings
 
-Each minigame can be turned off. The Blast Furnace bar can be fixed instead of worked out, and the coffer warning level set. The plaque, ground path, minimap path, action labels, quieter marks for what comes next, hint arrow and world map marker can each be turned off. Field notes are under their own section, off by default.
+Each minigame can be turned off. The Blast Furnace bar can be fixed instead of worked out, and the coffer warning level set. The plaque, ground path, minimap path, action labels, quieter marks for what comes next, hint arrow, world map marker and the visit summary in the chat can each be turned off. Field notes are under their own section, off by default.
 
 ## Development
 

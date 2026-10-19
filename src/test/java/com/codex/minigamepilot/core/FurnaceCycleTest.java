@@ -195,4 +195,17 @@ public class FurnaceCycleTest
 		assertEquals(Step.Target.BANK, step.getTarget());
 		assertTrue(step.getDetail().contains("coal"));
 	}
+
+	@Test
+	public void aHopKeepsOreOnTheBeltButReadsAfresh()
+	{
+		FurnaceCycle c = new FurnaceCycle();
+		c.observe(52, 0, true);
+		c.observe(0, 0, true);
+		c.relog();
+		// Back in after the login grace with a fresh load carried: only a base, no new load.
+		c.observe(27, 0, true);
+		c.observe(27, 0, true);
+		assertEquals(52, c.getOnBelt());
+	}
 }

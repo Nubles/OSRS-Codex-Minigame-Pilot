@@ -43,6 +43,9 @@ public final class MotherlodePilot
 	/** Grand Exchange prices, or null when not set. */
 	private java.util.function.IntUnaryOperator price;
 	private boolean wasEmptying;
+	/** This session's experience and ore worth as last shown, for its summary when you leave. */
+	private int xpSeen;
+	private long worthSeen;
 	/** The last snapshot planned from, for the field notes. */
 	Object lastState;
 
@@ -84,6 +87,14 @@ public final class MotherlodePilot
 		haul.forget();
 	}
 
+	/** Logged in again or hopped: readings start afresh, pay-dirt in flight stays in flight. */
+	void relogged()
+	{
+		cycle.relog();
+		lastSack = -1;
+		haul.forget();
+	}
+
 	/** Pay-dirt deposited this session. */
 	private int deposited()
 	{
@@ -95,10 +106,42 @@ public final class MotherlodePilot
 		this.price = price;
 	}
 
-	/** Brief for the panel when the player is elsewhere. */
-	View.Brief brief()
+	/** What this session came to, for when you leave the mine, or null when it was too short or idle. */
+	com.codex.minigamepilot.core.Visit visit(long now)
 	{
-		String status = session.begun() ? Session.format(deposited()) + " pay-dirt deposited this session" : null;
+		if (!session.begun())
+		{
+			return null;
+		}
+		java.util.List<String> parts = new java.util.ArrayList<>();
+		if (deposited() > 0)
+		{
+			parts.add(Session.format(deposited()) + " pay-dirt");
+		}
+		if (collected > 0)
+		{
+			parts.add(Session.format(collected) + " ore");
+		}
+		if (xpSeen > 0)
+		{
+			parts.add(Session.format(xpSeen) + " Mining xp");
+		}
+		if (worthSeen > 0)
+		{
+			parts.add("ore worth " + Session.format(worthSeen));
+		}
+		return com.codex.minigamepilot.core.Visit.of(now, session.activeMs(), parts);
+	}
+
+	/**
+	 * Brief for the panel when the player is elsewhere.
+	 *
+	 * @param lastVisit the summary saved when you last left the mine, or null
+	 */
+	View.Brief brief(com.codex.minigamepilot.core.Visit lastVisit, long now)
+	{
+		String status = lastVisit != null ? lastVisit.status(now)
+			: session.begun() ? Session.format(deposited()) + " pay-dirt deposited this session" : null;
 		return new View.Brief(View.Activity.MOTHERLODE, status,
 			"Under Falador, through the Dwarven Mine or the Falador mining guild. Bring a pickaxe; a hammer helps.");
 	}
@@ -132,17 +175,15 @@ public final class MotherlodePilot
 		boolean nearHopper = hopper != null && client.getLocalPlayer().getWorldLocation().distanceTo(hopper.getWorldLocation()) <= 2;
 		cycle.observe(s.payDirt, s.sack, nearHopper, s.brokenStruts >= 2);
 		boolean paidOut = lastSack >= 0 && s.sack < lastSack;
-		if (paidOut)
-		{
-			collected += lastSack - s.sack;
-		}
+		int drop = paidOut ? lastSack - s.sack : 0;
+		collected += drop;
 		lastSack = s.sack;
 		int[] ores = new int[com.codex.minigamepilot.core.OreHaul.ORES.length];
 		for (int i = 0; i < ores.length; i++)
 		{
 			ores[i] = pack.count(com.codex.minigamepilot.core.OreHaul.ORES[i]);
 		}
-		haul.observe(ores, paidOut);
+		haul.observe(ores, pack.count(ItemIds.GOLDEN_NUGGET), drop, pack.carries(ItemIds.COAL_BAG_OPEN));
 
 		Step step = cycle.next(s);
 		if (wasEmptying && !cycle.isEmptying())
@@ -212,9 +253,11 @@ public final class MotherlodePilot
 		view.stat(new View.Stat(Session.format(deposited()), "Pay-dirt", session.perHour(deposited(), now), Theme.GOLD));
 		view.stat(new View.Stat(Session.format(collected), "Ore", sacks + (sacks == 1 ? " sack emptied" : " sacks emptied"), Theme.TEAL));
 		int xp = session.xp(client);
+		xpSeen = xp;
 		view.stat(new View.Stat(Session.format(xp), "Mining xp", session.perHour(xp, now), Theme.GREEN));
 		view.stat(new View.Stat(session.elapsed(now), "Time", "In the mine", Theme.TEXT_MUTED));
 		long worth = price == null ? 0 : haul.worth(price);
+		worthSeen = worth;
 		if (worth > 0)
 		{
 			String rate = session.perHour(worth, now);

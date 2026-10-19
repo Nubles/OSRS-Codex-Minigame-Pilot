@@ -163,6 +163,32 @@ public final class GoalWatch
 		lastNuggets = -1;
 	}
 
+	/**
+	 * Logging in or hopping: experience and the inventory arrive over the first ticks, so what
+	 * was seen before is no base for what is gained next.
+	 */
+	public void relog()
+	{
+		last = View.Activity.NONE;
+		lastXp = -1;
+		lastNuggets = -1;
+		carried = null;
+		heldBefore = null;
+		lastTick = -1;
+	}
+
+	/** A skill's experience, or -1 while the skills have not arrived (no Hitpoints experience yet). */
+	static long known(long xp, long hitpointsXp)
+	{
+		return hitpointsXp > 0 ? xp : -1;
+	}
+
+	/** Experience gained since the last tick, 0 when either reading is not known. */
+	static long xpGained(long before, long now)
+	{
+		return before >= 0 && now > before ? now - before : 0;
+	}
+
 	/** The bank changed while open: remember what it holds of the goal items. */
 	public void bank(ItemContainer container)
 	{
@@ -332,17 +358,18 @@ public final class GoalWatch
 		ItemContainer inv = client.getItemContainer(InventoryID.INV);
 		ItemContainer worn = client.getItemContainer(InventoryID.WORN);
 		int nuggets = inv == null ? 0 : inv.count(ItemIds.GOLDEN_NUGGET);
-		// Carried plus banked as last seen: moving nuggets between the two changes neither.
-		int heldNuggets = nuggets + bank.getOrDefault(ItemIds.GOLDEN_NUGGET, 0);
+		// Carried plus banked as last seen: moving nuggets between the two changes neither. With
+		// no inventory yet (just logged in) nothing is known, so the next tick is no gain on it.
+		int heldNuggets = inv == null ? -1 : nuggets + bank.getOrDefault(ItemIds.GOLDEN_NUGGET, 0);
 		Skill skill = skillOf(activity);
-		long xp = skill == null ? -1 : client.getSkillExperience(skill);
+		long xp = skill == null ? -1 : known(client.getSkillExperience(skill), client.getSkillExperience(Skill.HITPOINTS));
 		if (activity != View.Activity.NONE)
 		{
 			Rate r = rate(activity);
 			r.ticks++;
-			if (activity == last && lastXp >= 0 && xp > lastXp)
+			if (activity == last)
 			{
-				r.xp += xp - lastXp;
+				r.xp += xpGained(lastXp, xp);
 			}
 			if (activity == View.Activity.MOTHERLODE && last == activity)
 			{

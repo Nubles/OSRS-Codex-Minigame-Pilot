@@ -6,6 +6,10 @@ import java.util.function.IntUnaryOperator;
  * The ore the Motherlode Mine's sack has paid out this session, and what it is worth. Ore is only
  * counted on a tick the sack goes down, when what turns up in your pack can only have come out
  * of it: ore taken from the bank or picked up elsewhere is left out.
+ *
+ * <p>With an open coal bag, the sack's coal goes straight into the bag and never shows in the
+ * pack. The sack says how many pieces it gave, so whatever of that did not land in the pack
+ * (ore or nuggets) went into the bag as coal.</p>
  */
 public final class OreHaul
 {
@@ -17,18 +21,46 @@ public final class OreHaul
 	private boolean seen;
 	/** Ticks left in which a pack that grows is the sack paying out. */
 	private int window;
+	/** Pieces the sack gave in the payout being watched, and how many of them landed in the pack. */
+	private int paid;
+	private int landed;
+	private int lastNuggets;
+	/** Whether an open coal bag was carried when the sack paid out. */
+	private boolean bagOpen;
 
 	/**
-	 * One tick.
+	 * One tick, without a coal bag.
 	 *
 	 * @param carried how many of each of {@link #ORES} you carry now, in that order
 	 * @param sackPaidOut whether the sack went down since the last tick
 	 */
 	public void observe(int[] carried, boolean sackPaidOut)
 	{
-		if (sackPaidOut)
+		observe(carried, 0, sackPaidOut ? 1 : 0, false);
+	}
+
+	/**
+	 * One tick.
+	 *
+	 * @param carried how many of each of {@link #ORES} you carry now, in that order
+	 * @param nuggets golden nuggets carried now
+	 * @param sackDrop how many pieces the sack went down by since the last tick
+	 * @param openCoalBag whether an open coal bag is carried, which takes the sack's coal
+	 */
+	public void observe(int[] carried, int nuggets, int sackDrop, boolean openCoalBag)
+	{
+		if (sackDrop > 0)
 		{
+			if (window == 0)
+			{
+				paid = 0;
+				landed = 0;
+				bagOpen = false;
+			}
 			window = 2;
+			// Only a payout seen from a known pack can say what went into the bag.
+			paid += seen ? sackDrop : 0;
+			bagOpen |= openCoalBag;
 		}
 		for (int i = 0; i < ORES.length; i++)
 		{
@@ -36,10 +68,27 @@ public final class OreHaul
 			if (seen && window > 0 && now > last[i])
 			{
 				haul[i] += now - last[i];
+				landed += now - last[i];
 			}
 			last[i] = now;
 		}
-		window = Math.max(0, window - 1);
+		int n = Math.max(0, nuggets);
+		if (seen && window > 0 && n > lastNuggets)
+		{
+			landed += n - lastNuggets;
+		}
+		lastNuggets = n;
+		if (window > 0 && --window == 0)
+		{
+			if (bagOpen && paid > landed)
+			{
+				// What the sack gave but the pack never showed went into the coal bag.
+				haul[0] += paid - landed;
+			}
+			paid = 0;
+			landed = 0;
+			bagOpen = false;
+		}
 		seen = true;
 	}
 
@@ -48,6 +97,9 @@ public final class OreHaul
 	{
 		seen = false;
 		window = 0;
+		paid = 0;
+		landed = 0;
+		bagOpen = false;
 	}
 
 	/** A new session: the haul starts again from nothing. */
