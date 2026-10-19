@@ -5,6 +5,7 @@ import com.codex.minigamepilot.core.Goal;
 import com.codex.minigamepilot.core.Goals;
 import com.codex.minigamepilot.core.ItemIds;
 import com.codex.minigamepilot.core.NavigatorGoals;
+import com.codex.minigamepilot.core.Owned;
 import com.codex.minigamepilot.core.Points;
 import com.codex.minigamepilot.ui.View;
 import java.util.ArrayList;
@@ -42,6 +43,8 @@ public final class GoalWatch
 	static final String POINTS_KEY = "goal.points";
 	/** The points book: total, contracts, what the total means and points spent since. */
 	static final String POINTS_BOOK_KEY = "goal.pointsBook";
+	/** The rewards you have been seen to own, so one put away in the costume room still counts. */
+	static final String OWNED_KEY = "goal.owned";
 	private static final Pattern POINTS = Pattern.compile("You have completed ([\\d,]+) contracts? with a total of ([\\d,]+) points?");
 	/** Time in a minigame before an hourly rate is trusted. */
 	private static final int RATE_TICKS = 300;
@@ -92,6 +95,10 @@ public final class GoalWatch
 	/** What the points rewards you own cost, as of the last tick. */
 	private long ownedCost;
 	private boolean storageWasOpen;
+	private Owned owned = new Owned();
+	/** Every reward carried or worn on the last tick, or null when not seen yet. */
+	private EnumSet<Goal.Reward> heldBefore;
+	private boolean groupWasOpen;
 	/** The game tick the contract reward shop was last seen open, or -1. */
 	private int shopTick = -1;
 	/** The game tick the books were last kept on, or -1. */
@@ -146,6 +153,9 @@ public final class GoalWatch
 		ownedCost = 0;
 		storageWasOpen = false;
 		shopTick = -1;
+		owned = Owned.decode(load.apply(OWNED_KEY));
+		heldBefore = null;
+		groupWasOpen = false;
 		lastTick = -1;
 		rates.clear();
 		last = View.Activity.NONE;
@@ -350,6 +360,8 @@ public final class GoalWatch
 			carried = null;
 			storageWasOpen = false;
 			shopTick = -1;
+			heldBefore = null;
+			groupWasOpen = false;
 		}
 		lastTick = tickCount;
 		if (inv != null)
@@ -367,7 +379,10 @@ public final class GoalWatch
 			// storage shut, and the bank as last seen already without it: the open storage a tick
 			// ago tells.
 			List<Goal.Reward> bought = bought(carried, now, inInventory, bank, storage || storageWasOpen, atShop);
+			// One you were already seen to own came from somewhere you keep it, not the shop.
+			bought.removeIf(owned::has);
 			storageWasOpen = storage;
+			remember(inv, worn, client);
 			for (Goal.Reward r : bought)
 			{
 				points.bought(r.getCost());
@@ -379,7 +394,7 @@ public final class GoalWatch
 			carried = now;
 		}
 
-		Have have = new Have(inv, worn, bank);
+		Have have = new Have(inv, worn, bank, owned);
 		ownedCost = ownedCost(have);
 		if (activity == View.Activity.NONE)
 		{
@@ -570,23 +585,76 @@ public final class GoalWatch
 		return false;
 	}
 
-	/** Whether an item is carried, worn or in the bank as last seen. */
+	/**
+	 * Remembers the rewards seen carried, worn or in the bank, so one put away in the costume
+	 * room still counts as owned; one that came out of group storage is not remembered.
+	 */
+	private void remember(ItemContainer inv, ItemContainer worn, Client client)
+	{
+		EnumSet<Goal.Reward> inPack = itemRewards(inv);
+		EnumSet<Goal.Reward> held = EnumSet.copyOf(inPack);
+		held.addAll(itemRewards(worn));
+		EnumSet<Goal.Reward> appeared = EnumSet.noneOf(Goal.Reward.class);
+		if (heldBefore != null)
+		{
+			appeared.addAll(inPack);
+			appeared.removeAll(heldBefore);
+		}
+		EnumSet<Goal.Reward> seen = EnumSet.copyOf(held);
+		for (Goal.Reward r : Goal.Reward.values())
+		{
+			if (r.ownedBy(id -> bank.getOrDefault(id, 0) > 0))
+			{
+				seen.add(r);
+			}
+		}
+		boolean group = showing(client, InterfaceID.SharedBank.ITEMS);
+		if (owned.see(seen, appeared, group || groupWasOpen))
+		{
+			save.accept(OWNED_KEY, owned.encode());
+		}
+		groupWasOpen = group;
+		heldBefore = held;
+	}
+
+	/** Every reward with an item among what a container holds. */
+	private static EnumSet<Goal.Reward> itemRewards(ItemContainer c)
+	{
+		EnumSet<Goal.Reward> set = EnumSet.noneOf(Goal.Reward.class);
+		if (c == null)
+		{
+			return set;
+		}
+		for (Goal.Reward r : Goal.Reward.values())
+		{
+			if (r.ownedBy(c::contains))
+			{
+				set.add(r);
+			}
+		}
+		return set;
+	}
+
+	/** Whether an item is carried, worn, in the bank as last seen, or a reward you were seen to own. */
 	static final class Have
 	{
 		private final ItemContainer inv;
 		private final ItemContainer worn;
 		private final Map<Integer, Integer> bank;
+		private final Owned owned;
 
-		Have(ItemContainer inv, ItemContainer worn, Map<Integer, Integer> bank)
+		Have(ItemContainer inv, ItemContainer worn, Map<Integer, Integer> bank, Owned owned)
 		{
 			this.inv = inv;
 			this.worn = worn;
 			this.bank = bank;
+			this.owned = owned;
 		}
 
 		boolean has(int id)
 		{
-			return inv != null && inv.contains(id) || worn != null && worn.contains(id) || bank.getOrDefault(id, 0) > 0;
+			return inv != null && inv.contains(id) || worn != null && worn.contains(id) || bank.getOrDefault(id, 0) > 0
+				|| owned != null && owned.hasItem(id);
 		}
 	}
 
