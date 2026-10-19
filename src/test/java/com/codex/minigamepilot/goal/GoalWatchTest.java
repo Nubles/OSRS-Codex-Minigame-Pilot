@@ -2,6 +2,7 @@ package com.codex.minigamepilot.goal;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import com.codex.minigamepilot.core.Goal;
@@ -23,19 +24,42 @@ public class GoalWatchTest
 	}
 
 	@Test
-	public void aRewardFromNowhereWasBought()
+	public void aRewardFromNowhereAtTheShopWasBought()
 	{
 		Map<Integer, Integer> bank = new HashMap<>();
 		EnumSet<Goal.Reward> none = EnumSet.noneOf(Goal.Reward.class);
 		EnumSet<Goal.Reward> sack = EnumSet.of(Goal.Reward.PLANK_SACK);
-		assertEquals(Collections.singletonList(Goal.Reward.PLANK_SACK), GoalWatch.bought(none, sack, sack, bank, false));
-		// Not on the first tick seen, nor with the bank open.
-		assertTrue(GoalWatch.bought(null, sack, sack, bank, false).isEmpty());
-		assertTrue(GoalWatch.bought(none, sack, sack, bank, true).isEmpty());
+		assertEquals(Collections.singletonList(Goal.Reward.PLANK_SACK), GoalWatch.bought(none, sack, sack, bank, false, true));
+		// Not on the first tick seen, nor with a storage open.
+		assertTrue(GoalWatch.bought(null, sack, sack, bank, false, true).isEmpty());
+		assertTrue(GoalWatch.bought(none, sack, sack, bank, true, true).isEmpty());
 		// Carried or worn a tick ago (taking off the boots), or in the bank as last seen.
-		assertTrue(GoalWatch.bought(sack, sack, sack, bank, false).isEmpty());
+		assertTrue(GoalWatch.bought(sack, sack, sack, bank, false, true).isEmpty());
 		bank.put(24882, 1);
-		assertTrue(GoalWatch.bought(none, sack, sack, bank, false).isEmpty());
+		assertTrue(GoalWatch.bought(none, sack, sack, bank, false, true).isEmpty());
+	}
+
+	@Test
+	public void aRewardTakenOutOfGroupStorageOrTheCostumeRoomIsNotBought()
+	{
+		// The outfit was never in the bank the Pilot saw: it sat in group storage or the costume
+		// room. Away from the reward shop it was only taken out, whatever else is open.
+		Map<Integer, Integer> bank = new HashMap<>();
+		EnumSet<Goal.Reward> none = EnumSet.noneOf(Goal.Reward.class);
+		EnumSet<Goal.Reward> shirt = EnumSet.of(Goal.Reward.CARPENTERS_SHIRT);
+		assertTrue(GoalWatch.bought(none, shirt, shirt, bank, false, false).isEmpty());
+		assertTrue(GoalWatch.bought(none, shirt, shirt, bank, true, false).isEmpty());
+	}
+
+	@Test
+	public void theShopCountsForAFewTicksAfterItCloses()
+	{
+		assertTrue(GoalWatch.atShop(100, 100));
+		assertTrue(GoalWatch.atShop(100, 100 + GoalWatch.SHOP_GRACE));
+		assertFalse(GoalWatch.atShop(100, 101 + GoalWatch.SHOP_GRACE));
+		assertFalse(GoalWatch.atShop(-1, 5));
+		// Logged in again: the tick count started over below the old shop tick.
+		assertFalse(GoalWatch.atShop(1000, 2));
 	}
 
 	@Test

@@ -18,17 +18,21 @@ It is part of the **Codex** suite, alongside [Codex Navigator](https://github.co
 - **The nearest vein on foot.** Distances are walked over the game's own collision map, so a vein around a corner beats one behind a wall. Veins with another player standing at them count as further away. The next vein after this one is quietly outlined too.
 - **Rockfalls and struts.** When the quickest way runs through a rockfall, the step becomes mining it. When both struts are broken and pay-dirt is held up, the step is hammering one.
 - **Either level.** It tells the upper and lower levels apart and sends you to the ladder when what you need is on the other.
+- **What the sack pays.** Every ore the sack hands you is counted and priced at today's Grand Exchange prices, with coins an hour beside your experience. Only what comes out of the sack counts, not ore taken from the bank.
 
 ### Blast Furnace
 - **Coal trips worked out ahead.** At the bank it compares the coal in the furnace, plus a full coal bag, with what a load of ore will burn, and calls a coal trip only when the ore would otherwise sit unsmelted. Steel with a coal bag never needs one, mithril needs one every other ore trip, and runite about one and a half to each ore trip.
 - **The whole round.** Deposit bars, fill the coal bag, withdraw coal or ore (ringed in the bank), load the belt, empty the coal bag and load again, put on ice gloves while the bars smelt, take them, bank. Gold asks for goldsmith gauntlets before the ore goes on the belt.
 - **Coffer watch.** It asks you to top up the coffer before it runs dry, and the panel shows how many minutes of smelting are left.
 - **Any bar.** Iron, steel, mithril, adamantite, runite, gold and silver, picked from the ore you carry, the ore in the furnace or the ore in your bank, or chosen in the settings.
+- **How far your bank goes.** The ore and coal in your bank, with what you carry, the coal bag and the furnace, turned into bars, trips and time at your own trip pace, and which runs out first: "975 runite bars, 92 trips, about 1h 38m. Coal runs out first: 1,060 more would smelt all the ore".
 
 ### Mahogany Homes
 - **From contract to points.** Which contractor to ask and for which tier, the planks and steel bars to bring (counted from the job's own furniture, plank sack included), the way to the client's house with a hint arrow and a world map marker, the teleport you carry that gets there quickest, then each piece of furniture in walking order.
 - **Floor by floor.** When the rest of the work, or the client, is upstairs, the step is the ladder.
 - **A checklist.** Every piece of furniture with what it needs (repair, remove, build) and what it costs, ticked off as you go.
+- **What a contract costs you.** Each contract you finish is measured: the Construction experience it gave (any outfit bonus included), the planks and steel the job took, and the whole loop's time. Priced at today's Grand Exchange prices, the tiers you have done are ranked by coins per experience point, with experience an hour, so you can see whether expert contracts are worth their mahogany. Nothing is guessed: a tier is ranked once you have finished one, and a job first seen half done is not measured.
+- **Planks in the bank.** Your tier's planks and steel bars in the bank, carried and in the plank sack, counted in contracts at what your own contracts take, and in time: "Mahogany planks for about 24 contracts, 1h 48m". Away from the minigames the Mahogany Homes card says the same.
 
 <p align="center">
   <img src="docs/screenshots/motherlode-sack.png" width="225" alt="Emptying the sack">
@@ -73,7 +77,7 @@ Each minigame works toward something, chosen in the settings: a reward from its 
 
 Pieces you already own are ticked off wherever they are: carried, worn, or in your bank as it was the last time you opened it. Nuggets in the bank count toward the total. Your Mahogany Homes points are read from the message after each contract. The card shows how much is left, what that comes to in contracts and time at the pace you have kept this session, and lights any piece you can already pay for. Once every reward is owned, the goal moves to the next level. Away from the minigames, the panel lists every goal at once.
 
-Whether that message's total is what you can spend or everything you have ever earned, the Pilot works out as you play rather than guessing. A total that drops can only be a balance; so can a total smaller than what the rewards you own cost. Buy a reward between two contracts and the next total settles it: a balance falls by the price, a lifetime total keeps climbing by a contract's few points. A reward that turns up in your pack from nowhere you had it (not carried, worn or in the bank a moment ago) counts as bought. Until it is settled, the card takes the lower of the two readings, so it never lights a reward you cannot afford yet.
+Whether that message's total is what you can spend or everything you have ever earned, the Pilot works out as you play rather than guessing. A total that drops can only be a balance; so can a total smaller than what the rewards you own cost. Buy a reward between two contracts and the next total settles it: a balance falls by the price, a lifetime total keeps climbing by a contract's few points. A reward counts as bought only when it turns up in your pack at the reward shop, from nowhere you had it (not carried, worn or in the bank a moment ago). A carpenter's piece taken out of group storage or your house's costume room is not a purchase. Until it is settled, the card takes the lower of the two readings, so it never lights a reward you cannot afford yet.
 
 **With Codex Navigator.** If you use [Codex Navigator](https://github.com/Nubles/OSRS-Codex-Navigator), a level goal the Pilot picks (the Blast Furnace level left at 0, or Next level and Next reward once the rewards are owned) follows the level your pinned goals need: your focus goal's first, otherwise the nearest one up. The card says which goal it is for, such as "Dragon Slayer II needs Smithing 70". Without Navigator nothing changes.
 
@@ -90,6 +94,10 @@ At the furnace the panel ranks every bar by what it makes at today's Grand Excha
 <p align="center">
   <img src="docs/screenshots/what-pays.png" width="225" alt="What each bar pays">
 </p>
+
+## Your bank, and Codex Bank Steward
+
+The supply counts come from the bank as the Pilot last saw it. If you use [Codex Bank Steward](https://github.com/Nubles/OSRS-Codex-Bank-Steward), its shared snapshot of your bank is read too, so the counts are there from the first login, before you open the bank; the newer of the two is used, and the card says which and how long ago. Without Bank Steward nothing changes. Potions and other items the minigames do not burn are not kept.
 
 ## Field notes
 

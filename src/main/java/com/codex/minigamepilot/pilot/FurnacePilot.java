@@ -1,10 +1,12 @@
 package com.codex.minigamepilot.pilot;
 
+import com.codex.minigamepilot.core.BankStock;
 import com.codex.minigamepilot.core.Bar;
 import com.codex.minigamepilot.core.BarPick;
 import com.codex.minigamepilot.core.FurnaceCycle;
 import com.codex.minigamepilot.core.ItemIds;
 import com.codex.minigamepilot.core.Step;
+import com.codex.minigamepilot.core.Supplies;
 import com.codex.minigamepilot.ui.Theme;
 import com.codex.minigamepilot.ui.View;
 import java.util.ArrayList;
@@ -203,6 +205,43 @@ public final class FurnacePilot
 		setup.tripSeconds = tripSeconds;
 		setup.goldsmith = s != null && (s.goldsmithWorn || s.goldsmithCarried);
 		return card(BarPick.rank(price, setup), last, tripSeconds, setup.level);
+	}
+
+	/**
+	 * How far the bar's ore and the coal you have go: in the bank (as last seen by the Pilot or
+	 * Bank Steward), carried, in the coal bag and waiting in the furnace. Null before any bank is seen.
+	 *
+	 * @param tripSeconds your usual trip this session, or 0 before one is timed
+	 */
+	View.Supply supply(BankStock stock, double tripSeconds, long now)
+	{
+		FurnaceCycle.Snapshot s = lastState instanceof FurnaceCycle.Snapshot ? (FurnaceCycle.Snapshot) lastState : null;
+		if (stock == null || s == null)
+		{
+			return null;
+		}
+		Bar bar = s.bar;
+		long ore = stock.count(bar.getOre()) + s.ore + s.furnaceOre;
+		long coal = stock.count(Bar.COAL) + s.coal + Math.max(0, s.bagCoal) + s.furnaceCoal;
+		Supplies.Furnace f = Supplies.furnace(bar, ore, coal, FurnaceCycle.load(s), s.coalBag ? s.bagCapacity : 0, tripSeconds);
+		List<View.Line> lines = new ArrayList<>();
+		String oreName = Character.toUpperCase(bar.oreName().charAt(0)) + bar.oreName().substring(1);
+		lines.add(new View.Line(oreName, Session.format(ore), ore > 0 ? View.Line.Mark.TODO : View.Line.Mark.IDLE));
+		if (bar.getCoal() > 0)
+		{
+			lines.add(new View.Line("Coal", Session.format(coal), coal > 0 ? View.Line.Mark.TODO : View.Line.Mark.IDLE));
+		}
+		String detail = f.limit();
+		if (detail != null && tripSeconds <= 0 && f.getBars() > 0)
+		{
+			detail += ". Time a few trips and this turns into time";
+		}
+		else if (detail == null && tripSeconds <= 0 && f.getBars() > 0)
+		{
+			detail = "Time a few trips and this turns into time";
+		}
+		return new View.Supply(bar.getName(), lines, f.headline(), detail, f.isCoalShort() || f.getBars() == 0,
+			HomesPilot.seenNote(stock, now));
 	}
 
 	/** The ranking as the panel shows it. */

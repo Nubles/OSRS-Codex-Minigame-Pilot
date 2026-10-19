@@ -98,7 +98,7 @@ public class PilotPanel extends PluginPanel
 
 		if (v.pick != null && !v.pick.picks.isEmpty())
 		{
-			body.add(new SectionHeader("What pays", v.pick.trailing));
+			body.add(new SectionHeader(v.pick.title, v.pick.trailing));
 			Card card = new Card(new BorderLayout(0, 4));
 			StackPanel rows = new StackPanel(2, 0);
 			for (View.Pick p : v.pick.picks)
@@ -107,6 +107,34 @@ public class PilotPanel extends PluginPanel
 			}
 			card.add(rows, BorderLayout.CENTER);
 			card.add(Ui.wrapped(v.pick.note, Theme.small(), Theme.TEXT_FAINT, WIDTH - 30), BorderLayout.SOUTH);
+			body.add(card);
+		}
+
+		if (v.supply != null && !v.supply.lines.isEmpty())
+		{
+			body.add(new SectionHeader("In the bank", v.supply.trailing));
+			Card card = new Card(new BorderLayout());
+			card.accent(v.supply.warn ? Theme.EMBER : Theme.TEAL);
+			StackPanel stack = new StackPanel(4, 0);
+			StackPanel lines = new StackPanel(1, 0);
+			for (View.Line line : v.supply.lines)
+			{
+				lines.add(new LineRow(line));
+			}
+			stack.add(lines);
+			if (v.supply.headline != null)
+			{
+				stack.add(Ui.wrapped(v.supply.headline, Theme.small(), Theme.TEXT, WIDTH - 30));
+			}
+			if (v.supply.detail != null)
+			{
+				stack.add(Ui.wrapped(v.supply.detail, Theme.small(), v.supply.warn ? Theme.EMBER : Theme.TEXT_MUTED, WIDTH - 30));
+			}
+			if (v.supply.note != null)
+			{
+				stack.add(Ui.wrapped(v.supply.note, Theme.small(), Theme.TEXT_FAINT, WIDTH - 30));
+			}
+			card.add(stack, BorderLayout.CENTER);
 			body.add(card);
 		}
 

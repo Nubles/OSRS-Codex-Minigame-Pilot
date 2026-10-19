@@ -22,8 +22,10 @@ import net.runelite.api.Client;
 import net.runelite.api.Item;
 import net.runelite.api.ItemContainer;
 import net.runelite.api.Skill;
+import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.gameval.InventoryID;
 import net.runelite.api.gameval.VarbitID;
+import net.runelite.api.widgets.Widget;
 
 /**
  * Keeps the goals planner's books: the nuggets and reward pieces in your bank (seen whenever it
@@ -44,6 +46,8 @@ public final class GoalWatch
 	/** Time in a minigame before an hourly rate is trusted. */
 	private static final int RATE_TICKS = 300;
 	private static final double TICK_HOURS = 0.6 / 3600;
+	/** Ticks after the reward shop closes in which a reward turning up still counts as bought. */
+	static final int SHOP_GRACE = 3;
 
 	/** The settings that decide what each minigame works toward. */
 	public static final class Choices
@@ -87,7 +91,9 @@ public final class GoalWatch
 	private EnumSet<Goal.Reward> carried;
 	/** What the points rewards you own cost, as of the last tick. */
 	private long ownedCost;
-	private boolean bankWasOpen;
+	private boolean storageWasOpen;
+	/** The game tick the contract reward shop was last seen open, or -1. */
+	private int shopTick = -1;
 	/** The game tick the books were last kept on, or -1. */
 	private int lastTick = -1;
 	private View.Activity last = View.Activity.NONE;
@@ -138,7 +144,8 @@ public final class GoalWatch
 		}
 		carried = null;
 		ownedCost = 0;
-		bankWasOpen = false;
+		storageWasOpen = false;
+		shopTick = -1;
 		lastTick = -1;
 		rates.clear();
 		last = View.Activity.NONE;
@@ -221,18 +228,21 @@ public final class GoalWatch
 	}
 
 	/**
-	 * The points rewards that turned up carried since the last tick from nowhere you had them:
-	 * not carried or worn a tick ago, not in the bank as last seen, and not with the bank open
-	 * (taking one out of a bank that changed since it was last seen is not buying it). Those
-	 * were just bought from Amy.
+	 * The points rewards that turned up carried since the last tick, at the reward shop, from
+	 * nowhere you had them: not carried or worn a tick ago and not in the bank as last seen.
+	 * Those were just bought. Anything that turns up away from the shop, or while a bank, group
+	 * storage or your house's costume room is open, was only taken out of storage, even when the
+	 * Pilot never saw it go in.
 	 *
 	 * @param before points rewards carried or worn on the last tick, or null when not seen yet
+	 * @param storageOpen a bank, group storage or costume room open on this tick or the last
+	 * @param atShop the contract reward shop open on this tick or one of the last few
 	 */
 	static List<Goal.Reward> bought(EnumSet<Goal.Reward> before, EnumSet<Goal.Reward> now, EnumSet<Goal.Reward> inInventory,
-		Map<Integer, Integer> bank, boolean bankOpen)
+		Map<Integer, Integer> bank, boolean storageOpen, boolean atShop)
 	{
 		List<Goal.Reward> out = new ArrayList<>();
-		if (before == null || bankOpen)
+		if (before == null || storageOpen || !atShop)
 		{
 			return out;
 		}
@@ -244,6 +254,30 @@ public final class GoalWatch
 			}
 		}
 		return out;
+	}
+
+	/**
+	 * Whether the reward shop was open on this tick or one of the last few. A shop tick from
+	 * before the tick count started over (logging in again) is not recent.
+	 */
+	static boolean atShop(int shopTick, int tickCount)
+	{
+		return shopTick >= 0 && tickCount >= shopTick && tickCount - shopTick <= SHOP_GRACE;
+	}
+
+	/** Whether an interface component is open and showing. */
+	private static boolean showing(Client client, int component)
+	{
+		Widget w = client.getWidget(component);
+		return w != null && !w.isHidden();
+	}
+
+	/** A bank, group storage or the costume room in your house: places a reward can come out of. */
+	static boolean storageOpen(Client client)
+	{
+		return com.codex.minigamepilot.pilot.FurnacePilot.bankOpen(client)
+			|| showing(client, InterfaceID.SharedBank.ITEMS)
+			|| showing(client, InterfaceID.PohCostumes.ITEMS);
 	}
 
 	/** The points rewards among what a container holds. */
@@ -314,7 +348,8 @@ public final class GoalWatch
 		{
 			// Ticks went by unwatched (goals hidden, say): what was carried then tells nothing now.
 			carried = null;
-			bankWasOpen = false;
+			storageWasOpen = false;
+			shopTick = -1;
 		}
 		lastTick = tickCount;
 		if (inv != null)
@@ -322,11 +357,17 @@ public final class GoalWatch
 			EnumSet<Goal.Reward> inInventory = pointsRewards(inv);
 			EnumSet<Goal.Reward> now = EnumSet.copyOf(inInventory);
 			now.addAll(pointsRewards(worn));
-			boolean bankOpen = com.codex.minigamepilot.pilot.FurnacePilot.bankOpen(client);
-			// Taking a reward out and closing the bank on one tick shows it carried with the bank
-			// shut, and the bank as last seen already without it: the open bank a tick ago tells.
-			List<Goal.Reward> bought = bought(carried, now, inInventory, bank, bankOpen || bankWasOpen);
-			bankWasOpen = bankOpen;
+			boolean storage = storageOpen(client);
+			if (showing(client, InterfaceID.ConstructionContractShop.UNIVERSE))
+			{
+				shopTick = tickCount;
+			}
+			boolean atShop = atShop(shopTick, tickCount);
+			// Taking a reward out and closing the storage on one tick shows it carried with the
+			// storage shut, and the bank as last seen already without it: the open storage a tick
+			// ago tells.
+			List<Goal.Reward> bought = bought(carried, now, inInventory, bank, storage || storageWasOpen, atShop);
+			storageWasOpen = storage;
 			for (Goal.Reward r : bought)
 			{
 				points.bought(r.getCost());

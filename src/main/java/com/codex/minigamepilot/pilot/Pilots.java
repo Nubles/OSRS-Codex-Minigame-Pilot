@@ -1,5 +1,6 @@
 package com.codex.minigamepilot.pilot;
 
+import com.codex.minigamepilot.core.BankStock;
 import com.codex.minigamepilot.core.Bar;
 import com.codex.minigamepilot.core.Contract;
 import com.codex.minigamepilot.core.Pace;
@@ -11,6 +12,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.IntUnaryOperator;
+import java.util.function.Supplier;
 import net.runelite.api.Client;
 import net.runelite.api.GameObject;
 import net.runelite.api.NPC;
@@ -28,21 +30,28 @@ public final class Pilots
 	private final Coach coach;
 	private final Recorder recorder;
 	private final IntUnaryOperator price;
+	private final Supplier<BankStock> stock;
 	private View.Activity last = View.Activity.NONE;
 
 	/**
 	 * @param loadBests the pace coach's saved bests for a minigame
 	 * @param saveBests saves them again when a round beats one
+	 * @param load reads a key of this account's saved settings
+	 * @param saveKey writes one
+	 * @param stock the supplies in your bank as last seen, or null when no bank has been seen
 	 */
 	public Pilots(Client client, Contract saved, Consumer<Contract> save, FieldNotes notes,
-		Function<View.Activity, String> loadBests, BiConsumer<View.Activity, String> saveBests, IntUnaryOperator price)
+		Function<View.Activity, String> loadBests, BiConsumer<View.Activity, String> saveBests, IntUnaryOperator price,
+		Function<String, String> load, BiConsumer<String, String> saveKey, Supplier<BankStock> stock)
 	{
 		this.client = client;
 		this.price = price;
+		this.stock = stock;
+		motherlode.setPrice(price);
 		this.coach = new Coach(loadBests, saveBests);
 		this.recorder = new Recorder(notes);
 		this.scene = new SceneIndex(client, id -> MotherlodePilot.isWatched(id) || FurnacePilot.isWatched(id) || HomesPilot.isWatched(id));
-		this.homes = new HomesPilot(saved, save);
+		this.homes = new HomesPilot(saved, save, load, saveKey);
 	}
 
 	public SceneIndex scene()
@@ -58,6 +67,7 @@ public final class Pilots
 	public void loadContract(Contract saved)
 	{
 		homes.load(saved);
+		homes.reloadBook();
 		coach.reload();
 	}
 
@@ -168,11 +178,24 @@ public final class Pilots
 			}
 			last = activity;
 		}
+		homes.settle(client.getSkillExperience(net.runelite.api.Skill.CONSTRUCTION));
 		Pace.Round round = coach.tick(client, flight, units, kind);
 		coach.decorate(flight.view, activity);
-		if (activity == View.Activity.FURNACE && price != null)
+		BankStock banked = stock == null ? null : stock.get();
+		if (activity == View.Activity.FURNACE)
 		{
-			flight.view.pick(furnace.pick(client, price, typicalTicks(coach.pace(View.Activity.FURNACE)) * 0.6));
+			double tripSeconds = typicalTicks(coach.pace(View.Activity.FURNACE)) * 0.6;
+			if (price != null)
+			{
+				flight.view.pick(furnace.pick(client, price, tripSeconds));
+			}
+			flight.view.supply(furnace.supply(banked, tripSeconds, now));
+		}
+		else if (activity == View.Activity.HOMES)
+		{
+			int level = client.getRealSkillLevel(net.runelite.api.Skill.CONSTRUCTION);
+			flight.view.pick(homes.costs(price, level));
+			flight.view.supply(homes.supply(banked, level, now));
 		}
 		recorder.tick(client, scene, flight, state, round);
 		return flight;
@@ -201,7 +224,7 @@ public final class Pilots
 	public View idleView()
 	{
 		View v = new View(true, View.Activity.NONE, null, null, null, -1);
-		v.brief(homes.brief());
+		v.brief(homes.brief(stock == null ? null : stock.get(), client.getRealSkillLevel(net.runelite.api.Skill.CONSTRUCTION)));
 		v.brief(motherlode.brief());
 		v.brief(furnace.brief());
 		return v;

@@ -37,6 +37,9 @@ public final class MotherlodePilot
 	private int lastSack = -1;
 	private int collected;
 	private int sacks;
+	private final com.codex.minigamepilot.core.OreHaul haul = new com.codex.minigamepilot.core.OreHaul();
+	/** Grand Exchange prices, or null when not set. */
+	private java.util.function.IntUnaryOperator price;
 	private boolean wasEmptying;
 	/** The last snapshot planned from, for the field notes. */
 	Object lastState;
@@ -76,6 +79,12 @@ public final class MotherlodePilot
 	{
 		cycle.reset();
 		lastSack = -1;
+		haul.forget();
+	}
+
+	void setPrice(java.util.function.IntUnaryOperator price)
+	{
+		this.price = price;
 	}
 
 	/** Brief for the panel when the player is elsewhere. */
@@ -107,11 +116,18 @@ public final class MotherlodePilot
 		TileObject hopper = first(scene.get(ObjectID.MOTHERLODE_HOPPER));
 		boolean nearHopper = hopper != null && client.getLocalPlayer().getWorldLocation().distanceTo(hopper.getWorldLocation()) <= 2;
 		cycle.observe(s.payDirt, s.sack, nearHopper, s.brokenStruts >= 2);
-		if (lastSack >= 0 && s.sack < lastSack)
+		boolean paidOut = lastSack >= 0 && s.sack < lastSack;
+		if (paidOut)
 		{
 			collected += lastSack - s.sack;
 		}
 		lastSack = s.sack;
+		int[] ores = new int[com.codex.minigamepilot.core.OreHaul.ORES.length];
+		for (int i = 0; i < ores.length; i++)
+		{
+			ores[i] = pack.count(com.codex.minigamepilot.core.OreHaul.ORES[i]);
+		}
+		haul.observe(ores, paidOut);
 
 		Step step = cycle.next(s);
 		if (wasEmptying && !cycle.isEmptying())
@@ -183,6 +199,12 @@ public final class MotherlodePilot
 		int xp = session.xp(client);
 		view.stat(new View.Stat(Session.format(xp), "Mining xp", session.perHour(xp, now), Theme.GREEN));
 		view.stat(new View.Stat(session.elapsed(now), "Time", "In the mine", Theme.TEXT_MUTED));
+		long worth = price == null ? 0 : haul.worth(price);
+		if (worth > 0)
+		{
+			String rate = session.perHour(worth, now);
+			view.stat(new View.Stat(Session.format(worth), "Ore worth", rate.isEmpty() ? "Grand Exchange prices" : rate, Theme.GOLD_BRIGHT));
+		}
 
 		Flight flight = new Flight(View.Activity.MOTHERLODE, step, view).to(way);
 		if (step.getTarget() == Step.Target.VEIN && way != null)

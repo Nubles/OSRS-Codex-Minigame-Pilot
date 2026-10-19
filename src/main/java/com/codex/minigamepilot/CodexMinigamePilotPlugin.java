@@ -1,5 +1,6 @@
 package com.codex.minigamepilot;
 
+import com.codex.minigamepilot.core.BankStock;
 import com.codex.minigamepilot.core.Bar;
 import com.codex.minigamepilot.core.Goals;
 import com.codex.minigamepilot.core.NavigatorGoals;
@@ -119,6 +120,12 @@ public class CodexMinigamePilotPlugin extends Plugin
 	private GoalWatch goals;
 	private String navigatorJson;
 	private NavigatorGoals.Board navigatorBoard;
+	/** Where the Pilot keeps its own look at the bank's supplies. */
+	static final String STOCK_KEY = "stock.bank";
+	/** The supplies in the bank as the Pilot last saw them, or null. */
+	private BankStock ownStock;
+	private String stewardJson;
+	private BankStock stewardStock;
 
 	@Provides
 	CodexMinigamePilotConfig provideConfig(ConfigManager configManager)
@@ -134,7 +141,11 @@ public class CodexMinigamePilotPlugin extends Plugin
 		{
 			notes.open(VERSION);
 		}
-		pilots = new Pilots(client, loadContract(), this::saveContract, notes, this::loadBests, this::saveBests, id -> (int) Math.min(Integer.MAX_VALUE, itemManager.getItemPrice(id)));
+		pilots = new Pilots(client, loadContract(), this::saveContract, notes, this::loadBests, this::saveBests,
+			id -> (int) Math.min(Integer.MAX_VALUE, itemManager.getItemPrice(id)),
+			key -> configManager.getRSProfileConfiguration(CodexMinigamePilotConfig.GROUP, key),
+			(key, value) -> configManager.setRSProfileConfiguration(CodexMinigamePilotConfig.GROUP, key, value),
+			this::bankStock);
 		goals = new GoalWatch(key -> configManager.getRSProfileConfiguration(CodexMinigamePilotConfig.GROUP, key),
 			(key, value) -> configManager.setRSProfileConfiguration(CodexMinigamePilotConfig.GROUP, key, value),
 			this::navigatorBoard);
@@ -160,6 +171,8 @@ public class CodexMinigamePilotPlugin extends Plugin
 			{
 				pilots.rescan();
 				goals.reload();
+				pilots.loadContract(loadContract());
+				loadStock();
 			}
 			publish();
 		});
@@ -217,9 +230,13 @@ public class CodexMinigamePilotPlugin extends Plugin
 	@Subscribe
 	public void onItemContainerChanged(ItemContainerChanged event)
 	{
-		if (event.getContainerId() == InventoryID.BANK && goals != null)
+		if (event.getContainerId() == InventoryID.BANK)
 		{
-			goals.bank(event.getItemContainer());
+			if (goals != null)
+			{
+				goals.bank(event.getItemContainer());
+			}
+			seeBank(event.getItemContainer());
 			return;
 		}
 		if (event.getContainerId() != InventoryID.INV || pilots == null)
@@ -278,6 +295,59 @@ public class CodexMinigamePilotPlugin extends Plugin
 		{
 			goals.reload();
 		}
+		loadStock();
+	}
+
+	/** This account's saved look at the bank, after logging in or switching account. */
+	private void loadStock()
+	{
+		ownStock = BankStock.decode(configManager.getRSProfileConfiguration(CodexMinigamePilotConfig.GROUP, STOCK_KEY));
+		stewardJson = null;
+		stewardStock = null;
+	}
+
+	/** The bank changed while open: keep its supplies, saved only when they change. */
+	private void seeBank(ItemContainer container)
+	{
+		if (container == null)
+		{
+			return;
+		}
+		Map<Integer, Long> counts = new HashMap<>();
+		for (Item item : container.getItems())
+		{
+			if (item.getId() > 0 && item.getQuantity() > 0 && BankStock.isSupply(item.getId()))
+			{
+				counts.merge(item.getId(), (long) item.getQuantity(), Long::sum);
+			}
+		}
+		BankStock seen = BankStock.seen(counts, System.currentTimeMillis());
+		if (!seen.sameItems(ownStock))
+		{
+			configManager.setRSProfileConfiguration(CodexMinigamePilotConfig.GROUP, STOCK_KEY, seen.encode());
+		}
+		ownStock = seen;
+	}
+
+	/**
+	 * The supplies in the bank: the Pilot's own look or Codex Bank Steward's shared snapshot,
+	 * whichever is newer, or null when neither has seen the bank. Bank Steward's is parsed again
+	 * only when it changes.
+	 */
+	private BankStock bankStock()
+	{
+		String json = configManager.getRSProfileConfiguration(BankStock.STEWARD_GROUP, BankStock.STEWARD_KEY);
+		if (json == null || json.isEmpty())
+		{
+			stewardJson = null;
+			stewardStock = null;
+		}
+		else if (!json.equals(stewardJson))
+		{
+			stewardJson = json;
+			stewardStock = BankStock.steward(gson, json);
+		}
+		return BankStock.newest(ownStock, stewardStock);
 	}
 
 	@Subscribe

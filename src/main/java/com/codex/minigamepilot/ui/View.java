@@ -226,18 +226,50 @@ public final class View
 		}
 	}
 
-	/** What each bar pays at today's prices, best first. */
+	/** A ranking at today's prices, best first: what each bar pays, or what each contract tier costs. */
 	public static final class PickCard
 	{
+		final String title;
 		final String trailing;
 		final String note;
 		final List<Pick> picks;
 
 		public PickCard(String trailing, String note, List<Pick> picks)
 		{
+			this("What pays", trailing, note, picks);
+		}
+
+		public PickCard(String title, String trailing, String note, List<Pick> picks)
+		{
+			this.title = title;
 			this.trailing = trailing;
 			this.note = note;
 			this.picks = picks == null ? Collections.emptyList() : picks;
+		}
+	}
+
+	/**
+	 * How far the supplies in your bank go: each supply and how many you have, what they come to
+	 * in a sentence, what runs out first, and where and when the bank was seen.
+	 */
+	public static final class Supply
+	{
+		final String trailing;
+		final List<Line> lines;
+		final String headline;
+		final String detail;
+		/** True when the detail is a shortfall, drawn in ember. */
+		final boolean warn;
+		final String note;
+
+		public Supply(String trailing, List<Line> lines, String headline, String detail, boolean warn, String note)
+		{
+			this.trailing = trailing;
+			this.lines = lines == null ? Collections.emptyList() : lines;
+			this.headline = headline;
+			this.detail = detail;
+			this.warn = warn;
+			this.note = note;
 		}
 	}
 
@@ -256,6 +288,7 @@ public final class View
 	PaceCard pace;
 	final List<GoalCard> goals = new ArrayList<>();
 	PickCard pick;
+	Supply supply;
 
 	/**
 	 * @param place where, such as "Falador" or "Lower level", or null
@@ -272,9 +305,17 @@ public final class View
 		this.loopAt = loopAt;
 	}
 
+	/** Logged out: what the Pilot does at each minigame, for a first look before logging in. */
 	public static View loggedOut()
 	{
-		return new View(false, Activity.NONE, null, null, null, -1);
+		View v = new View(false, Activity.NONE, null, null, null, -1);
+		v.brief(new Brief(Activity.MOTHERLODE, null,
+			"Each load sized to fill the sack, the nearest free vein on foot, and rockfalls and struts dealt with on the way."));
+		v.brief(new Brief(Activity.FURNACE, null,
+			"Coal trips worked out ahead, the whole round in order, the coffer watched, and what each bar pays."));
+		v.brief(new Brief(Activity.HOMES, null,
+			"The planks to bring, the way to the client, each piece of furniture in walking order, and what a contract costs you."));
+		return v;
 	}
 
 	public int loopAt()
@@ -291,6 +332,12 @@ public final class View
 	public View pick(PickCard p)
 	{
 		pick = p;
+		return this;
+	}
+
+	public View supply(Supply s)
+	{
+		supply = s;
 		return this;
 	}
 
@@ -366,10 +413,18 @@ public final class View
 		}
 		if (pick != null)
 		{
-			b.append("|pick").append(pick.trailing).append(pick.note);
+			b.append("|pick").append(pick.title).append(pick.trailing).append(pick.note);
 			for (Pick p : pick.picks)
 			{
 				b.append(p.name).append(p.figure).append(p.detail).append(p.current);
+			}
+		}
+		if (supply != null)
+		{
+			b.append("|supply").append(supply.trailing).append(supply.headline).append(supply.detail).append(supply.note);
+			for (Line l : supply.lines)
+			{
+				b.append(l.text).append(l.trailing).append(l.mark);
 			}
 		}
 		return b.toString();
