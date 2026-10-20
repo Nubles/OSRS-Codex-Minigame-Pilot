@@ -23,7 +23,6 @@ import com.codex.minigamepilot.pilot.LoginSettle;
 import com.google.gson.Gson;
 import com.google.inject.Provides;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import javax.inject.Inject;
@@ -47,7 +46,6 @@ import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.api.events.WallObjectDespawned;
 import net.runelite.api.events.WallObjectSpawned;
 import net.runelite.api.gameval.InventoryID;
-import net.runelite.client.RuneLite;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.chat.ChatColorType;
 import net.runelite.client.chat.ChatMessageBuilder;
@@ -69,6 +67,8 @@ import net.runelite.client.util.Text;
 
 @PluginDescriptor(
 	name = "Codex Minigame Pilot",
+	internalName = "codex-minigame-pilot",
+	legacyDataDirectory = "codex-minigame-pilot",
 	description = "One clear next step for Motherlode Mine, Blast Furnace and Mahogany Homes: what to click, the path there, and why",
 	tags = {"motherlode", "mlm", "blast furnace", "mahogany homes", "construction", "mining", "smithing", "guide", "codex"}
 )
@@ -151,7 +151,7 @@ public class CodexMinigamePilotPlugin extends Plugin
 	@Override
 	protected void startUp()
 	{
-		notes = new FieldNotes(new File(RuneLite.RUNELITE_DIR, "codex-minigame-pilot"), gson);
+		notes = new FieldNotes(this::getPluginDirectory, gson);
 		if (config.fieldNotes())
 		{
 			notes.open(VERSION);

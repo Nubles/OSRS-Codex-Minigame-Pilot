@@ -267,7 +267,7 @@ public interface CodexMinigamePilotConfig extends Config
 	@ConfigItem(
 		keyName = "fieldNotes",
 		name = "Keep field notes",
-		description = "While in a minigame, write what the Pilot sees and decides to .runelite/codex-minigame-pilot on your computer, for checking its guidance; nothing is sent anywhere",
+		description = "While in a minigame, write what the Pilot sees and decides to .runelite/plugin-data/codex-minigame-pilot on your computer, for checking its guidance; nothing is sent anywhere",
 		section = NOTES,
 		position = 0
 	)

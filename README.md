@@ -117,7 +117,7 @@ Your bank's goal items and supplies as last seen, your Mahogany Homes points, th
 
 ## Field notes
 
-An optional setting, **Keep field notes**, writes a plain record of what the Pilot saw and decided to `.runelite/codex-minigame-pilot/` while you are in a minigame: each step it chose, any target it could not find, the minigame's varbits, game messages, your clicks, objects and characters nearby (with whether the Pilot was tracking them), and each timed round. It is for checking the guidance against real play. It is off unless you turn it on, it stays on your computer, and nothing is sent anywhere.
+An optional setting, **Keep field notes**, writes a plain record of what the Pilot saw and decided to the plugin's own data folder, `.runelite/plugin-data/codex-minigame-pilot/`, while you are in a minigame: each step it chose, any target it could not find, the minigame's varbits, game messages, your clicks, objects and characters nearby (with whether the Pilot was tracking them), and each timed round. It is for checking the guidance against real play. It is off unless you turn it on, it stays on your computer, and nothing is sent anywhere.
 
 ## Rules posture
 

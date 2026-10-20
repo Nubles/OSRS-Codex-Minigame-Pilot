@@ -3,22 +3,21 @@ package com.codex.minigamepilot.pilot;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import net.runelite.client.util.Filepath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Field notes: an optional, local record of what the Pilot saw and decided, one JSON object a
- * line, written to .runelite/codex-minigame-pilot. It exists so the guidance can be checked
+ * line, written to the plugin's own data folder (.runelite/plugin-data/codex-minigame-pilot)
+ * through RuneLite's Filepath, which keeps every write inside that folder. It exists so the guidance can be checked
  * against a real session: which objects and varbits the game showed, which step was chosen,
  * where a target could not be found, and how each round went. Nothing is sent anywhere.
  */
@@ -28,7 +27,8 @@ public final class FieldNotes
 	/** A notes file stops growing past this, so a forgotten setting cannot fill a disk. */
 	private static final long LIMIT = 25L * 1024 * 1024;
 
-	private final File dir;
+	/** The plugin's data folder, looked up only when notes are first opened. */
+	private final Callable<Filepath> dir;
 	private final Gson gson;
 	private final ExecutorService writer = Executors.newSingleThreadExecutor(r ->
 	{
@@ -37,11 +37,11 @@ public final class FieldNotes
 		return t;
 	});
 	private BufferedWriter out;
-	private File file;
+	private Filepath file;
 	private long written;
 	private volatile boolean active;
 
-	public FieldNotes(File dir, Gson gson)
+	public FieldNotes(Callable<Filepath> dir, Gson gson)
 	{
 		this.dir = dir;
 		this.gson = gson;
@@ -56,14 +56,14 @@ public final class FieldNotes
 		}
 		active = true;
 		String name = "field-notes-" + new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date()) + ".jsonl";
-		File target = new File(dir, name);
 		writer.execute(() ->
 		{
 			try
 			{
-				Files.createDirectories(dir.toPath());
-				BufferedWriter w = new BufferedWriter(new OutputStreamWriter(
-					Files.newOutputStream(target.toPath(), StandardOpenOption.CREATE, StandardOpenOption.APPEND), StandardCharsets.UTF_8));
+				Filepath folder = dir.call();
+				folder.createDirectories();
+				Filepath target = folder.joinSegment(name);
+				BufferedWriter w = target.openBufferedWriter(StandardOpenOption.CREATE, StandardOpenOption.APPEND);
 				synchronized (this)
 				{
 					out = w;
@@ -71,9 +71,9 @@ public final class FieldNotes
 					written = 0;
 				}
 			}
-			catch (IOException e)
+			catch (Exception e)
 			{
-				log.warn("Could not open field notes at {}", target, e);
+				log.warn("Could not open field notes {}", name, e);
 			}
 		});
 		JsonObject start = new JsonObject();
@@ -89,7 +89,7 @@ public final class FieldNotes
 	}
 
 	/** The file being written, once it is open, or null. */
-	public synchronized File file()
+	public synchronized Filepath file()
 	{
 		return file;
 	}
