@@ -128,4 +128,22 @@ public class MotherlodeCycleTest
 		assertEquals("still on its way, and no deposit counted twice", 27, c.getInFlight());
 		assertEquals(27, c.getDeposited());
 	}
+
+	@Test
+	public void keepsEmptyingASackThatWasNotFull()
+	{
+		MotherlodeCycle c = new MotherlodeCycle();
+		// 80 in a sack with room to spare: the player searches it anyway.
+		c.observe(0, 80, false, false);
+		c.observe(0, 53, false, false);
+		assertTrue(c.isEmptying());
+		// Banked the 27 taken: back to the sack, not off to mine.
+		Step s = c.next(snap(0, 28, 0, 53));
+		assertEquals(Step.Target.SACK, s.getTarget());
+		c.observe(0, 26, false, false);
+		c.observe(0, 0, false, false);
+		assertEquals(Step.Target.BANK, c.next(snap(0, 1, 27, 0)).getTarget());
+		assertEquals(Step.Target.VEIN, c.next(snap(0, 28, 0, 0)).getTarget());
+		assertFalse(c.isEmptying());
+	}
 }
