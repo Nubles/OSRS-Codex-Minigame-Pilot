@@ -188,8 +188,10 @@ public final class MotherlodePilot
 		s.brokenStruts = struts.size();
 		s.hammer = pack.carries(ItemIds.HAMMER, ItemIds.IMCANDO_HAMMER) || pack.wears(ItemIds.IMCANDO_HAMMER_OFFHAND, ItemIds.IMCANDO_HAMMER);
 
-		TileObject hopper = first(scene.get(ObjectID.MOTHERLODE_HOPPER));
-		boolean nearHopper = hopper != null && client.getLocalPlayer().getWorldLocation().distanceTo(hopper.getWorldLocation()) <= 2;
+		// The upper level has its own hopper once unlocked, under the same id: any hopper in reach counts.
+		Collection<TileObject> hoppers = scene.get(ObjectID.MOTHERLODE_HOPPER);
+		WorldPoint at = client.getLocalPlayer().getWorldLocation();
+		boolean nearHopper = hoppers.stream().anyMatch(h -> at.distanceTo(h.getWorldLocation()) <= 2);
 		cycle.observe(s.payDirt, s.sack, nearHopper, s.brokenStruts >= 2);
 		boolean paidOut = lastSack >= 0 && s.sack < lastSack;
 		int drop = paidOut ? lastSack - s.sack : 0;
@@ -218,7 +220,7 @@ public final class MotherlodePilot
 					way = ground.nearest(scene.get(VEINS), v -> crowded(client, v) ? CROWDED : 0);
 					break;
 				case HOPPER:
-					way = ground.to(hopper);
+					way = ground.nearest(hoppers, null);
 					break;
 				case SACK:
 					way = ground.nearest(scene.get(SACKS), null);
@@ -355,10 +357,5 @@ public final class MotherlodePilot
 			}
 		}
 		return false;
-	}
-
-	private static TileObject first(Collection<TileObject> objects)
-	{
-		return objects.isEmpty() ? null : objects.iterator().next();
 	}
 }

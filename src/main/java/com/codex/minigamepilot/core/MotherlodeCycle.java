@@ -55,6 +55,12 @@ public final class MotherlodeCycle
 			deposited += went;
 			idle = 0;
 		}
+		if (lastSack >= 0 && sack < lastSack)
+		{
+			// The sack only goes down when it is searched: the player is emptying it, full or not,
+			// and should be kept at it until it is empty rather than sent back to mine.
+			emptying = true;
+		}
 		if (lastSack >= 0 && sack > lastSack)
 		{
 			inFlight = Math.max(0, inFlight - (sack - lastSack));
