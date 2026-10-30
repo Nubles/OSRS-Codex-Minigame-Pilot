@@ -46,12 +46,18 @@ public final class MotherlodePilot
 	/** This session's experience and ore worth as last shown, for its summary when you leave. */
 	private int xpSeen;
 	private long worthSeen;
-	/** Saved for this account once it has been seen on the upper level, which takes 100 nuggets to unlock. */
+	/** Saved for this account once it has been seen on the upper level, which is bought with nuggets. */
 	static final String UPPER_KEY = "motherlode.upper";
 	private java.util.function.Function<String, String> load;
 	private java.util.function.BiConsumer<String, String> save;
 	/** Whether this account has the upper level, as far as it has been seen; null until read. */
 	private Boolean upper;
+	/**
+	 * Saved for this account once it has put pay-dirt in the upper hopper, a separate unlock from
+	 * the upper level itself. Until then only the hopper downstairs is offered.
+	 */
+	static final String UPPER_HOPPER_KEY = "motherlode.upperHopper";
+	private Boolean upperHopper;
 	/** The last snapshot planned from, for the field notes. */
 	Object lastState;
 
@@ -98,6 +104,7 @@ public final class MotherlodePilot
 	{
 		session.startOver();
 		upper = null;
+		upperHopper = null;
 	}
 
 	/** Logged in again or hopped: readings start afresh, pay-dirt in flight stays in flight. */
@@ -194,6 +201,33 @@ public final class MotherlodePilot
 		return upper;
 	}
 
+	private boolean hasUpperHopper()
+	{
+		if (upperHopper == null)
+		{
+			upperHopper = load != null && "1".equals(load.apply(UPPER_HOPPER_KEY));
+		}
+		return upperHopper;
+	}
+
+	private void usedUpperHopper()
+	{
+		if (!hasUpperHopper())
+		{
+			upperHopper = true;
+			if (save != null)
+			{
+				save.accept(UPPER_HOPPER_KEY, "1");
+			}
+		}
+	}
+
+	/** Whether an object stands on the upper level, told apart by tile height as the level is. */
+	private static boolean upstairs(Client client, TileObject o)
+	{
+		return net.runelite.api.Perspective.getTileHeight(client, o.getLocalLocation(), 0) < -490;
+	}
+
 	Flight fly(Client client, SceneIndex scene, long now)
 	{
 		if (session.tick(client, now))
@@ -219,11 +253,32 @@ public final class MotherlodePilot
 		s.brokenStruts = struts.size();
 		s.hammer = pack.carries(ItemIds.HAMMER, ItemIds.IMCANDO_HAMMER) || pack.wears(ItemIds.IMCANDO_HAMMER_OFFHAND, ItemIds.IMCANDO_HAMMER);
 
-		// The upper level has its own hopper once unlocked, under the same id: any hopper in reach counts.
+		// The upper level has its own hopper, under the same id, once its separate unlock is bought: any
+		// hopper in reach counts a deposit, but the upper one is only offered once it has been used.
 		Collection<TileObject> hoppers = scene.get(ObjectID.MOTHERLODE_HOPPER);
 		WorldPoint at = client.getLocalPlayer().getWorldLocation();
-		boolean nearHopper = hoppers.stream().anyMatch(h -> at.distanceTo(h.getWorldLocation()) <= 2);
-		cycle.observe(s.payDirt, s.sack, nearHopper, s.brokenStruts >= 2);
+		TileObject nearest = null;
+		for (TileObject h : hoppers)
+		{
+			if (at.distanceTo(h.getWorldLocation()) <= 2)
+			{
+				nearest = h;
+			}
+		}
+		int before = cycle.getDeposited();
+		cycle.observe(s.payDirt, s.sack, nearest != null, s.brokenStruts >= 2);
+		if (nearest != null && cycle.getDeposited() > before && upstairs(client, nearest))
+		{
+			usedUpperHopper();
+		}
+		java.util.List<TileObject> usable = new java.util.ArrayList<>();
+		for (TileObject h : hoppers)
+		{
+			if (hasUpperHopper() || !upstairs(client, h))
+			{
+				usable.add(h);
+			}
+		}
 		boolean paidOut = lastSack >= 0 && s.sack < lastSack;
 		int drop = paidOut ? lastSack - s.sack : 0;
 		collected += drop;
@@ -251,7 +306,7 @@ public final class MotherlodePilot
 					way = ground.nearest(scene.get(VEINS), v -> crowded(client, v) ? CROWDED : 0);
 					break;
 				case HOPPER:
-					way = ground.nearest(hoppers, null);
+					way = ground.nearest(usable, null);
 					break;
 				case SACK:
 					way = ground.nearest(scene.get(SACKS), null);
@@ -277,7 +332,7 @@ public final class MotherlodePilot
 			}
 			else if (step.getTarget() != Step.Target.NONE && !step.isWaiting())
 			{
-				// Only send a player up who has the upper level: it takes 100 nuggets to unlock, and
+				// Only send a player up who has the upper level: it is a nugget unlock, and
 				// the ladder is there either way. Down here with no vein to reach, wait for one to grow back.
 				boolean upstairs = "Upper level".equals(level(client));
 				Ground.Way<TileObject> ladder = upstairs || hasUpper(false) ? ground.nearest(scene.get(LADDERS), null) : null;
