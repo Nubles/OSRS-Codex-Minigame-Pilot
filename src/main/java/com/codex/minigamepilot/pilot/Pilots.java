@@ -60,6 +60,7 @@ public final class Pilots
 		this.price = price;
 		this.stock = stock;
 		motherlode.setPrice(price);
+		motherlode.setStore(load, saveKey);
 		this.coach = new Coach(loadBests, saveBests);
 		this.recorder = new Recorder(notes);
 		this.scene = new SceneIndex(client, id -> MotherlodePilot.isWatched(id) || FurnacePilot.isWatched(id) || HomesPilot.isWatched(id));
