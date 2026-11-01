@@ -58,6 +58,8 @@ public final class MotherlodePilot
 	 */
 	static final String UPPER_HOPPER_KEY = "motherlode.upperHopper";
 	private Boolean upperHopper;
+	/** The player has said in the settings that the upper hopper is unlocked. */
+	private boolean upperHopperSet;
 	/** The last snapshot planned from, for the field notes. */
 	Object lastState;
 
@@ -190,7 +192,7 @@ public final class MotherlodePilot
 		{
 			upper = load != null && "1".equals(load.apply(UPPER_KEY));
 		}
-		if (upstairs && !upper)
+		if ((upstairs || upperHopperSet) && !upper)
 		{
 			upper = true;
 			if (save != null)
@@ -201,8 +203,18 @@ public final class MotherlodePilot
 		return upper;
 	}
 
+	/** The "Upper hopper unlocked" setting: offers the upper hopper before it has been used. */
+	void setUpperHopper(boolean on)
+	{
+		upperHopperSet = on;
+	}
+
 	private boolean hasUpperHopper()
 	{
+		if (upperHopperSet)
+		{
+			return true;
+		}
 		if (upperHopper == null)
 		{
 			upperHopper = load != null && "1".equals(load.apply(UPPER_HOPPER_KEY));
@@ -226,6 +238,23 @@ public final class MotherlodePilot
 	private static boolean upstairs(Client client, TileObject o)
 	{
 		return net.runelite.api.Perspective.getTileHeight(client, o.getLocalLocation(), 0) < -490;
+	}
+
+	/**
+	 * The objects on the same level as the player. The two levels share a floor, so a walk can
+	 * seem to run between them; only the ladder really does.
+	 */
+	private static java.util.List<TileObject> onLevel(Client client, Collection<? extends TileObject> objects, boolean up)
+	{
+		java.util.List<TileObject> here = new java.util.ArrayList<>();
+		for (TileObject o : objects)
+		{
+			if (upstairs(client, o) == up)
+			{
+				here.add(o);
+			}
+		}
+		return here;
 	}
 
 	Flight fly(Client client, SceneIndex scene, long now)
@@ -271,14 +300,16 @@ public final class MotherlodePilot
 		{
 			usedUpperHopper();
 		}
+		boolean up = "Upper level".equals(level(client));
 		java.util.List<TileObject> usable = new java.util.ArrayList<>();
-		for (TileObject h : hoppers)
+		for (TileObject h : onLevel(client, hoppers, up))
 		{
 			if (hasUpperHopper() || !upstairs(client, h))
 			{
 				usable.add(h);
 			}
 		}
+		java.util.List<TileObject> veins = onLevel(client, scene.get(VEINS), up);
 		boolean paidOut = lastSack >= 0 && s.sack < lastSack;
 		int drop = paidOut ? lastSack - s.sack : 0;
 		collected += drop;
@@ -303,19 +334,19 @@ public final class MotherlodePilot
 			switch (step.getTarget())
 			{
 				case VEIN:
-					way = ground.nearest(scene.get(VEINS), v -> crowded(client, v) ? CROWDED : 0);
+					way = ground.nearest(veins, v -> crowded(client, v) ? CROWDED : 0);
 					break;
 				case HOPPER:
 					way = ground.nearest(usable, null);
 					break;
 				case SACK:
-					way = ground.nearest(scene.get(SACKS), null);
+					way = ground.nearest(onLevel(client, scene.get(SACKS), up), null);
 					break;
 				case BANK:
-					way = ground.nearest(scene.banks(), null);
+					way = ground.nearest(onLevel(client, scene.banks(), up), null);
 					break;
 				case STRUT:
-					way = ground.nearest(struts, null);
+					way = ground.nearest(onLevel(client, struts, up), null);
 					break;
 				default:
 					break;
@@ -334,9 +365,8 @@ public final class MotherlodePilot
 			{
 				// Only send a player up who has the upper level: it is a nugget unlock, and
 				// the ladder is there either way. Down here with no vein to reach, wait for one to grow back.
-				boolean upstairs = "Upper level".equals(level(client));
-				Ground.Way<TileObject> ladder = upstairs || hasUpper(false) ? ground.nearest(scene.get(LADDERS), null) : null;
-				if (ladder == null && !upstairs && step.getTarget() == Step.Target.VEIN)
+				Ground.Way<TileObject> ladder = up || hasUpper(false) ? ground.nearest(scene.get(LADDERS), null) : null;
+				if (ladder == null && !up && step.getTarget() == Step.Target.VEIN)
 				{
 					step = Step.waiting("Wait for a vein", "Every vein you can reach is mined out; they grow back shortly", Step.Target.VEIN);
 				}
@@ -348,7 +378,7 @@ public final class MotherlodePilot
 			}
 		}
 
-		hasUpper("Upper level".equals(level(client)));
+		hasUpper(up);
 		View view = new View(true, View.Activity.MOTHERLODE, step, level(client), LOOP, stage(step, cycle.isEmptying()));
 		int room = cycle.room(s);
 		view.gauge(new View.Gauge("Sack", s.sack, cycle.getInFlight(), s.capacity,
@@ -381,7 +411,7 @@ public final class MotherlodePilot
 		if (step.getTarget() == Step.Target.VEIN && way != null)
 		{
 			// The next vein along, quietly, so the eye already knows where to go after this one.
-			Ground.Way<TileObject> next = ground.nearest(scene.get(VEINS), v -> v == flight.object ? 1000 : crowded(client, v) ? CROWDED : 0);
+			Ground.Way<TileObject> next = ground.nearest(veins, v -> v == flight.object ? 1000 : crowded(client, v) ? CROWDED : 0);
 			if (next != null && next.thing != flight.object)
 			{
 				flight.others.add(next.thing);

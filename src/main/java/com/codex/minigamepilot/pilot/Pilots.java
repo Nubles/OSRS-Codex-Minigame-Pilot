@@ -67,6 +67,12 @@ public final class Pilots
 		this.homes = new HomesPilot(saved, save, load, saveKey);
 	}
 
+	/** The "Upper hopper unlocked" setting for the Motherlode Mine. */
+	public void upperHopper(boolean on)
+	{
+		motherlode.setUpperHopper(on);
+	}
+
 	public SceneIndex scene()
 	{
 		return scene;
