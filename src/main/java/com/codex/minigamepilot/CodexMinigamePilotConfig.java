@@ -155,6 +155,18 @@ public interface CodexMinigamePilotConfig extends Config
 		return 2500;
 	}
 
+	@ConfigItem(
+		keyName = "upperHopper",
+		name = "Upper hopper unlocked",
+		description = "Turn on if you have bought the Motherlode Mine's upper hopper, so it is offered straight away. The Pilot also learns it the first time you use it",
+		section = MINIGAMES,
+		position = 5
+	)
+	default boolean upperHopper()
+	{
+		return false;
+	}
+
 	@ConfigItem(keyName = "plaque", name = "Step plaque", description = "Show the next step on a small plaque in the game view", section = GUIDANCE, position = 0)
 	default boolean plaque()
 	{

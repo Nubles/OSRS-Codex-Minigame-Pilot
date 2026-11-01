@@ -17,7 +17,7 @@ It is part of the **Codex** suite of RuneLite plugins and shares their look: war
 - **Fill, then empty.** It remembers whether you are filling the sack or emptying it, so after banking it sends you back to the sack, not the veins, until the sack is empty.
 - **The nearest vein on foot.** Distances are walked over the game's own collision map, so a vein around a corner beats one behind a wall. Veins with another player standing at them count as further away. The next vein after this one is quietly outlined too.
 - **Rockfalls and struts.** When the quickest way runs through a rockfall, the step becomes mining it. When both struts are broken and pay-dirt is held up, the step is hammering one.
-- **Either level.** It tells the upper and lower levels apart and sends you to the ladder when what you need is on the other.
+- **Either level.** It tells the upper and lower levels apart, keeps the vein, hopper and next vein on the level you are on, and sends you to the ladder when what you need is on the other. The upper level and its hopper are separate nugget unlocks, so it only offers them once you have used them, or straight away if you turn on Upper hopper unlocked.
 - **What the sack pays.** Every ore the sack hands you is counted and priced at today's Grand Exchange prices, with coins an hour beside your experience. Only what comes out of the sack counts, not ore taken from the bank. With an open coal bag the sack's coal goes straight into the bag; the sack says how many pieces it gave, so what never reached your pack is counted as coal in the bag.
 
 ### Blast Furnace
