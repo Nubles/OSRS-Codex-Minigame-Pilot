@@ -50,8 +50,8 @@ public final class MotherlodePilot
 	static final String UPPER_KEY = "motherlode.upper";
 	private java.util.function.Function<String, String> load;
 	private java.util.function.BiConsumer<String, String> save;
-	/** Whether this account has the upper level, as far as it has been seen; null until read. */
-	private Boolean upper;
+	/** Whether this account has the upper level, as far as it has been seen. */
+	private final UpperLevel upper = new UpperLevel();
 	/**
 	 * Saved for this account once it has put pay-dirt in the upper hopper, a separate unlock from
 	 * the upper level itself. Until then only the hopper downstairs is offered.
@@ -105,7 +105,7 @@ public final class MotherlodePilot
 	void newAccount()
 	{
 		session.startOver();
-		upper = null;
+		upper.forget();
 		upperHopper = null;
 	}
 
@@ -185,22 +185,18 @@ public final class MotherlodePilot
 		this.save = save;
 	}
 
-	/** Whether the upper level is open to this account: it has been seen there, now or before. */
-	private boolean hasUpper(boolean upstairs)
+	/**
+	 * Reads this tick for the upper level, saving it once learnt, and says whether it is open:
+	 * 72 Mining and seen up there, now or before, or the upper hopper set as unlocked.
+	 */
+	private boolean hasUpper(Client client, boolean upstairs)
 	{
-		if (upper == null)
+		int mining = Math.max(client.getRealSkillLevel(Skill.MINING), client.getBoostedSkillLevel(Skill.MINING));
+		if (upper.observe(() -> load == null ? null : load.apply(UPPER_KEY), upstairs, mining, upperHopperSet) && save != null)
 		{
-			upper = load != null && "1".equals(load.apply(UPPER_KEY));
+			save.accept(UPPER_KEY, "1");
 		}
-		if ((upstairs || upperHopperSet) && !upper)
-		{
-			upper = true;
-			if (save != null)
-			{
-				save.accept(UPPER_KEY, "1");
-			}
-		}
-		return upper;
+		return upper.open(mining);
 	}
 
 	/** The "Upper hopper unlocked" setting: offers the upper hopper before it has been used. */
@@ -301,6 +297,7 @@ public final class MotherlodePilot
 			usedUpperHopper();
 		}
 		boolean up = "Upper level".equals(level(client));
+		boolean upperOpen = hasUpper(client, up);
 		java.util.List<TileObject> usable = new java.util.ArrayList<>();
 		for (TileObject h : onLevel(client, hoppers, up))
 		{
@@ -363,9 +360,9 @@ public final class MotherlodePilot
 			}
 			else if (step.getTarget() != Step.Target.NONE && !step.isWaiting())
 			{
-				// Only send a player up who has the upper level: it is a nugget unlock, and
-				// the ladder is there either way. Down here with no vein to reach, wait for one to grow back.
-				Ground.Way<TileObject> ladder = up || hasUpper(false) ? ground.nearest(scene.get(LADDERS), null) : null;
+				// Only send a player up who has the upper level: it needs 72 Mining and a nugget unlock,
+				// and the ladder is there either way. Down here with no vein to reach, wait for one to grow back.
+				Ground.Way<TileObject> ladder = up || upperOpen ? ground.nearest(scene.get(LADDERS), null) : null;
 				if (ladder == null && !up && step.getTarget() == Step.Target.VEIN)
 				{
 					step = Step.waiting("Wait for a vein", "Every vein you can reach is mined out; they grow back shortly", Step.Target.VEIN);
@@ -378,7 +375,6 @@ public final class MotherlodePilot
 			}
 		}
 
-		hasUpper(up);
 		View view = new View(true, View.Activity.MOTHERLODE, step, level(client), LOOP, stage(step, cycle.isEmptying()));
 		int room = cycle.room(s);
 		view.gauge(new View.Gauge("Sack", s.sack, cycle.getInFlight(), s.capacity,
