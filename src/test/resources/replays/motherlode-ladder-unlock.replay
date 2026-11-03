@@ -1,0 +1,35 @@
+# Issue #7, the other half: 57 Mining is not enough on its own; the upper level is a nugget
+# unlock the game does not tell plugins about. The Pilot learns it by seeing the player up there
+# for 3 ticks running (UpperLevel.SETTLE), and only offers the ladder after that.
+include /replays/scenes/motherlode.scene
+skill MINING 60
+at 3740 5650
+remove lowVein1
+remove lowVein2
+
+# Never seen upstairs: wait for a vein, no ladder.
+tick 3
+expect step = "Wait for a vein"
+expect saved.motherlode.upper = -
+
+# One odd reading upstairs (a scene still loading) unlocks nothing.
+at 3740 5672
+tick
+at 3740 5650
+tick 3
+expect step = "Wait for a vein"
+expect saved.motherlode.upper = -
+
+# Really up there, 3 ticks running: learnt and saved for the account.
+at 3740 5672
+tick 2
+expect saved.motherlode.upper = -
+tick
+expect saved.motherlode.upper = 1
+
+# Back down with the lower veins mined out: now the ladder is the way to the next vein.
+at 3740 5650
+tick
+expect step = "Climb the ladder"
+expect target = LADDER
+expect object = ladderBottom

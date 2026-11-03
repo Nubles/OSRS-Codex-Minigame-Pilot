@@ -1,0 +1,26 @@
+# Issue #2: with the upper hopper unlocked but the setting left off, the Pilot ignored it and
+# sent full loads down the ladder. Using it once teaches the Pilot, and it is saved.
+include /replays/scenes/motherlode.scene
+skill MINING 70
+saved motherlode.upper 1
+at 3726 5698
+items INV PAYDIRT 27
+
+# Not known yet: the hopper below is the safe choice.
+tick
+expect step = "Climb the ladder"
+
+# The player knows better and fills the upper hopper.
+at 3754 5689
+tick
+items INV clear
+items INV RUNE_PICKAXE 1
+tick
+expect saved.motherlode.upperHopper = 1
+
+# The next load goes straight in the upper hopper.
+never target = LADDER
+at 3726 5698
+items INV PAYDIRT 27
+tick
+expect object = upperHopper

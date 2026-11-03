@@ -317,6 +317,12 @@ public final class View
 		this.loopAt = loopAt;
 	}
 
+	/** Where the step is, such as "Lower level", or null. */
+	public String place()
+	{
+		return place;
+	}
+
 	/** Logged out: what the Pilot does at each minigame, for a first look before logging in. */
 	public static View loggedOut()
 	{

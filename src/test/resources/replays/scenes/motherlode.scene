@@ -1,0 +1,41 @@
+# A schematic Motherlode Mine for replays. Not the real map: just its shape where the Pilot cares.
+#
+# Facts from RuneLite's own Motherlode plugin (runelite-client .../plugins/motherlode/MotherlodePlugin.java):
+#  - the mine is map regions 14679-14681, 14935-14937, 15191-15193; every tile of this scene is in one of them
+#  - both levels are plane 0; the upper level is told apart by ground height below -490
+# Object names are RuneLite's (net.runelite.api.gameval.ObjectID).
+#
+#   y 5720 +--------------------------------------------+
+#          | UPPER LEVEL (height -600)                  |
+#          |   upVein1 upVein2          upperHopper     |
+#          |               ladderTop                    |
+#   y 5668 |=========== cliff, no way across ===========|
+#          |               ladderBottom                 |
+#          |   lowVein1 lowVein2        hopper   sack   |
+#          | LOWER LEVEL (height 0)            bank     |
+#   y 5616 +--------------------------------------------+
+#        x 3704                                       3807
+
+scene 3704 5616
+height 3704 5670 104 50 -600
+block 3704 5668 104 2
+
+# the lower level
+wall MOTHERLODE_ORE_SINGLE 3720 5640 as lowVein1
+wall MOTHERLODE_ORE_SINGLE 3724 5640 as lowVein2
+object MOTHERLODE_HOPPER 3750 5650 as hopper
+object MOTHERLODE_SACK 3760 5645 as sack
+name 90000 "Bank chest"                   # a stand-in chest: the Pilot finds banks by name
+object 90000 3770 5640 as bank
+object MOTHERLODE_LADDER_BOTTOM 3740 5667 as ladderBottom
+
+# the upper level
+object MOTHERLODE_LADDER_TOP 3740 5670 as ladderTop
+wall MOTHERLODE_ORE_SINGLE 3720 5700 as upVein1
+wall MOTHERLODE_ORE_SINGLE 3724 5700 as upVein2
+object MOTHERLODE_HOPPER 3755 5690 as upperHopper
+
+# an account that can mine here: 30 Mining, not boostable (oldschool.runescape.wiki/w/Motherlode_Mine).
+# The upper level needs 57 Mining, not boostable, and 100 golden nuggets; the upper hopper 50 more (same page).
+skill MINING 40
+items INV RUNE_PICKAXE 1
