@@ -79,6 +79,23 @@ public final class FakeGame
 		default void container(int containerId)
 		{
 		}
+
+		default void npcSpawned(NPC npc)
+		{
+		}
+
+		default void npcDespawned(NPC npc)
+		{
+		}
+
+		default void varp(int id, int value)
+		{
+		}
+
+		/** A skill's level, boost or experience changed. */
+		default void stat(Skill skill)
+		{
+		}
 	}
 
 	private Listener listener = new Listener()
@@ -99,9 +116,12 @@ public final class FakeGame
 	private final Map<Skill, int[]> skills = new EnumMap<>(Skill.class);
 	private final Map<Integer, List<Item>> containers = new HashMap<>();
 	private final Map<Integer, String> objectNames = new HashMap<>();
+	/** Objects that change with a varbit: the varbit, then the object shown for each of its values. */
+	private final Map<Integer, int[]> multilocs = new HashMap<>();
 	/** Objects in the scene by the handle given to them in the script. */
 	private final Map<String, TileObject> objects = new LinkedHashMap<>();
 	private final List<NPC> npcs = new ArrayList<>();
+	private final Map<String, NPC> npcNames = new LinkedHashMap<>();
 	private final List<Player> players = new ArrayList<>();
 	private final TreeSet<String> unmodelled = new TreeSet<>();
 	private int nextHandle;
@@ -141,7 +161,12 @@ public final class FakeGame
 			listener.despawned(o);
 		}
 		objects.clear();
+		for (NPC n : new ArrayList<>(npcs))
+		{
+			listener.npcDespawned(n);
+		}
 		npcs.clear();
+		npcNames.clear();
 		players.clear();
 		baseX = worldX;
 		baseY = worldY;
@@ -304,7 +329,25 @@ public final class FakeGame
 		objectNames.put(objectId, name);
 	}
 
-	public NPC npc(int id, String name, int worldX, int worldY, int plane, int size)
+	/**
+	 * Spawns an NPC and tells the plugin.
+	 *
+	 * @param handle the script's name for it, or null
+	 */
+	/**
+	 * Makes an object one that changes with a varbit, as urns and doors do: the game shows
+	 * {@code shown[value]} for the varbit's value (the last one past the end), and plugins read it
+	 * through {@code ObjectComposition.getImpostor()}.
+	 */
+	public void multiloc(int objectId, int varbit, int... shown)
+	{
+		int[] entry = new int[shown.length + 1];
+		entry[0] = varbit;
+		System.arraycopy(shown, 0, entry, 1, shown.length);
+		multilocs.put(objectId, entry);
+	}
+
+	public NPC npc(int id, String name, int worldX, int worldY, int plane, int size, String handle)
 	{
 		WorldPoint wp = new WorldPoint(worldX, worldY, plane);
 		int index = npcs.size();
@@ -338,7 +381,25 @@ public final class FakeGame
 			}
 		});
 		npcs.add(npc);
+		if (handle != null)
+		{
+			npcNames.put(handle, npc);
+		}
+		listener.npcSpawned(npc);
 		return npc;
+	}
+
+	/** Despawns an NPC by the script's name for it; false when there is none by that name. */
+	public boolean removeNpc(String handle)
+	{
+		NPC npc = npcNames.remove(handle);
+		if (npc == null)
+		{
+			return false;
+		}
+		npcs.remove(npc);
+		listener.npcDespawned(npc);
+		return true;
 	}
 
 	/** Another player standing on a tile. */
@@ -352,7 +413,12 @@ public final class FakeGame
 
 	public void clearActors()
 	{
+		for (NPC n : new ArrayList<>(npcs))
+		{
+			listener.npcDespawned(n);
+		}
 		npcs.clear();
+		npcNames.clear();
 		players.clear();
 	}
 
@@ -362,16 +428,19 @@ public final class FakeGame
 	public void skill(Skill skill, int level, int xp)
 	{
 		skills.put(skill, new int[]{level, level, xp});
+		listener.stat(skill);
 	}
 
 	public void boost(Skill skill, int boosted)
 	{
 		skills.get(skill)[1] = boosted;
+		listener.stat(skill);
 	}
 
 	public void xp(Skill skill, int xp)
 	{
 		skills.get(skill)[2] = xp;
+		listener.stat(skill);
 	}
 
 	public void varbit(int id, int value)
@@ -385,7 +454,11 @@ public final class FakeGame
 
 	public void varp(int id, int value)
 	{
-		varps.put(id, value);
+		Integer old = varps.put(id, value);
+		if (old == null || old != value)
+		{
+			listener.varp(id, value);
+		}
 	}
 
 	/** Replaces what an inventory (InventoryID) holds; pairs of item id and quantity, one slot each. */
@@ -451,6 +524,52 @@ public final class FakeGame
 	public TreeSet<String> unmodelled()
 	{
 		return unmodelled;
+	}
+
+	/** The tile an object stands on, for spawn events: where it is and what else stands there. */
+	public net.runelite.api.Tile tile(TileObject o)
+	{
+		WorldPoint wp = o.getWorldLocation();
+		return proxy(net.runelite.api.Tile.class, (m, a) ->
+		{
+			switch (m.getName())
+			{
+				case "getWorldLocation":
+					return wp;
+				case "getLocalLocation":
+					return LocalPoint.fromWorld(view, wp.getX(), wp.getY());
+				case "getPlane":
+					return wp.getPlane();
+				case "getRenderLevel":
+					return wp.getPlane();
+				case "getSceneLocation":
+					return new Point(wp.getX() - baseX, wp.getY() - baseY);
+				case "getGameObjects":
+				{
+					GameObject[] out = new GameObject[5];
+					int i = 0;
+					for (TileObject t : objects.values())
+					{
+						if (t instanceof GameObject && t.getWorldLocation().equals(wp) && i < out.length)
+						{
+							out[i++] = (GameObject) t;
+						}
+					}
+					return out;
+				}
+				case "getWallObject":
+					for (TileObject t : objects.values())
+					{
+						if (t instanceof WallObject && t.getWorldLocation().equals(wp))
+						{
+							return t;
+						}
+					}
+					return null;
+				default:
+					return unknown("Tile." + m.getName(), m);
+			}
+		});
 	}
 
 	// ---- the proxies -----------------------------------------------------------------------
@@ -639,6 +758,7 @@ public final class FakeGame
 	private ObjectComposition objectDefinition(int id)
 	{
 		String name = objectNames.get(id);
+		int[] multi = multilocs.get(id);
 		return proxy(ObjectComposition.class, (m, a) ->
 		{
 			switch (m.getName())
@@ -647,9 +767,22 @@ public final class FakeGame
 					return id;
 				case "getName":
 					return name == null ? "null" : name;
+				case "getVarbitId":
+					return multi == null ? -1 : multi[0];
+				case "getVarPlayerId":
+					return -1;
 				case "getImpostorIds":
+					return multi == null ? null : Arrays.copyOfRange(multi, 1, multi.length);
 				case "getImpostor":
-					return null;
+				{
+					if (multi == null)
+					{
+						return null;
+					}
+					int value = varbits.getOrDefault(multi[0], 0);
+					int shown = multi[1 + Math.max(0, Math.min(value, multi.length - 2))];
+					return shown < 0 ? null : objectDefinition(shown);
+				}
 				case "getActions":
 					return new String[5];
 				default:

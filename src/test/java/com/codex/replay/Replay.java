@@ -38,9 +38,11 @@ import net.runelite.api.Skill;
  * height X Y W L H [PLANE]       ground height of a block of tiles (lower is higher up)
  * block X Y W L [PLANE]          make a block of tiles impassable; open X Y W L undoes it
  * object ID X Y [W L] [as NAME]  spawn a game object; wall ID X Y [as NAME] spawns a wall object
- * remove NAME|ID                 despawn one object by name, or every object with an id
+ * remove NAME|ID                 despawn an object or NPC by name, or every object with an id
+ * multiloc ID VARBIT SHOWN...    an object that shows SHOWN[value of VARBIT] (urns, doors)
  * name ID "Name"                 what the game calls an object (banks are found by name)
- * npc ID "Name" X Y [SIZE]       an NPC; player "Name" X Y another player; actors clear drops both
+ * npc ID "Name" X Y [SIZE] [as NAME]  an NPC (remove NAME despawns it)
+ * player "Name" X Y              another player; actors clears every NPC and player
  * skill SKILL LEVEL [XP]         real level (and experience, else the level's minimum)
  * boost SKILL LEVEL / xp SKILL XP
  * varbit ID VALUE / varp ID VALUE
@@ -192,12 +194,27 @@ public final class Replay
 			case "remove":
 				remove(a.get(0));
 				break;
+			case "multiloc":
+			{
+				int[] shown = new int[a.size() - 2];
+				for (int i = 2; i < a.size(); i++)
+				{
+					shown[i - 2] = id("ObjectID", a.get(i));
+				}
+				game.multiloc(id("ObjectID", a.get(0)), id("VarbitID", a.get(1)), shown);
+				break;
+			}
 			case "name":
 				game.name(id("ObjectID", a.get(0)), a.get(1));
 				break;
 			case "npc":
-				game.npc(num(a, 0), a.get(1), num(a, 2), num(a, 3), game.at() == null ? 0 : game.at().getPlane(), a.size() > 4 ? num(a, 4) : 1);
+			{
+				int as = a.indexOf("as");
+				List<String> args = as < 0 ? a : a.subList(0, as);
+				game.npc(id("NpcID", args.get(0)), args.get(1), num(args, 2), num(args, 3), game.at() == null ? 0 : game.at().getPlane(),
+					args.size() > 4 ? num(args, 4) : 1, as < 0 ? null : a.get(as + 1));
 				break;
+			}
 			case "player":
 				game.player(a.get(0), num(a, 1), num(a, 2), game.at() == null ? 0 : game.at().getPlane());
 				break;
@@ -300,6 +317,10 @@ public final class Replay
 
 	private void remove(String what)
 	{
+		if (game.removeNpc(what))
+		{
+			return;
+		}
 		game.remove(game.object(what) != null ? what : "id:" + id("ObjectID", what));
 	}
 
