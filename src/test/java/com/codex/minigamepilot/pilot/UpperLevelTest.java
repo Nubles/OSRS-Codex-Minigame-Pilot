@@ -38,7 +38,7 @@ public class UpperLevelTest
 	}
 
 	@Test
-	public void underSeventyTwoMiningItIsNeverOffered()
+	public void underFiftySevenMiningItIsNeverOffered()
 	{
 		// The player in the report: 40-odd Mining, sent up a ladder they cannot use.
 		UpperLevel u = new UpperLevel();
@@ -55,8 +55,8 @@ public class UpperLevelTest
 	public void aSavedUnlockOpensItWithTheLevel()
 	{
 		UpperLevel u = new UpperLevel();
-		assertFalse(u.observe(() -> "1", false, 72, false));
-		assertTrue(u.open(72));
+		assertFalse(u.observe(() -> "1", false, 57, false));
+		assertTrue(u.open(57));
 	}
 
 	@Test
@@ -83,5 +83,14 @@ public class UpperLevelTest
 		u.forget();
 		u.observe(() -> null, false, 80, false);
 		assertFalse(u.open(80));
+	}
+
+	@Test
+	public void fiftySixMiningIsOneShort()
+	{
+		UpperLevel u = new UpperLevel();
+		u.observe(() -> "1", false, 56, false);
+		assertFalse(u.open(56));
+		assertTrue(u.open(UpperLevel.MINING));
 	}
 }

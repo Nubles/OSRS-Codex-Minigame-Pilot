@@ -187,11 +187,12 @@ public final class MotherlodePilot
 
 	/**
 	 * Reads this tick for the upper level, saving it once learnt, and says whether it is open:
-	 * 72 Mining and seen up there, now or before, or the upper hopper set as unlocked.
+	 * 57 Mining and seen up there, now or before, or the upper hopper set as unlocked.
 	 */
 	private boolean hasUpper(Client client, boolean upstairs)
 	{
-		int mining = Math.max(client.getRealSkillLevel(Skill.MINING), client.getBoostedSkillLevel(Skill.MINING));
+		// A boost does not count: the level asks for 57 Mining unboosted.
+		int mining = client.getRealSkillLevel(Skill.MINING);
 		if (upper.observe(() -> load == null ? null : load.apply(UPPER_KEY), upstairs, mining, upperHopperSet) && save != null)
 		{
 			save.accept(UPPER_KEY, "1");
@@ -360,7 +361,7 @@ public final class MotherlodePilot
 			}
 			else if (step.getTarget() != Step.Target.NONE && !step.isWaiting())
 			{
-				// Only send a player up who has the upper level: it needs 72 Mining and a nugget unlock,
+				// Only send a player up who has the upper level: it needs 57 Mining (not boostable) and a nugget unlock,
 				// and the ladder is there either way. Down here with no vein to reach, wait for one to grow back.
 				Ground.Way<TileObject> ladder = up || upperOpen ? ground.nearest(scene.get(LADDERS), null) : null;
 				if (ladder == null && !up && step.getTarget() == Step.Target.VEIN)
