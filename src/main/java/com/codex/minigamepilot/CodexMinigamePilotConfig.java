@@ -1,5 +1,6 @@
 package com.codex.minigamepilot;
 
+import com.codex.minigamepilot.core.Assault;
 import com.codex.minigamepilot.core.Goals;
 import com.codex.minigamepilot.core.MixCycle;
 import com.codex.minigamepilot.core.Mixology;
@@ -193,6 +194,45 @@ public interface CodexMinigamePilotConfig extends Config
 		public String toString()
 		{
 			return reward == null ? "None" : reward.getTitle() + " (" + reward.points() + ")";
+		}
+	}
+
+	/** What Barbarian Assault honour points are saved for. */
+	enum AssaultReward
+	{
+		NONE(null),
+		FIGHTER_TORSO(Assault.Reward.FIGHTER_TORSO),
+		PENANCE_SKIRT(Assault.Reward.PENANCE_SKIRT),
+		FIGHTER_HAT(Assault.Reward.FIGHTER_HAT),
+		RANGER_HAT(Assault.Reward.RANGER_HAT),
+		RUNNER_HAT(Assault.Reward.RUNNER_HAT),
+		HEALER_HAT(Assault.Reward.HEALER_HAT),
+		RUNNER_BOOTS(Assault.Reward.RUNNER_BOOTS),
+		PENANCE_GLOVES(Assault.Reward.PENANCE_GLOVES),
+		GRANITE_BODY(Assault.Reward.GRANITE_BODY),
+		ROLE_LEVELS(Assault.Reward.ROLE_LEVELS);
+
+		private final Assault.Reward reward;
+
+		AssaultReward(Assault.Reward reward)
+		{
+			this.reward = reward;
+		}
+
+		/** The reward, or null for none. */
+		public Assault.Reward reward()
+		{
+			return reward;
+		}
+
+		@Override
+		public String toString()
+		{
+			if (reward == null)
+			{
+				return "None";
+			}
+			return reward.price() > 0 ? reward.getTitle() + " (" + reward.price() + " each role)" : reward.getTitle();
 		}
 	}
 
@@ -575,6 +615,18 @@ public interface CodexMinigamePilotConfig extends Config
 		return true;
 	}
 
+	@ConfigItem(
+		keyName = "barbarianAssault",
+		name = "Barbarian Assault",
+		description = "Keep every Barbarian Assault game with its waves, the role you played and their times, and the honour points it gave each role; show your points against the reward you want and the role to play next to reach it soonest. Nothing about the fight itself: RuneLite's Barbarian Assault plugin covers that",
+		section = MINIGAMES,
+		position = 26
+	)
+	default boolean barbarianAssault()
+	{
+		return true;
+	}
+
 	@ConfigItem(keyName = "plaque", name = "Step plaque", description = "Show the next step on a small plaque in the game view", section = GUIDANCE, position = 0)
 	default boolean plaque()
 	{
@@ -729,11 +781,23 @@ public interface CodexMinigamePilotConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = "assaultReward",
+		name = "Barbarian Assault reward",
+		description = "The reward from Commander Connad your honour points are saved for (every role pays its price), or every role to level 5: the panel shows each role's points against it, the role to play next, and the games and time to it at your pace",
+		section = GOALS,
+		position = 8
+	)
+	default AssaultReward assaultReward()
+	{
+		return AssaultReward.FIGHTER_TORSO;
+	}
+
+	@ConfigItem(
 		keyName = "showGoals",
 		name = "Show goals",
 		description = "Show the goal card on the panel",
 		section = GOALS,
-		position = 8
+		position = 9
 	)
 	default boolean showGoals()
 	{
@@ -745,7 +809,7 @@ public interface CodexMinigamePilotConfig extends Config
 		name = "Reward road",
 		description = "In each minigame, show its rewards as a road (at the Blast Furnace, the bars each Smithing level opens): what you own, what you can have now and how far off the rest is at your pace",
 		section = GOALS,
-		position = 9
+		position = 10
 	)
 	default boolean rewardRoad()
 	{

@@ -127,7 +127,10 @@ public final class Step
 		/** A rogue guard, to blind with the flash powder. */
 		GUARD,
 		/** A wall safe at the end of the maze. */
-		WALL_SAFE
+		WALL_SAFE,
+		// Barbarian Assault
+		/** Commander Connad, who keeps the rewards shop and the role levels. */
+		COMMANDER
 	}
 
 	private final String verb;

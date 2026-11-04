@@ -1,6 +1,6 @@
 # Codex Minigame Pilot
 
-**One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes, Guardians of the Rift, Tempoross, the Giants' Foundry, Mastering Mixology, Vale Totems, the Tithe Farm, stealing artefacts, stealing valuables and the Rogues' Den maze.** The Pilot watches the minigame you are in and always shows the single thing to do next: what to click, lit in gold in the world, the path there drawn on the ground and the minimap, and a line on why. You still do every click. It only reads the game and draws.
+**One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes, Guardians of the Rift, Tempoross, the Giants' Foundry, Mastering Mixology, Vale Totems, the Tithe Farm, stealing artefacts, stealing valuables and the Rogues' Den maze, with a Barbarian Assault companion.** The Pilot watches the minigame you are in and always shows the single thing to do next: what to click, lit in gold in the world, the path there drawn on the ground and the minimap, and a line on why. You still do every click. It only reads the game and draws.
 
 It is part of the **Codex** suite of RuneLite plugins and shares their look: warm ink, aged gold and the game's own fonts.
 
@@ -172,6 +172,22 @@ It is part of the **Codex** suite of RuneLite plugins and shares their look: war
   <img src="docs/screenshots/roguesden-plaque-tile.png" alt="Plaque with the wrong tile">
 </p>
 
+### Barbarian Assault (a companion, outside the fight)
+The calls, the eggs and the healers are left to RuneLite's own Barbarian Assault plugin. The Pilot keeps the rest: what your games come to, and what to play next.
+- **Every game kept.** Each game, per account: its waves, the role you played in each (read from the role's horn), each wave's time from its "---- Wave: N ----" line to its end, lost waves and retries, and the honour points the game gave every role, read from the game's own point counters as they rise. The panel shows the game under way wave by wave, your last games, the quickest full game and queen wave, and honour points an hour.
+- **Your points against a reward.** Choose a reward under *Barbarian Assault reward*: the fighter torso (the default), the Penance skirt, a hat, the runner boots, the Penance gloves, the granite body, or every role to level 5. Each role's points are drawn against what it still needs (every role pays an item's price; a level goal costs a role 200, 300, 400 and 500 for levels 2 to 5), with a reward you own ticked off from your bank, pack or worn items.
+- **The role to play next.** Every role pays the price, so the role with the most games still to go holds you up: the Pilot names it, and plans game by game, counting the 5 points each won game gives the other three roles at the queen's wave. A full game in each role counts for what yours have given you; a role you have never finished a game in counts only the wiki's 80 and 5 for wave 10, so its count is "at most". With your own pace, the games come with a time: "279 short · at most 6 games, 1h 42m".
+- **Connad at the right moment.** When a level is paid for, when the reward is affordable, or when a role nears the 5,000 cap (where points are lost), Commander Connad is lit and the step says so.
+
+<p align="center">
+  <img src="docs/screenshots/assault-panel-lobby.png" width="225" alt="Barbarian Assault: the role to play for the fighter torso">
+  <img src="docs/screenshots/assault-panel-wave.png" width="225" alt="Barbarian Assault: a game wave by wave">
+</p>
+<p align="center">
+  <img src="docs/screenshots/assault-plaque-lobby.png" alt="Plaque in the outpost">
+  <img src="docs/screenshots/assault-plaque-wave.png" alt="Plaque in a wave">
+</p>
+
 ### Tempoross
 - **One step through the storm.** Catch harpoonfish, cook them at the shrine, fill the ammunition crate, and harpoon the spirit pool while Tempoross is down. Each step is lit in the world, the fishing spot, the shrine, the crate or the pool, with its path and a line of why.
 - **The double spot first.** When a spot of jumping harpoonfish is up, that is where you fish, even with raw fish still to cook: it can give two a catch, and the wiki's strategies say to fish there wherever possible.
@@ -306,9 +322,9 @@ Codex Minigame Pilot is guidance only. It reads what the game already shows you 
 
 ## Settings that matter
 
-- **Minigames:** turn each of the eleven off; *Mark patrols* for stealing artefacts; *Mark homeowners* for stealing valuables; *Tithe plants a round* for the Tithe Farm; *Vale totem wood* and *Claim offerings as you pass* for Vale Totems; *Mixology orders to make* (every order, or the most resin per paste) and *Mixology station cues*; *Cook before loading* and *Load what you hold at storm* (80%) for Tempoross; *Fragments before first craft* for Guardians of the Rift (120 by default); fix the *Blast Furnace bar* instead of letting the Pilot work it out; *Top up coffer below* (2,500 coins by default).
+- **Minigames:** turn each of the eleven off; *Mark patrols* for stealing artefacts; *Mark homeowners* for stealing valuables; *Tithe plants a round* for the Tithe Farm; *Vale totem wood* and *Claim offerings as you pass* for Vale Totems; *Mixology orders to make* (every order, or the most resin per paste) and *Mixology station cues*; *Cook before loading* and *Load what you hold at storm* (80%) for Tempoross; *Fragments before first craft* for Guardians of the Rift (120 by default); fix the *Blast Furnace bar* instead of letting the Pilot work it out; *Top up coffer below* (2,500 coins by default); *Barbarian Assault* for the companion.
 - **Guidance:** *Step plaque*, *Path on the ground*, *Path on minimap*, *Action labels*, *Mark what comes after*, *Hint arrow*, *World map marker* and *Low planks in chat* for Mahogany Homes, and *Visit summary in chat*. All on by default.
-- **Goals:** what Motherlode nuggets and Mahogany Homes points are saved for, the *Mixology reward* your resin is saved for, the *Vale Totems reward* your research points are saved for, the *Tithe Farm reward* your points are saved for, the *Stealing artefacts level* and *Stealing valuables level* (0 for the next), the *Blast Furnace level* to work toward (0 for the next), *Show goals* and *Reward road*.
+- **Goals:** what Motherlode nuggets and Mahogany Homes points are saved for, the *Mixology reward* your resin is saved for, the *Vale Totems reward* your research points are saved for, the *Tithe Farm reward* your points are saved for, the *Barbarian Assault reward* your honour points are saved for (the fighter torso by default, or every role to level 5), the *Stealing artefacts level* and *Stealing valuables level* (0 for the next), the *Blast Furnace level* to work toward (0 for the next), *Show goals* and *Reward road*.
 - **Tick coach:** *Tick coach*, on by default.
 - **Field notes:** *Keep field notes*, off by default.
 

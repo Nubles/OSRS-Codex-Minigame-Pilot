@@ -390,6 +390,8 @@ final class Coach
 				return "the guard";
 			case WALL_SAFE:
 				return "the wall safe";
+			case COMMANDER:
+				return "Commander Connad";
 			default:
 				return null;
 		}

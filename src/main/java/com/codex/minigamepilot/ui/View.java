@@ -25,7 +25,8 @@ public final class View
 		TITHE("Tithe Farm"),
 		ARTEFACTS("Stealing Artefacts"),
 		HOUSES("Stealing Valuables"),
-		ROGUES_DEN("Rogues' Den");
+		ROGUES_DEN("Rogues' Den"),
+		BARBARIAN_ASSAULT("Barbarian Assault");
 
 		private final String title;
 
@@ -631,6 +632,8 @@ public final class View
 			"The citizen an urchin has distracted, the vacant house once its owner has gone and how long you have, the open window out, and every haul kept with coins and experience an hour."));
 		v.brief(new Brief(Activity.ROGUES_DEN, null,
 			"The maze one leg at a time with its traps marked, the right tile and the shortcut at 80 Thieving, every run kept, and the rogue set's time at your pace."));
+		v.brief(new Brief(Activity.BARBARIAN_ASSAULT, null,
+			"Every game kept with its waves, roles and times, your honour points in each role against the reward you want, and the role to play next to get there soonest."));
 		return v;
 	}
 

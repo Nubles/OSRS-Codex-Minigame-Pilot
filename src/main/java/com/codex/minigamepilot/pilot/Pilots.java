@@ -47,6 +47,8 @@ public final class Pilots
 	private volatile boolean useValuables = true;
 	private final RoguesDenPilot den = new RoguesDenPilot();
 	private volatile boolean useDen = true;
+	private final AssaultPilot assault = new AssaultPilot();
+	private volatile boolean useAssault = true;
 	private final Coach coach;
 	private final Recorder recorder;
 	private final IntUnaryOperator price;
@@ -90,12 +92,14 @@ public final class Pilots
 		valuables.setStore(load, saveKey);
 		valuables.setPrice(price);
 		den.setStore(load, saveKey);
+		assault.setStore(load, saveKey);
 		this.coach = new Coach(loadBests, saveBests);
 		this.recorder = new Recorder(notes);
 		this.scene = new SceneIndex(client, id -> MotherlodePilot.isWatched(id) || FurnacePilot.isWatched(id) || HomesPilot.isWatched(id)
 			|| RiftPilot.isWatched(id) || StormPilot.isWatched(id) || FoundryPilot.isWatched(id)
 			|| MixologyPilot.isWatched(id) || TotemsPilot.isWatched(id) || TithePilot.isWatched(id)
-			|| ArtefactsPilot.isWatched(id) || HousesPilot.isWatched(id) || RoguesDenPilot.isWatched(id));
+			|| ArtefactsPilot.isWatched(id) || HousesPilot.isWatched(id) || RoguesDenPilot.isWatched(id)
+			|| AssaultPilot.isWatched(id));
 		this.homes = new HomesPilot(saved, save, load, saveKey);
 		homes.readers(null, stock);
 	}
@@ -198,6 +202,13 @@ public final class Pilots
 		den.settings(traps);
 	}
 
+	/** The "Barbarian Assault" settings: on, and the reward saved for (or null). */
+	public void barbarianAssault(boolean on, com.codex.minigamepilot.core.Assault.Reward reward)
+	{
+		useAssault = on;
+		assault.settings(reward);
+	}
+
 	/** A spot animation appeared in the scene: Mastering Mixology's station cues. */
 	public void spotanim(int id)
 	{
@@ -252,6 +263,7 @@ public final class Pilots
 			artefacts.newAccount();
 			valuables.newAccount();
 			den.newAccount();
+			assault.newAccount();
 			said.clear();
 			unsaid.clear();
 		}
@@ -283,6 +295,7 @@ public final class Pilots
 		storm.chat(message);
 		foundry.chat(message);
 		valuables.chat(message);
+		assault.chat(message, client.getTickCount());
 	}
 
 	/** @param bankCoal coal in the open bank, or -1 when the bank is closed */
@@ -353,6 +366,11 @@ public final class Pilots
 		Object state = null;
 		int units = 0;
 		String kind = null;
+		// Barbarian Assault's games are followed every tick, so one is kept even while you stand elsewhere.
+		if (useAssault)
+		{
+			assault.watch(client, now);
+		}
 		if (useMotherlode && MotherlodePilot.inMine(client))
 		{
 			activity = View.Activity.MOTHERLODE;
@@ -444,6 +462,13 @@ public final class Pilots
 			state = den.lastState;
 			units = den.units();
 		}
+		else if (useAssault && assault.active(client, scene, npcs()))
+		{
+			activity = View.Activity.BARBARIAN_ASSAULT;
+			flight = assault.fly(client, npcs(), now);
+			state = assault.lastState;
+			units = assault.units();
+		}
 		else
 		{
 			activity = View.Activity.NONE;
@@ -496,6 +521,10 @@ public final class Pilots
 			else if (last == View.Activity.ROGUES_DEN)
 			{
 				den.left(now);
+			}
+			else if (last == View.Activity.BARBARIAN_ASSAULT)
+			{
+				assault.left();
 			}
 			last = activity;
 		}
@@ -585,6 +614,8 @@ public final class Pilots
 			// A run under way ends where it stood.
 			den.relogged(now);
 		}
+		// A Barbarian Assault game under way ends where it stood, wherever you were.
+		assault.relogged(now, client.getTickCount());
 		motherlode.relogged();
 		furnace.relogged();
 		coach.left();
@@ -706,6 +737,7 @@ public final class Pilots
 		v.brief(artefacts.brief());
 		v.brief(valuables.brief());
 		v.brief(den.brief());
+		v.brief(assault.brief());
 		return v;
 	}
 }

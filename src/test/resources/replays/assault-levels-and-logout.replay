@@ -1,0 +1,108 @@
+# Barbarian Assault for every role at level 5: points near the cap spent first, a level paid for
+# lit at Commander Connad, the role furthest from level 5 to play, then a game of a lost wave, the
+# same wave won, and a logout in wave 2 that keeps the game where it stood.
+#
+# Facts (OSRS wiki, Barbarian Assault; Commander Connad; the game's client scripts in runelite/cs2-scripts):
+#  - "Points cap at 5,000 in each role."
+#  - role levels cost 200, 300, 400 and 500 honour points for levels 2 to 5, the same in every role
+#  - "Players may upgrade the level in a particular role from level 1 up to level 5."
+#  - the reward shop shows "level up to" the role level plus one, and "Mastered" from 5
+#  - Commander Connad, NPC 1656, "located on the main floor of the Barbarian Outpost"
+# The outpost's tiles here are only a stage for the replay: the Pilot reads no tile of it.
+scene 2500 3520
+at 2535 3570
+npc BARBASSAULT_BARBARIAN_COMMANDER "Commander Connad" 2538 3572 as connad
+skill HITPOINTS 40
+assault reward ROLE_LEVELS
+# Defender at 4,950: 9 x 512 + 342.
+varbit BARBASSAULT_POINTS_ATTACKER_BASE 250
+varbit BARBASSAULT_POINTS_COLLECTOR_BASE 388
+varbit BARBASSAULT_POINTS_COLLECTOR_EXTRA 1
+varbit BARBASSAULT_POINTS_DEFENDER_BASE 342
+varbit BARBASSAULT_POINTS_DEFENDER_EXTRA 9
+varbit BARBASSAULT_POINTS_HEALER_BASE 100
+varbit BARBASSULT_ROLELEVEL_ATT 1
+varbit BARBASSULT_ROLELEVEL_COL 2
+varbit BARBASSULT_ROLELEVEL_DEF 5
+varbit BARBASSULT_ROLELEVEL_HEAL 4
+tick
+expect activity = BARBARIAN_ASSAULT
+expect step = "Spend defender points at Connad"
+expect detail = "4,950 of 5,000: points past the cap are lost"
+expect target = COMMANDER
+expect npc = "Commander Connad"
+expect gauge.Defender = "4950/5000"
+expect gauge.Collector = "900/1200"
+expect lines ~ "Defender level 5 DONE"
+expect lines.note = "1 of 4 at level 5"
+
+# Spent: 2,000 left. Attacker's level 2 is paid for: 200 of its 250.
+varbit BARBASSAULT_POINTS_DEFENDER_BASE 464
+varbit BARBASSAULT_POINTS_DEFENDER_EXTRA 3
+tick
+expect step = "Level up attacker to 2"
+expect detail = "200 attacker points, at Commander Connad"
+expect npc = "Commander Connad"
+expect lines ~ "Attacker level 1 NEXT"
+
+# Levelled up: attacker 2 with 50 left, collector to 5 with nothing left. Attacker needs
+# 300 + 400 + 500 = 1,200, less its 50; healer 500, less its 100.
+varbit BARBASSULT_ROLELEVEL_ATT 2
+varbit BARBASSAULT_POINTS_ATTACKER_BASE 50
+varbit BARBASSULT_ROLELEVEL_COL 5
+varbit BARBASSAULT_POINTS_COLLECTOR_BASE 0
+varbit BARBASSAULT_POINTS_COLLECTOR_EXTRA 0
+tick
+expect step = "Play attacker next"
+expect detail ~ "1,150 short · at most "
+expect target = NONE
+expect gauge.Attacker = "50/1200"
+expect gauge.Healer = "100/500"
+expect pick = "Next: attacker"
+expect goal = "150/1700"
+
+# Wave 1 as attacker, lost: the horn goes and no points come.
+chat GAMEMESSAGE "---- Wave: 1 ----"
+widget BarbassaultOverAtt.BARBASSAULT_ATTACKER_HORN_TEXT text "Attacker"
+tick 40
+expect step = "Wave 1 as attacker"
+close BarbassaultOverAtt.BARBASSAULT_ATTACKER_HORN_TEXT
+tick 3
+expect step = "Wave 1 next"
+expect detail ~ "Wave 1 lost: again · "
+expect lines ~ "Wave 1 · attacker TODO"
+
+# Wave 1 again, won.
+chat GAMEMESSAGE "---- Wave: 1 ----"
+widget BarbassaultOverAtt.BARBASSAULT_ATTACKER_HORN_TEXT text "Attacker"
+tick 60
+expect step = "Wave 1 as attacker"
+# Your log has no won wave 1 yet, so no quickest beside it.
+expect detail = "0:36 so far"
+close BarbassaultOverAtt.BARBASSAULT_ATTACKER_HORN_TEXT
+varbit BARBASSAULT_POINTS_ATTACKER_BASE 62
+widget BarbassaultWavecomplete.ROOT_MODEL0
+tick
+close BarbassaultWavecomplete.ROOT_MODEL0
+tick 10
+expect step = "Wave 2 next"
+expect lines ~ "Wave 1 · attacker TODO, Wave 1 · attacker DONE"
+expect stat.Waves_won = "1"
+
+# Wave 2, and a logout in it: the game is kept as it stood, the wave untimed.
+chat GAMEMESSAGE "---- Wave: 2 ----"
+widget BarbassaultOverAtt.BARBASSAULT_ATTACKER_HORN_TEXT text "Attacker"
+tick 20
+state LOGIN_SCREEN
+close BarbassaultOverAtt.BARBASSAULT_ATTACKER_HORN_TEXT
+state LOGGED_IN
+tick 3
+# Timed to the start of wave 2, the last thing seen before the logout.
+expect saved.assault.kept ~ ",114,12,0,0,0,1A41x/1A61d/2A0x"
+expect stat.Points = "12"
+expect step = "Play attacker next"
+
+# Away from the outpost the companion rests; and off, it says nothing at the outpost.
+setting barbarianAssault off
+tick
+expect activity = NONE

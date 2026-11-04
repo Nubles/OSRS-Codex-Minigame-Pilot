@@ -48,6 +48,8 @@ public class SavedSettingsTest
 			"stealingValuables", "valuablesOwners", "valuablesLevel",
 			// Rogues' Den.
 			"roguesDen", "roguesDenTraps",
+			// Barbarian Assault.
+			"barbarianAssault", "assaultReward",
 			"fieldNotes")), keys);
 		assertEquals("codexminigamepilot", CodexMinigamePilotConfig.GROUP);
 	}
