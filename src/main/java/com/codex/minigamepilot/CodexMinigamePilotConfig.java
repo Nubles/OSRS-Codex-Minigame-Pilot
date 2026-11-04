@@ -806,6 +806,18 @@ public interface CodexMinigamePilotConfig extends Config
 		return true;
 	}
 
+	@ConfigItem(
+		keyName = "barracudaTrials",
+		name = "Barracuda Trials",
+		description = "Keep every Barracuda Trial run with a split at each objective, race the ghost of your best run of each trial and rank, and see your Sailing experience an hour by trial and the next rank's time to beat",
+		section = MINIGAMES,
+		position = 33
+	)
+	default boolean barracudaTrials()
+	{
+		return true;
+	}
+
 	@ConfigItem(keyName = "plaque", name = "Step plaque", description = "Show the next step on a small plaque in the game view", section = GUIDANCE, position = 0)
 	default boolean plaque()
 	{
@@ -850,6 +862,18 @@ public interface CodexMinigamePilotConfig extends Config
 
 	@ConfigItem(keyName = "visitChat", name = "Visit summary in chat", description = "When you leave the Motherlode Mine or the Blast Furnace, say in the chat what the visit came to", section = GUIDANCE, position = 7)
 	default boolean visitChat()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "barracudaWaypoint",
+		name = "Barracuda next waypoint",
+		description = "In a Barracuda Trial, mark the one place your best run of that trial and rank passed its next objective: a single tile and a ring on the minimap, never a path. Learnt from your own runs only",
+		section = GUIDANCE,
+		position = 9
+	)
+	default boolean barracudaWaypoint()
 	{
 		return true;
 	}

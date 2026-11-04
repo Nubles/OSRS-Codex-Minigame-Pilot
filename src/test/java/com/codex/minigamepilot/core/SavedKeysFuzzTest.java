@@ -534,6 +534,37 @@ public class SavedKeysFuzzTest
 	}
 
 	@Test
+	public void barracudaKept()
+	{
+		survive("barracuda.kept", "1;1767000000000,t,s,190,776,f,60.2970.2960/120.2990.2980/190.2960.2950;1767000100000,j,-,30,0,o,;1767000200000,g,m,600,9000,a,100.0.0", s ->
+		{
+			BarracudaLog g = BarracudaLog.decode(s);
+			for (Barracuda.Trial t : new Barracuda.Trial[]{null, Barracuda.Trial.TEMPOR_TANTRUM, Barracuda.Trial.GWENITH_GLIDE})
+			{
+				for (double h : new double[]{g.xpPerHour(t), g.xpPerHourSitting(t)})
+				{
+					assertTrue(!Double.isNaN(h) && !Double.isInfinite(h));
+				}
+			}
+			for (BarracudaLog.Run x : g.all())
+			{
+				assertTrue(x.ticks >= 0 && x.ticks <= BarracudaLog.LONGEST && x.xp >= 0 && x.xp <= BarracudaLog.XP_MAX);
+				assertTrue(x.trial != null && x.end != null && x.splits().size() <= BarracudaLog.SPLITS_MAX);
+				int last = 0;
+				for (BarracudaLog.Split sp : x.splits())
+				{
+					assertTrue(sp.tick >= last && sp.x >= 0 && sp.y >= 0);
+					last = sp.tick;
+				}
+				sane(Barracuda.clock(x.ticks));
+				sane(x.course());
+			}
+			BarracudaLog.decode(g.encode());
+		});
+		survive("barracuda.ranks", "1;tsjkgm", s -> com.codex.minigamepilot.pilot.BarracudaPilotTest.ranks(s));
+	}
+
+	@Test
 	public void nmzKills()
 	{
 		survive("nmz.kills", "1;H|Count Draynor|1|2600;N|Elvarg|3|7200", s ->

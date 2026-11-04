@@ -57,6 +57,8 @@ public final class Pilots
 	private volatile boolean useNmz = true;
 	private final VolcanicPilot volcanic = new VolcanicPilot();
 	private volatile boolean useVolcanic = true;
+	private final BarracudaPilot barracuda = new BarracudaPilot();
+	private volatile boolean useBarracuda = true;
 	private final Coach coach;
 	private final Recorder recorder;
 	private final IntUnaryOperator price;
@@ -107,6 +109,7 @@ public final class Pilots
 		nmz.setStore(load, saveKey);
 		nmz.setPrice(price);
 		volcanic.setStore(load, saveKey);
+		barracuda.setStore(load, saveKey);
 		this.coach = new Coach(loadBests, saveBests);
 		this.recorder = new Recorder(notes);
 		this.scene = new SceneIndex(client, id -> MotherlodePilot.isWatched(id) || FurnacePilot.isWatched(id) || HomesPilot.isWatched(id)
@@ -151,6 +154,13 @@ public final class Pilots
 	{
 		useVolcanic = on;
 		volcanic.settings(reward);
+	}
+
+	/** The "Barracuda Trials" settings: on, and the next waypoint from your ghost. */
+	public void barracudaTrials(boolean on, boolean waypoint)
+	{
+		useBarracuda = on;
+		barracuda.settings(waypoint);
 	}
 
 	/** After a Mahogany Homes hand-in, a line when the planks left run low, once, or null. */
@@ -310,6 +320,7 @@ public final class Pilots
 			gnome.newAccount();
 			nmz.newAccount();
 			volcanic.newAccount();
+			barracuda.newAccount();
 			said.clear();
 			unsaid.clear();
 		}
@@ -344,6 +355,7 @@ public final class Pilots
 		assault.chat(message, client.getTickCount());
 		wintertodt.chat(message);
 		volcanic.chat(message);
+		barracuda.chat(message);
 		gnome.chat(message, client.getTickCount());
 	}
 
@@ -439,6 +451,11 @@ public final class Pilots
 		if (useVolcanic)
 		{
 			volcanic.watch(client, now);
+		}
+		// A Barracuda Trial run is followed every tick too, so sailing away or logging out ends it.
+		if (useBarracuda)
+		{
+			barracuda.watch(client, npcs(), now);
 		}
 		if (useMotherlode && MotherlodePilot.inMine(client))
 		{
@@ -559,6 +576,13 @@ public final class Pilots
 			state = volcanic.lastState;
 			units = volcanic.units();
 		}
+		else if (useBarracuda && barracuda.active(client))
+		{
+			activity = View.Activity.BARRACUDA_TRIALS;
+			flight = barracuda.fly(client, npcs(), now);
+			state = barracuda.lastState;
+			units = barracuda.units();
+		}
 		else if (useAssault && assault.active(client, scene, npcs()))
 		{
 			activity = View.Activity.BARBARIAN_ASSAULT;
@@ -638,6 +662,10 @@ public final class Pilots
 			else if (last == View.Activity.VOLCANIC_MINE)
 			{
 				volcanic.left();
+			}
+			else if (last == View.Activity.BARRACUDA_TRIALS)
+			{
+				barracuda.left();
 			}
 			last = activity;
 		}
@@ -737,6 +765,8 @@ public final class Pilots
 		nmz.relogged(now, client.getTickCount());
 		// A Volcanic Mine game ends on logging out.
 		volcanic.relogged(client, now, client.getTickCount());
+		// A Barracuda Trial run ends on logging out.
+		barracuda.relogged(client, now, client.getTickCount());
 		motherlode.relogged();
 		furnace.relogged();
 		coach.left();
@@ -863,6 +893,7 @@ public final class Pilots
 		v.brief(gnome.brief());
 		v.brief(nmz.brief());
 		v.brief(volcanic.brief());
+		v.brief(barracuda.brief(client.getRealSkillLevel(net.runelite.api.Skill.SAILING)));
 		return v;
 	}
 }
