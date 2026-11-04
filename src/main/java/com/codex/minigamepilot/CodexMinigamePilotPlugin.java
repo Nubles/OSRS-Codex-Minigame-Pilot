@@ -74,8 +74,8 @@ import net.runelite.client.util.Text;
 	name = "Codex Minigame Pilot",
 	internalName = "codex-minigame-pilot",
 	legacyDataDirectory = "codex-minigame-pilot",
-	description = "One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes, Guardians of the Rift, Tempoross, the Giants' Foundry, Mastering Mixology, Vale Totems and the Tithe Farm: what to click, the path there, and why",
-	tags = {"motherlode", "mlm", "blast furnace", "mahogany homes", "construction", "mining", "smithing", "guardians of the rift", "gotr", "runecraft", "tempoross", "fishing", "giants foundry", "mastering mixology", "mixology", "herblore", "vale totems", "fletching", "varlamore", "tithe farm", "farming", "guide", "codex"}
+	description = "One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes, Guardians of the Rift, Tempoross, the Giants' Foundry, Mastering Mixology, Vale Totems, the Tithe Farm and stealing artefacts: what to click, the path there, and why",
+	tags = {"motherlode", "mlm", "blast furnace", "mahogany homes", "construction", "mining", "smithing", "guardians of the rift", "gotr", "runecraft", "tempoross", "fishing", "giants foundry", "mastering mixology", "mixology", "herblore", "vale totems", "fletching", "varlamore", "tithe farm", "farming", "stealing artefacts", "thieving", "piscarilius", "guide", "codex"}
 )
 public class CodexMinigamePilotPlugin extends Plugin
 {
@@ -183,6 +183,7 @@ public class CodexMinigamePilotPlugin extends Plugin
 		pilots.mixology(config.mixology(), config.mixologyPlan(), config.mixologyReward().reward(), config.mixologyCues());
 		pilots.totems(config.valeTotems(), config.totemsWood().wood(), config.totemsClaim(), config.totemsReward().reward());
 		pilots.tithe(config.titheFarm(), config.tithePlants().plan(), config.titheReward().reward());
+		pilots.artefacts(config.stealingArtefacts(), config.artefactsPatrols(), config.artefactsLevel());
 		goals = new GoalWatch(key -> configManager.getRSProfileConfiguration(CodexMinigamePilotConfig.GROUP, key),
 			(key, value) -> configManager.setRSProfileConfiguration(CodexMinigamePilotConfig.GROUP, key, value),
 			this::navigatorBoard);
@@ -288,6 +289,12 @@ public class CodexMinigamePilotPlugin extends Plugin
 		if (CodexMinigamePilotConfig.GROUP.equals(event.getGroup()) && event.getKey() != null && event.getKey().startsWith("tithe") && pilots != null)
 		{
 			pilots.tithe(config.titheFarm(), config.tithePlants().plan(), config.titheReward().reward());
+			return;
+		}
+		if (CodexMinigamePilotConfig.GROUP.equals(event.getGroup()) && event.getKey() != null
+			&& ("stealingArtefacts".equals(event.getKey()) || event.getKey().startsWith("artefacts")) && pilots != null)
+		{
+			pilots.artefacts(config.stealingArtefacts(), config.artefactsPatrols(), config.artefactsLevel());
 			return;
 		}
 		if (CodexMinigamePilotConfig.GROUP.equals(event.getGroup()) && "tickCoach".equals(event.getKey()) && pilots != null)
@@ -660,7 +667,7 @@ public class CodexMinigamePilotPlugin extends Plugin
 	/** Whether a step's destination beyond the scene gets the hint arrow and a world map marker. */
 	private static boolean travels(Flight f)
 	{
-		return f.activity == View.Activity.HOMES || f.activity == View.Activity.TOTEMS;
+		return f.activity == View.Activity.HOMES || f.activity == View.Activity.TOTEMS || f.activity == View.Activity.ARTEFACTS;
 	}
 
 	/** Clears the hint arrow only if it is still the one the Pilot set. */
@@ -690,12 +697,25 @@ public class CodexMinigamePilotPlugin extends Plugin
 		mapPoint = WorldMapPoint.builder()
 			.worldPoint(want)
 			.image(icon)
-			.name(f.activity == View.Activity.TOTEMS ? "Vale totem site" : "Mahogany Homes client")
-			.tooltip(f.activity == View.Activity.TOTEMS ? "Vale totem site" : "Mahogany Homes client")
+			.name(mapName(f))
+			.tooltip(mapName(f))
 			.jumpOnClick(true)
 			.snapToEdge(true)
 			.build();
 		worldMapPointManager.add(mapPoint);
+	}
+
+	private static String mapName(Flight f)
+	{
+		if (f.activity == View.Activity.TOTEMS)
+		{
+			return "Vale totem site";
+		}
+		if (f.activity == View.Activity.ARTEFACTS)
+		{
+			return f.step != null && f.step.getTarget() == com.codex.minigamepilot.core.Step.Target.KHALED ? "Captain Khaled" : "Artefact house";
+		}
+		return "Mahogany Homes client";
 	}
 
 	private void clearMapPoint()

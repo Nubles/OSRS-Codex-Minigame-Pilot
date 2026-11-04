@@ -96,7 +96,14 @@ public final class Step
 		SEED_TABLE,
 		WATER_BARREL,
 		/** The farm door, between the seed table's room and the patches. */
-		FARM_DOOR
+		FARM_DOOR,
+		// Stealing artefacts (a house's ladder is LADDER)
+		/** Captain Khaled, who gives the tasks and takes the artefacts. */
+		KHALED,
+		/** The drawers in the house of the task. */
+		DRAWERS,
+		/** The house of the task, before its drawers or ladder are in sight. */
+		HOUSE
 	}
 
 	private final String verb;

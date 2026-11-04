@@ -1,6 +1,6 @@
 # Codex Minigame Pilot
 
-**One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes, Guardians of the Rift, Tempoross, the Giants' Foundry, Mastering Mixology, Vale Totems and the Tithe Farm.** The Pilot watches the minigame you are in and always shows the single thing to do next: what to click, lit in gold in the world, the path there drawn on the ground and the minimap, and a line on why. You still do every click. It only reads the game and draws.
+**One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes, Guardians of the Rift, Tempoross, the Giants' Foundry, Mastering Mixology, Vale Totems, the Tithe Farm and stealing artefacts.** The Pilot watches the minigame you are in and always shows the single thing to do next: what to click, lit in gold in the world, the path there drawn on the ground and the minimap, and a line on why. You still do every click. It only reads the game and draws.
 
 It is part of the **Codex** suite of RuneLite plugins and shares their look: warm ink, aged gold and the game's own fonts.
 
@@ -123,6 +123,22 @@ It is part of the **Codex** suite of RuneLite plugins and shares their look: war
   <img src="docs/screenshots/tithe-plaque-water.png" alt="Plaque at a wilting plant">
 </p>
 
+### Stealing artefacts
+- **The house Captain Khaled names.** The task is read from the game (the varbit RuneLite calls `PISCARILIUS_BURGLARY_TARGET`) and from Khaled's own words when he gives it ("It can be found in the..."). Which varbit value is which house is not on the wiki, so where his words and the varbit disagree, his words win and the panel says so. The varbit values and where each house stands are as the [Stealing Artefacts](https://github.com/pajlads/StealingArtefacts) plugin (MIT) has them, re-implemented rather than copied; each drawer's place is replaced by the game's own once it comes into view.
+- **Ladder, drawers, and back down.** Only the north house keeps its drawer on the ground floor; in the others the step is the house's ladder, then the drawers (lit gold, *Pick-lock*), then the ladder down. Upstairs in the wrong house, it says so. A house out of sight gets the hint arrow and a world map marker, pointed where its drawers were last seen.
+- **On foot, clear of the patrols.** With an artefact the step is Captain Khaled, walked to on foot: the wiki says a teleport, a logout or a random event loses it, so a teleport book you carry is flagged "not until the hand-in". The patrols near you are outlined in ember with a wedge on the ground the way each faces (*Mark patrols*), and the step says when the nearest one is facing you.
+- **The district on the panel.** The six houses as they lie, the task's lit, the patrols with their facing, Khaled (or an arrow his way) and you.
+- **Every artefact kept.** Each trip, from the task to the hand-in, is kept per account with its house, Thieving experience, Khaled's coins and time, or as lost when it never reached him. The panel shows artefacts, experience and coins an hour at your own pace, against the wiki's 48 an hour, your quickest trip, and your average to each house beside the wiki's.
+- **A Thieving level, and the diary.** Your next level (or the one under *Stealing artefacts level*) in artefacts at 750 and 40 times your level each, and in time at your pace, with the Kourend & Kebos hard diary task (deliver an artefact) ticked once you have.
+
+<p align="center">
+  <img src="docs/screenshots/artefacts-panel-ladder.png" width="225" alt="Stealing artefacts: the west house's ladder">
+  <img src="docs/screenshots/artefacts-panel-hot.png" width="225" alt="Stealing artefacts: back to Captain Khaled with the patrols marked">
+</p>
+<p align="center">
+  <img src="docs/screenshots/artefacts-plaque-hot.png" alt="Plaque with an artefact in hand">
+</p>
+
 ### Tempoross
 - **One step through the storm.** Catch harpoonfish, cook them at the shrine, fill the ammunition crate, and harpoon the spirit pool while Tempoross is down. Each step is lit in the world, the fishing spot, the shrine, the crate or the pool, with its path and a line of why.
 - **The double spot first.** When a spot of jumping harpoonfish is up, that is where you fish, even with raw fish still to cook: it can give two a catch, and the wiki's strategies say to fish there wherever possible.
@@ -170,7 +186,7 @@ It is part of the **Codex** suite of RuneLite plugins and shares their look: war
 
 ## The panel
 
-The helm at the top holds the next action as one large gilt word and the full instruction under it, and flares when the step changes. Under it, the minigame's loop with your place in it, its gauges (the sack with pay-dirt in flight, the furnace's coal against what the next load needs, the planks the job still takes), the furniture checklist, and the session so far: pay-dirt, ore, bars, contracts, points and experience, with hourly pace. Away from the minigames it lists all seven and what is waiting at each, such as an open contract, and what your last visit to the Motherlode Mine and the Blast Furnace came to: "Last visit 3 hours ago: 1h 12m for 1,134 pay-dirt, 972 ore, 68k Mining xp and ore worth 142k."
+The helm at the top holds the next action as one large gilt word and the full instruction under it, and flares when the step changes. Under it, the minigame's loop with your place in it, its gauges (the sack with pay-dirt in flight, the furnace's coal against what the next load needs, the planks the job still takes), the furniture checklist, and the session so far: pay-dirt, ore, bars, contracts, points and experience, with hourly pace. Away from the minigames it lists them all and what is waiting at each, such as an open contract, and what your last visit to the Motherlode Mine and the Blast Furnace came to: "Last visit 3 hours ago: 1h 12m for 1,134 pay-dirt, 972 ore, 68k Mining xp and ore worth 142k."
 
 Each minigame's card also keeps your best visit, the most pay-dirt or bars an hour over at least fifteen minutes, with its experience an hour: "Best visit 5 days ago: 1,620 pay-dirt and 81k Mining xp an hour over 1h 24m." It is kept per account, and a session never carries over to another account.
 
@@ -245,7 +261,7 @@ All are read only, never written, and everything works without them.
 
 ## Your data
 
-Your bank's goal items and supplies as last seen, your Mahogany Homes points, your Guardians of the Rift points, your last thirty Tempoross games, your last fifty Giants' Foundry swords and the moulds the jig has shown you own, your last hundred Mastering Mixology deliveries, your last hundred Vale totems with where each totem site stands and the order you visit them, your last hundred Tithe Farm sacks and the order you plant your round in, your last fifty Mahogany Homes contracts, the rewards you own, your round bests, your last and best visit to each minigame and what your contracts take are saved in your RuneLite profile, per account. A damaged or hand-edited value is read as far as it can be and the rest left out, so it never stops the Pilot.
+Your bank's goal items and supplies as last seen, your Mahogany Homes points, your Guardians of the Rift points, your last thirty Tempoross games, your last fifty Giants' Foundry swords and the moulds the jig has shown you own, your last hundred Mastering Mixology deliveries, your last hundred Vale totems with where each totem site stands and the order you visit them, your last hundred Tithe Farm sacks and the order you plant your round in, your last two hundred artefact trips with where each house's drawers and Captain Khaled were seen, your last fifty Mahogany Homes contracts, the rewards you own, your round bests, your last and best visit to each minigame and what your contracts take are saved in your RuneLite profile, per account. A damaged or hand-edited value is read as far as it can be and the rest left out, so it never stops the Pilot.
 
 ## Field notes
 
@@ -257,9 +273,9 @@ Codex Minigame Pilot is guidance only. It reads what the game already shows you 
 
 ## Settings that matter
 
-- **Minigames:** turn each of the nine off; *Tithe plants a round* for the Tithe Farm; *Vale totem wood* and *Claim offerings as you pass* for Vale Totems; *Mixology orders to make* (every order, or the most resin per paste) and *Mixology station cues*; *Cook before loading* and *Load what you hold at storm* (80%) for Tempoross; *Fragments before first craft* for Guardians of the Rift (120 by default); fix the *Blast Furnace bar* instead of letting the Pilot work it out; *Top up coffer below* (2,500 coins by default).
+- **Minigames:** turn each of the ten off; *Mark patrols* for stealing artefacts; *Tithe plants a round* for the Tithe Farm; *Vale totem wood* and *Claim offerings as you pass* for Vale Totems; *Mixology orders to make* (every order, or the most resin per paste) and *Mixology station cues*; *Cook before loading* and *Load what you hold at storm* (80%) for Tempoross; *Fragments before first craft* for Guardians of the Rift (120 by default); fix the *Blast Furnace bar* instead of letting the Pilot work it out; *Top up coffer below* (2,500 coins by default).
 - **Guidance:** *Step plaque*, *Path on the ground*, *Path on minimap*, *Action labels*, *Mark what comes after*, *Hint arrow*, *World map marker* and *Low planks in chat* for Mahogany Homes, and *Visit summary in chat*. All on by default.
-- **Goals:** what Motherlode nuggets and Mahogany Homes points are saved for, the *Mixology reward* your resin is saved for, the *Vale Totems reward* your research points are saved for, the *Tithe Farm reward* your points are saved for, the *Blast Furnace level* to work toward (0 for the next), *Show goals* and *Reward road*.
+- **Goals:** what Motherlode nuggets and Mahogany Homes points are saved for, the *Mixology reward* your resin is saved for, the *Vale Totems reward* your research points are saved for, the *Tithe Farm reward* your points are saved for, the *Stealing artefacts level* (0 for the next), the *Blast Furnace level* to work toward (0 for the next), *Show goals* and *Reward road*.
 - **Tick coach:** *Tick coach*, on by default.
 - **Field notes:** *Keep field notes*, off by default.
 

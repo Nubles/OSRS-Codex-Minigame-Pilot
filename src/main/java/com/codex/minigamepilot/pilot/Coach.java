@@ -138,6 +138,8 @@ final class Coach
 				return Skill.FLETCHING;
 			case TITHE:
 				return Skill.FARMING;
+			case ARTEFACTS:
+				return Skill.THIEVING;
 			default:
 				return null;
 		}
@@ -357,6 +359,12 @@ final class Coach
 				return "the water barrel";
 			case FARM_DOOR:
 				return "the farm door";
+			case KHALED:
+				return "Captain Khaled";
+			case DRAWERS:
+				return "the drawers";
+			case HOUSE:
+				return "the house";
 			default:
 				return null;
 		}

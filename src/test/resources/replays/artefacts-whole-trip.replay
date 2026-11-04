@@ -1,0 +1,82 @@
+# Stealing artefacts: a whole trip. Captain Khaled names the west house, the ladder and the
+# drawers upstairs are lit, the artefact goes back down and to him on foot with the patrol near
+# you marked, and the trip is kept with its experience, coins and time.
+#
+# Facts (OSRS wiki, Stealing artefacts; Captain Khaled; Transcript:Captain Khaled):
+#  - "requiring level 49 Thieving to participate"; "A lockpick or hair clip is required"
+#  - Khaled: "It can be found in the [location]."
+#  - "Successfully picking the lock grants 750 Thieving experience"; delivering "yields additional
+#    Thieving experience equal to 40 times the current Thieving level" (2,800 at 70) and
+#    "500–1,000 coins"
+#  - the task is varbit PISCARILIUS_BURGLARY_TARGET; that 5 is the west house and 8 "deliver" is
+#    as the Stealing Artefacts plugin reads it (unconfirmed)
+include /replays/scenes/artefacts.scene
+skill HITPOINTS 10
+skill THIEVING 70
+items INV set LOCKPICK 1 COINS 1000
+tick
+expect activity = ARTEFACTS
+expect step = "Ask Captain Khaled for a house"
+expect npc = "Captain Khaled"
+expect district = "target none, 0 patrols, Khaled"
+expect goal.note ~ "artefacts at 3,550 xp each; the time shows after your first trip"
+expect goal.pieces ~ "Hard diary: deliver an artefact TODO"
+
+# He names the west house; the task varbit follows.
+widget ChatLeft.TEXT text "You need to recover an artefact for me. It can be found in the West House."
+varbit PISCARILIUS_BURGLARY_TARGET 5
+tick
+close ChatLeft.TEXT
+expect step = "Climb the ladder in the west house"
+expect object = westLadderUp
+expect detail = "The drawers are upstairs"
+expect lines.note = "As Khaled said"
+expect pick.current = "West house 1:20"
+expect place = "Port Piscarilius · west house"
+
+walk 1752 3753
+at 1752 3753 1
+tick
+expect step = "Pick the lock of the drawers"
+expect verb = "Pick-lock"
+expect object = westDrawers
+
+# The lock is picked: 750 xp and an artefact.
+items INV set LOCKPICK 1 COINS 1000 PISCARILIUS_STOLEN_RING 1
+xp THIEVING 738377
+varbit PISCARILIUS_BURGLARY_TARGET 8
+tick
+expect step = "Climb down the ladder"
+expect object = westLadderDown
+
+at 1752 3753 0
+npc PISCARILIUS_PATROLMAN_N_1 "Patrolman" 1758 3750 as patrol
+tick
+expect step = "Take the artefact to Captain Khaled"
+expect target = KHALED
+expect npc = "Captain Khaled"
+expect wary = 1
+expect district = "target none, 1 patrol, Khaled"
+expect detail ~ "patrol"
+expect place = "Piscarilius · artefact in hand"
+never step = "Climb the ladder in the west house"
+walk 1789 3745
+
+# The hand-in: the artefact goes, 2,800 xp and 750 coins come.
+items INV set LOCKPICK 1 COINS 1750
+xp THIEVING 741177
+varbit PISCARILIUS_BURGLARY_TARGET 0
+tick 3
+expect saved.artefacts.kept ~ ",WEST,1,3550,750"
+expect stat.Delivered = "1"
+expect stat.Coins = "750"
+expect stat.Lost = "0"
+expect supply.headline ~ "Quickest: west house in "
+expect goal.pieces ~ "Hard diary: deliver an artefact DONE"
+expect step = "Ask Captain Khaled for a house"
+expect saved.artefacts.places ~ "WEST:1750,3749,1"
+expect saved.artefacts.places ~ "KHALED:1790,3745,0"
+expect stat.Thieving_xp = "3,550"
+# 3,550 xp in 74 ticks (44 seconds): the next level at that pace.
+expect goal.note = "21 artefacts at 3,550 xp each, about 15m at your pace"
+expect pick.current = "-"

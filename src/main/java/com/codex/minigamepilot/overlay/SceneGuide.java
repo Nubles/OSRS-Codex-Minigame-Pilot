@@ -94,6 +94,10 @@ public class SceneGuide extends Overlay
 				}
 			}
 		}
+		for (NPC n : f.wary)
+		{
+			drawWary(g, n);
+		}
 		if (set.route)
 		{
 			drawRoute(g, f.route, f.step.isWaiting());
@@ -192,6 +196,51 @@ public class SceneGuide extends Overlay
 			{
 				plate(g, f.step.getVerb(), at.getX(), at.getY(), Theme.GOLD);
 			}
+		}
+	}
+
+	/**
+	 * A character to keep clear of: its outline in ember, and on the ground a wedge the way it
+	 * faces, so you can see when it has turned away.
+	 */
+	private void drawWary(Graphics2D g, NPC npc)
+	{
+		LocalPoint lp = npc.getLocalLocation();
+		if (lp != null)
+		{
+			double a = npc.getOrientation() * Math.PI * 2 / 2048.0;
+			int len = 2 * Perspective.LOCAL_TILE_SIZE;
+			int plane = client.getTopLevelWorldView().getPlane();
+			Polygon wedge = new Polygon();
+			Point at = Perspective.localToCanvas(client, lp, plane);
+			if (at != null)
+			{
+				wedge.addPoint(at.getX(), at.getY());
+				for (double spread : new double[]{0.45, -0.45})
+				{
+					double dx = -Math.sin(a + spread);
+					double dy = -Math.cos(a + spread);
+					Point p = Perspective.localToCanvas(client, new LocalPoint(lp.getX() + (int) (dx * len), lp.getY() + (int) (dy * len), lp.getWorldView()), plane);
+					if (p == null)
+					{
+						wedge = null;
+						break;
+					}
+					wedge.addPoint(p.getX(), p.getY());
+				}
+				if (wedge != null)
+				{
+					g.setColor(Ink.WARY_FILL);
+					g.fill(wedge);
+				}
+			}
+		}
+		Shape hull = npc.getConvexHull();
+		if (hull != null)
+		{
+			g.setStroke(Ink.MEDIUM);
+			g.setColor(Ink.WARY_RIM);
+			g.draw(hull);
 		}
 	}
 
