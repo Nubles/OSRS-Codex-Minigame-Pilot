@@ -26,10 +26,15 @@ final class Ink
 	static final Color MINIMAP_SHADOW = Theme.alpha(Color.BLACK, 140);
 	static final Color PLATE_FILL = Theme.alpha(Theme.INK_DEEP, 215);
 	static final Color RING_RIM = Theme.alpha(Theme.GOLD_BRIGHT, 230);
+	/** Under a ring on a light interface, such as the chatbox's parchment, so the gold still reads. */
+	static final Color RING_SHADOW = Theme.alpha(Theme.INK_DEEP, 200);
+	static final BasicStroke HEAVY = new BasicStroke(4f);
 	static final Color HULL_RIM = Theme.alpha(Theme.GOLD_BRIGHT, 220);
 
 	/** The target's fill as it pulses, from 30 to 70 alpha, for gold and for teal. */
 	static final Color[] GOLD_PULSE = pulse(Theme.GOLD, 30, 40);
+	/** Stronger, for a choice on the chatbox's light parchment. */
+	static final Color[] CHOICE_PULSE = pulse(Theme.GOLD_BRIGHT, 25, 30);
 	static final Color[] TEAL_PULSE = pulse(Theme.TEAL, 30, 40);
 	/** A character's hull pulses a little softer. */
 	static final Color[] HULL_PULSE = pulse(Theme.GOLD, 25, 35);

@@ -1,0 +1,152 @@
+# Vale Totems: one whole totem at an empty site, from the build with the best logs carried, through
+# the three spirits the site wants (ringed in the carving choices by their icons) and four maple
+# decorations, to the ents' offerings claimed and on to the next site, which the Pilot then learns
+# is where you go after this one.
+#
+# Facts (OSRS wiki, Vale Totems, Oak totem, Redwood totem, Offering site, Ent trail):
+#  - "Maple: 50 Fletching", "Yew: 65 Fletching"; "temporary Fletching skill boosts do work"
+#  - "Each complete totem requires five logs (one to build the totem and four fletched items for
+#    decorations)"; decorations are "4 of any Fletching product made of" the totem's wood
+#  - "Totems should be carved to match the nearby spirits; of the 5 spirit variants, only 3 will
+#    be active near a totem site at any time"; 25% less decoration experience per wrong animal
+#  - offerings are claimed at the offering site ("Claim"); "Rummaging the offerings consumes 100
+#    of them for one Vale Research Point"
+#  - "The player will also receive 15% increased experience for the next 4 build/carving actions"
+#    after stepping on a pair of ent trails
+#  - the spirits A to E are the buffalo (NPC 14589), jaguar (14590), eagle (14591), snake (14592)
+#    and scorpion (14593): RuneLite's ENT_TOTEMS_ANIMAL_A to _E
+#  - what the site varbits' values mean (base 0 for none, a wanted spirit 1 to 5, a carved tier
+#    the spirit plus 9, decorations 0 to 4, offerings waiting) is as the Totem Fletching plugin
+#    by TheRealGuru reads them (a cross-check)
+include /replays/scenes/totems.scene
+skill HITPOINTS 10
+skill FLETCHING 60
+items INV set KNIFE 1 MAPLE_LOGS 5 OAK_LOGS 2
+at 1381 3321
+tick
+expect activity = TOTEMS
+expect place = "Site 1 · empty"
+expect step = "Build a maple totem"
+expect object = site1
+expect lines = "Site 1 NEXT, Site 2 TODO, Site 3 TODO, Site 4 IDLE, Site 5 IDLE, Site 6 IDLE, Site 7 IDLE, Site 8 IDLE"
+expect lines.note = "Loop: 8 logs, 32 decorations"
+# Where the three sites in sight stand is kept for the account.
+expect saved.totems.sites = "1380,3320,0;1400,3330,0;1420,3320,0;-;-;-;-;-"
+# Ent trails within reach are marked quietly while no trail bonus is under way.
+expect others = "trailA, trailB"
+
+# One wood chosen in the settings; a wood above your level is said, not guessed around.
+totems wood OAK
+tick
+expect step = "Build an oak totem"
+totems wood YEW
+tick
+expect step = "Yew totems need 65 Fletching"
+totems wood BEST
+tick
+expect step = "Build a maple totem"
+
+# Built: the site wants the eagle, the buffalo and the scorpion.
+varbit ENT_TOTEMS_SITE_1_BASE 3
+varbit ENT_TOTEMS_SITE_1_ANIMAL_1 3
+varbit ENT_TOTEMS_SITE_1_ANIMAL_2 1
+varbit ENT_TOTEMS_SITE_1_ANIMAL_3 5
+items INV set KNIFE 1 MAPLE_LOGS 4 OAK_LOGS 2
+tick
+expect place = "Site 1 · maple totem"
+expect step = "Carve the eagle"
+expect detail = "This site's spirits: eagle, buffalo and scorpion. Each wrong carving costs 25% of the decoration experience"
+expect gauge.Decorations = "0/4"
+expect marks = -
+
+# The carving choices on screen: the three the site wants are ringed, by the icons they show.
+widget Skillmulti.A item ENT_TOTEMS_ANIMAL_ICON_A 1
+widget Skillmulti.B item ENT_TOTEMS_ANIMAL_ICON_B 1
+widget Skillmulti.C item ENT_TOTEMS_ANIMAL_ICON_C 1
+widget Skillmulti.D item ENT_TOTEMS_ANIMAL_ICON_D 1
+widget Skillmulti.E item ENT_TOTEMS_ANIMAL_ICON_E 1
+tick
+expect marks = "Buffalo, Eagle, Scorpion"
+varbit ENT_TOTEMS_SITE_1_LOW 12
+tick
+expect step = "Carve the buffalo"
+expect marks = "Buffalo, Scorpion"
+varbit ENT_TOTEMS_SITE_1_MID 10
+tick
+expect step = "Carve the scorpion"
+expect detail ~ "The last carving"
+expect marks = "Scorpion"
+close Skillmulti.A
+close Skillmulti.B
+close Skillmulti.C
+close Skillmulti.D
+close Skillmulti.E
+varbit ENT_TOTEMS_SITE_1_TOP 14
+tick
+# Carved, and no maple decorations carried: fletch the logs with the knife.
+expect step = "Fletch your maple logs"
+expect detail = "Any fletched maple item decorates this totem; 4 still needed"
+expect marks = -
+items INV set KNIFE 1 MAPLE_LOGS 2 UNSTRUNG_MAPLE_SHORTBOW 2
+tick
+expect step = "Decorate the totem (0 of 4)"
+expect detail = "You carry 2 of the 4 still needed; fletch your logs for the rest"
+expect object = site1
+varbit ENT_TOTEMS_SITE_1_DECORATIONS 2
+items INV set KNIFE 1 MAPLE_LOGS 2
+tick
+expect step = "Fletch your maple logs"
+items INV set KNIFE 1 MAPLE_LOGS 3 UNSTRUNG_MAPLE_LONGBOW 2
+tick
+expect step = "Decorate the totem (2 of 4)"
+expect detail = "Any fletched maple item; 2 more finish it"
+expect gauge.Decorations = "2/4"
+
+# The fourth decoration finishes the totem: it is kept with the experience it gave.
+xp FLETCHING 275742
+varbit ENT_TOTEMS_SITE_1_DECORATIONS 4
+items INV set KNIFE 1 MAPLE_LOGS 3
+tick
+expect saved.totems.kept ~ ",MAPLE,2000,0"
+expect stat.Totems = "1"
+expect step = "Go to site 2"
+expect detail = "Then build a maple totem"
+expect object = site2
+expect lines = "Site 1 · maple DONE, Site 2 NEXT, Site 3 TODO, Site 4 IDLE, Site 5 IDLE, Site 6 IDLE, Site 7 IDLE, Site 8 IDLE"
+
+# An ent leaves offerings: claimed before moving on, unless that setting is off.
+varbit ENT_TOTEMS_SITE_1_POINTS 300
+tick
+expect step = "Claim the offerings"
+expect object = offerings1
+expect detail = "300 offerings here, 3 research points' worth"
+expect stat.Offerings = "300"
+expect gauge.Offerings = "300/15000"
+setting totemsClaim off
+tick
+expect step = "Go to site 2"
+setting totemsClaim on
+varbit ENT_TOTEMS_SITE_1_POINTS 0
+items INV set KNIFE 1 MAPLE_LOGS 3 ENT_TOTEMS_LOOT 300
+tick
+expect step = "Go to site 2"
+expect stat.Offerings = "300"
+
+# At site 2: build there, and the Pilot has learnt that site 2 comes after site 1 in your loop.
+at 1399 3329
+tick
+expect place = "Site 2 · empty"
+expect step = "Build a maple totem"
+varbit ENT_TOTEMS_SITE_2_BASE 3
+tick
+expect saved.totems.loop = "2,-1,-1,-1,-1,-1,-1,-1"
+# No multiloc read here: the wood is the base varbit's number.
+expect place = "Site 2 · maple totem"
+expect step = "Carve the totem"
+
+# A pair of ent trails stepped on: the bonus shows, and the trails are no longer marked.
+expect others = "trailA, trailB"
+varbit ENT_TOTEMS_TRAIL_XP_BUFF_ACTIONS 4
+tick
+expect gauge.Trail_bonus = "4/4"
+expect others = -

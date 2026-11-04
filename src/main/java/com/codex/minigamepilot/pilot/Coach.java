@@ -134,6 +134,8 @@ final class Coach
 				return Skill.SMITHING;
 			case MIXOLOGY:
 				return Skill.HERBLORE;
+			case TOTEMS:
+				return Skill.FLETCHING;
 			default:
 				return null;
 		}
@@ -341,6 +343,10 @@ final class Coach
 				return "the refiner";
 			case DIGWEED:
 				return "the digweed";
+			case TOTEM:
+				return "the totem";
+			case OFFERINGS:
+				return "the offerings";
 			default:
 				return null;
 		}

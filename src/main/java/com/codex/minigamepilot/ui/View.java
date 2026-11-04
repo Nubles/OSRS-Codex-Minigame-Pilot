@@ -20,7 +20,8 @@ public final class View
 		RIFT("Guardians of the Rift"),
 		TEMPOROSS("Tempoross"),
 		FOUNDRY("Giants' Foundry"),
-		MIXOLOGY("Mastering Mixology");
+		MIXOLOGY("Mastering Mixology"),
+		TOTEMS("Vale Totems");
 
 		private final String title;
 
@@ -436,6 +437,8 @@ public final class View
 			"The best moulds you own for the commission, the right tool at the right heat for each stage, and your swords kept."));
 		v.brief(new Brief(Activity.MIXOLOGY, null,
 			"Which orders your paste can fill, the levers for each, the right station with its cue, the paste to refine next, and your resin towards a reward."));
+		v.brief(new Brief(Activity.TOTEMS, null,
+			"The next totem site and the logs to bring, the three spirits each totem wants ringed in the carving choices, the offerings waiting, and your research points towards a reward."));
 		return v;
 	}
 

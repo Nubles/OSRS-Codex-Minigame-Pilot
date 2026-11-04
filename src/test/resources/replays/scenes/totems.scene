@@ -1,0 +1,34 @@
+# A schematic corner of Auburn Valley for Vale Totems replays. Not the real map: three of the
+# eight totem sites, each with its offerings beside it, a bank and a pair of ent trails, on one
+# open field near Auburnvale.
+#
+# Facts:
+#  - names are RuneLite's (net.runelite.api.gameval): each site's totem ENT_TOTEMS_SITE_n_BASE and
+#    its offerings ENT_TOTEMS_SITE_n_OFFERINGS; the ent trail ENT_TOTEMS_TRAIL_PART_0 and _1; the
+#    totem objects ENT_TOTEMS_BASE_NONE ("Totem site", 57064 on the wiki) and
+#    ENT_TOTEMS_CARVED_BASE_OAK to _REDWOOD ("Oak totem" 57065, "Redwood totem" 57091 on the wiki)
+#  - OSRS wiki, Vale Totems: "There are eight totems in the valley"; the strategies page begins a
+#    loop "at the bank in Auburnvale"
+#  - which varbit the game's totem multiloc follows is not known here: site 1's base varbit stands
+#    in, its number naming the wood (1 oak to 6 redwood). Site 2 shows no multiloc, so its wood is
+#    read from that varbit alone.
+#
+#   y 3330            site2 (1400) offerings2 (1402)
+#   y 3326     trailA (1390)  trailB (1392)
+#   y 3320  site1 (1380) offerings1 (1382)                 site3 (1420) offerings3 (1422)
+#   y 3300            bank (1390)
+#        x 1376                                            1424
+
+scene 1340 3260
+
+multiloc ENT_TOTEMS_SITE_1_BASE ENT_TOTEMS_SITE_1_BASE ENT_TOTEMS_BASE_NONE ENT_TOTEMS_CARVED_BASE_OAK ENT_TOTEMS_CARVED_BASE_WILLOW ENT_TOTEMS_CARVED_BASE_MAPLE ENT_TOTEMS_CARVED_BASE_YEW ENT_TOTEMS_CARVED_BASE_MAGIC ENT_TOTEMS_CARVED_BASE_REDWOOD
+object ENT_TOTEMS_SITE_1_BASE 1380 3320 as site1
+object ENT_TOTEMS_SITE_1_OFFERINGS 1382 3320 as offerings1
+object ENT_TOTEMS_SITE_2_BASE 1400 3330 as site2
+object ENT_TOTEMS_SITE_2_OFFERINGS 1402 3330 as offerings2
+object ENT_TOTEMS_SITE_3_BASE 1420 3320 as site3
+object ENT_TOTEMS_SITE_3_OFFERINGS 1422 3320 as offerings3
+object ENT_TOTEMS_TRAIL_PART_0 1390 3326 as trailA
+object ENT_TOTEMS_TRAIL_PART_1 1392 3326 as trailB
+name 90001 "Bank booth"                  # a stand-in booth: the Pilot finds banks by name
+object 90001 1390 3300 as bank

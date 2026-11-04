@@ -1,0 +1,34 @@
+# Vale Totems: offerings that arrive with a world hop (the game sending your sites' counts again)
+# are not offerings an ent left while you played. Only the rise seen after the hop counts towards
+# the next totem kept, and that totem is timed from your return.
+#
+# Facts: the site varbits as the Totem Fletching plugin by TheRealGuru reads them (a cross-check);
+# OSRS wiki, Vale Totems: "Every 80 ticks (48 seconds), Ents travel between these sites, leaving
+# offerings at completed totems"
+include /replays/scenes/totems.scene
+skill HITPOINTS 10
+skill FLETCHING 60
+items INV set KNIFE 1 UNSTRUNG_MAPLE_SHORTBOW 1
+varbit ENT_TOTEMS_SITE_1_BASE 3
+varbit ENT_TOTEMS_SITE_1_BASE_CARVED 1
+varbit ENT_TOTEMS_SITE_1_DECORATIONS 3
+at 1381 3321
+tick
+expect step = "Decorate the totem (3 of 4)"
+# An ent at site 2's finished totem leaves 200 offerings while you work.
+varbit ENT_TOTEMS_SITE_2_POINTS 200
+tick 2
+
+# A hop: the counts come back higher than last seen, as they would after time away.
+state HOPPING
+varbit ENT_TOTEMS_SITE_2_POINTS 700
+state LOGGED_IN
+tick
+varbit ENT_TOTEMS_SITE_2_POINTS 750
+tick
+xp FLETCHING 274742
+varbit ENT_TOTEMS_SITE_1_DECORATIONS 4
+tick
+# 50 offerings seen after the hop, not the 200 before it nor the 500 the hop brought; 1,000 xp
+# over the 2 ticks since you were back.
+expect saved.totems.kept ~ ",2,MAPLE,1000,50"

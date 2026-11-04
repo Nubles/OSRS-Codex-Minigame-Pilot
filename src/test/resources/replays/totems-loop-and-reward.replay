@@ -1,0 +1,78 @@
+# Vale Totems: your research points towards a reward at your own pace, a site too full of offerings
+# to build at, the bank when no logs are carried, your own loop order before the nearest site, and
+# a site beyond the loaded scene headed for where it was last seen.
+#
+# Facts (OSRS wiki, Vale Totems, Offering site, Vale Research Points, Vale Research Exchange):
+#  - "Level 20 Fletching is required for Vale Totems"; "Magic: 80 Fletching"
+#  - at 15,000 offerings a new totem cannot be built there: "You should take some of the offerings
+#    already here before building a new totem"
+#  - "Rummaging the offerings consumes 100 of them for one Vale Research Point"
+#  - the fletching knife costs 350 Vale Research Points at the Vale Research Exchange (Ranulph)
+#  - the strategies page begins each loop "at the bank in Auburnvale"
+#  - site varbit values as the Totem Fletching plugin by TheRealGuru reads them (a cross-check)
+include /replays/scenes/totems.scene
+skill HITPOINTS 10
+skill FLETCHING 85
+# Two magic totems kept from an earlier session, 200 ticks (2 minutes) apiece, each with 1,000
+# offerings from the ents: 30,000 offerings, 300 research points and 150,000 xp an hour.
+saved totems.kept "1;1767000000000,200,MAGIC,5000,1000;1767000120000,200,MAGIC,5000,1000"
+# Site 4 was seen on an earlier visit, out past this scene's edge.
+saved totems.sites "-;-;-;1500,3380,0;-;-;-;-"
+# You have gone from site 1 to site 3 before.
+saved totems.loop "3,-1,-1,-1,-1,-1,-1,-1"
+totems reward FLETCHING_KNIFE
+varp ENT_TOTEMS_RESEARCH_POINTS 200
+items INV set KNIFE 1 ENT_TOTEMS_LOOT 2500
+at 1381 3321
+tick
+# No logs carried: to the bank, for the best logs your level builds.
+expect step = "Bank for magic logs"
+expect object = bank
+expect stat.Research_points = "200"
+expect stat.Offerings = "2,500"
+# 200 points and 25 more in the offerings you hold, against the knife's 350: 125 to go at 300 an hour.
+expect goal = "225/350"
+expect goal.note = "About 25m at your pace"
+expect supply.headline = "Quickest totem: 2:00"
+
+# Below 20 Fletching there is no totem to build.
+skill FLETCHING 15
+tick
+expect step = "Vale Totems needs 20 Fletching"
+skill FLETCHING 85
+
+# A site with 15,000 offerings: claim before building there, even with claiming as you pass off.
+setting totemsClaim off
+items INV set KNIFE 1 MAGIC_LOGS 5 ENT_TOTEMS_LOOT 2500
+varbit ENT_TOTEMS_SITE_1_POINTS 15000
+tick
+expect step = "Claim the offerings"
+expect detail = "15,000 offerings here: no new totem can be built here until you take some"
+expect object = offerings1
+expect lines ~ "Site 1 NEXT"
+varbit ENT_TOTEMS_SITE_1_POINTS 0
+tick
+expect step = "Build a magic totem"
+setting totemsClaim on
+
+# Site 1 finished; sites 2 and 3 empty. Site 3 comes next, after site 1 in your own loop,
+# although site 2 is nearer.
+varbit ENT_TOTEMS_SITE_1_BASE 5
+varbit ENT_TOTEMS_SITE_1_BASE_CARVED 1
+varbit ENT_TOTEMS_SITE_1_DECORATIONS 4
+tick
+expect step = "Go to site 3"
+expect object = site3
+
+# Sites 2 and 3 finished too: site 4, out of sight, is headed for where it was seen.
+varbit ENT_TOTEMS_SITE_2_BASE 5
+varbit ENT_TOTEMS_SITE_2_BASE_CARVED 1
+varbit ENT_TOTEMS_SITE_2_DECORATIONS 4
+varbit ENT_TOTEMS_SITE_3_BASE 5
+varbit ENT_TOTEMS_SITE_3_BASE_CARVED 1
+varbit ENT_TOTEMS_SITE_3_DECORATIONS 4
+tick
+expect step = "Go to site 4"
+expect detail = "Then build a magic totem"
+expect destination = "1500 3380"
+expect object = -

@@ -37,6 +37,8 @@ public final class Pilots
 	private volatile boolean useFoundry = true;
 	private final MixologyPilot mixology = new MixologyPilot();
 	private volatile boolean useMixology = true;
+	private final TotemsPilot totems = new TotemsPilot();
+	private volatile boolean useTotems = true;
 	private final Coach coach;
 	private final Recorder recorder;
 	private final IntUnaryOperator price;
@@ -74,11 +76,12 @@ public final class Pilots
 		foundry.setStore(load, saveKey);
 		mixology.setStore(load, saveKey);
 		mixology.setPrice(price);
+		totems.setStore(load, saveKey);
 		this.coach = new Coach(loadBests, saveBests);
 		this.recorder = new Recorder(notes);
 		this.scene = new SceneIndex(client, id -> MotherlodePilot.isWatched(id) || FurnacePilot.isWatched(id) || HomesPilot.isWatched(id)
 			|| RiftPilot.isWatched(id) || StormPilot.isWatched(id) || FoundryPilot.isWatched(id)
-			|| MixologyPilot.isWatched(id));
+			|| MixologyPilot.isWatched(id) || TotemsPilot.isWatched(id));
 		this.homes = new HomesPilot(saved, save, load, saveKey);
 		homes.readers(null, stock);
 	}
@@ -146,6 +149,13 @@ public final class Pilots
 		mixology.settings(plan, reward, cues);
 	}
 
+	/** The "Vale Totems" settings: on, the wood to build with (null for the best), claiming as you pass, and the reward saved for (or null). */
+	public void totems(boolean on, com.codex.minigamepilot.core.Totems.Wood wood, boolean claim, com.codex.minigamepilot.core.Totems.Reward reward)
+	{
+		useTotems = on;
+		totems.settings(wood, claim, reward);
+	}
+
 	/** A spot animation appeared in the scene: Mastering Mixology's station cues. */
 	public void spotanim(int id)
 	{
@@ -195,6 +205,7 @@ public final class Pilots
 			storm.newAccount();
 			foundry.newAccount();
 			mixology.newAccount();
+			totems.newAccount();
 			said.clear();
 			unsaid.clear();
 		}
@@ -340,6 +351,13 @@ public final class Pilots
 			state = mixology.lastState;
 			units = mixology.units();
 		}
+		else if (useTotems && totems.active(client, scene))
+		{
+			activity = View.Activity.TOTEMS;
+			flight = totems.fly(client, scene, now);
+			state = totems.lastState;
+			units = totems.units();
+		}
 		else
 		{
 			activity = View.Activity.NONE;
@@ -372,6 +390,10 @@ public final class Pilots
 			else if (last == View.Activity.MIXOLOGY)
 			{
 				mixology.left();
+			}
+			else if (last == View.Activity.TOTEMS)
+			{
+				totems.left();
 			}
 			last = activity;
 		}
@@ -436,6 +458,10 @@ public final class Pilots
 		else if (last == View.Activity.MIXOLOGY)
 		{
 			mixology.left();
+		}
+		else if (last == View.Activity.TOTEMS)
+		{
+			totems.left();
 		}
 		motherlode.relogged();
 		furnace.relogged();
@@ -553,6 +579,7 @@ public final class Pilots
 		v.brief(storm.brief());
 		v.brief(foundry.brief());
 		v.brief(mixology.brief());
+		v.brief(totems.brief());
 		return v;
 	}
 }

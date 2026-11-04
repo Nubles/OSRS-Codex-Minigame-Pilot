@@ -74,8 +74,8 @@ import net.runelite.client.util.Text;
 	name = "Codex Minigame Pilot",
 	internalName = "codex-minigame-pilot",
 	legacyDataDirectory = "codex-minigame-pilot",
-	description = "One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes, Guardians of the Rift, Tempoross, the Giants' Foundry and Mastering Mixology: what to click, the path there, and why",
-	tags = {"motherlode", "mlm", "blast furnace", "mahogany homes", "construction", "mining", "smithing", "guardians of the rift", "gotr", "runecraft", "tempoross", "fishing", "giants foundry", "mastering mixology", "mixology", "herblore", "guide", "codex"}
+	description = "One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes, Guardians of the Rift, Tempoross, the Giants' Foundry, Mastering Mixology and Vale Totems: what to click, the path there, and why",
+	tags = {"motherlode", "mlm", "blast furnace", "mahogany homes", "construction", "mining", "smithing", "guardians of the rift", "gotr", "runecraft", "tempoross", "fishing", "giants foundry", "mastering mixology", "mixology", "herblore", "vale totems", "fletching", "varlamore", "guide", "codex"}
 )
 public class CodexMinigamePilotPlugin extends Plugin
 {
@@ -181,6 +181,7 @@ public class CodexMinigamePilotPlugin extends Plugin
 		pilots.tempoross(config.tempoross(), config.temporossCook(), config.temporossStormLoad());
 		pilots.foundry(config.foundry());
 		pilots.mixology(config.mixology(), config.mixologyPlan(), config.mixologyReward().reward(), config.mixologyCues());
+		pilots.totems(config.valeTotems(), config.totemsWood().wood(), config.totemsClaim(), config.totemsReward().reward());
 		goals = new GoalWatch(key -> configManager.getRSProfileConfiguration(CodexMinigamePilotConfig.GROUP, key),
 			(key, value) -> configManager.setRSProfileConfiguration(CodexMinigamePilotConfig.GROUP, key, value),
 			this::navigatorBoard);
@@ -275,6 +276,12 @@ public class CodexMinigamePilotPlugin extends Plugin
 		if (CodexMinigamePilotConfig.GROUP.equals(event.getGroup()) && event.getKey() != null && event.getKey().startsWith("mixology") && pilots != null)
 		{
 			pilots.mixology(config.mixology(), config.mixologyPlan(), config.mixologyReward().reward(), config.mixologyCues());
+			return;
+		}
+		if (CodexMinigamePilotConfig.GROUP.equals(event.getGroup()) && event.getKey() != null
+			&& ("valeTotems".equals(event.getKey()) || event.getKey().startsWith("totems")) && pilots != null)
+		{
+			pilots.totems(config.valeTotems(), config.totemsWood().wood(), config.totemsClaim(), config.totemsReward().reward());
 			return;
 		}
 		if (CodexMinigamePilotConfig.GROUP.equals(event.getGroup()) && "tickCoach".equals(event.getKey()) && pilots != null)
@@ -632,7 +639,7 @@ public class CodexMinigamePilotPlugin extends Plugin
 
 	private void updateArrow(Flight f)
 	{
-		WorldPoint want = config.hintArrow() && f.activity == View.Activity.HOMES ? f.destination : null;
+		WorldPoint want = config.hintArrow() && travels(f) ? f.destination : null;
 		if (want != null && !want.equals(arrow))
 		{
 			client.setHintArrow(want);
@@ -642,6 +649,12 @@ public class CodexMinigamePilotPlugin extends Plugin
 		{
 			clearArrow();
 		}
+	}
+
+	/** Whether a step's destination beyond the scene gets the hint arrow and a world map marker. */
+	private static boolean travels(Flight f)
+	{
+		return f.activity == View.Activity.HOMES || f.activity == View.Activity.TOTEMS;
 	}
 
 	/** Clears the hint arrow only if it is still the one the Pilot set. */
@@ -656,7 +669,7 @@ public class CodexMinigamePilotPlugin extends Plugin
 
 	private void updateMapPoint(Flight f)
 	{
-		WorldPoint want = config.worldMap() && f.activity == View.Activity.HOMES ? f.destination : null;
+		WorldPoint want = config.worldMap() && travels(f) ? f.destination : null;
 		if (want == null)
 		{
 			clearMapPoint();
@@ -671,8 +684,8 @@ public class CodexMinigamePilotPlugin extends Plugin
 		mapPoint = WorldMapPoint.builder()
 			.worldPoint(want)
 			.image(icon)
-			.name("Mahogany Homes client")
-			.tooltip("Mahogany Homes client")
+			.name(f.activity == View.Activity.TOTEMS ? "Vale totem site" : "Mahogany Homes client")
+			.tooltip(f.activity == View.Activity.TOTEMS ? "Vale totem site" : "Mahogany Homes client")
 			.jumpOnClick(true)
 			.snapToEdge(true)
 			.build();
