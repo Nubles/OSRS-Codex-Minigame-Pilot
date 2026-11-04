@@ -1,0 +1,61 @@
+# Giants' Foundry: the moulds you own. Until the jig has listed a bought mould the Pilot sets only
+# what it knows you have, and says it is not sure; once the jig shows it, the pick uses it. Then a
+# sword put in storage, and one too damaged to finish.
+#
+# Facts (OSRS wiki):
+#  - Giants' Foundry/Mould List: for Light Flat the best defaults are Serpent Ricasso (8+8), Stiletto
+#    Blade (6+8) and Gladius Point (0+6, the first of two sixes), 36; Choppa! (level 80, 450
+#    reputation) scores Light 22 and Flat 2, so with it the blade gives 24 and the mould 46
+#  - Giants' Foundry: preform storage keeps the sword with its progress and heat; "This sword is too
+#    damaged to keep working. You should give it to Kovac and try again."
+#  - a bought mould sets one of the VarbitID.GIANTS_FOUNDRY_UNLOCKED_MOULD_* varbits (RuneLite's
+#    gameval names: five a part); the Pilot only counts them. Commission values 2 Light and 3 Flat,
+#    and a locked mould's grey text, are as the Easy Giants' Foundry plugin reads them (a cross-check)
+include /replays/scenes/foundry.scene
+skill HITPOINTS 10
+skill SMITHING 81
+varp GIANTS_FOUNDRY_REWARD_SHOP_POINTS 2000
+at 3200 5000
+varbit GIANTS_FOUNDRY_COMMISSION_WORD_1 2
+varbit GIANTS_FOUNDRY_COMMISSION_WORD_2 3
+tick
+expect place = "Light Flat"
+expect pick = "36 for Light Flat"
+expect marks = "Serpent Ricasso, Stiletto Blade, Gladius Point"
+expect pick.note ~ "Of the moulds at your level"
+
+# One blade bought, but the jig has not shown which: no guess, and it says so.
+varbit GIANTS_FOUNDRY_UNLOCKED_MOULD_BLADE_11 1
+tick
+expect pick = "36 for Light Flat"
+expect pick.note ~ "Open the mould jig's tabs"
+
+# The jig lists the blades: Choppa! is yours, and the pick takes it.
+widget GiantsFoundryMould.CONTENT child 0 text "Stiletto Blade"
+widget GiantsFoundryMould.CONTENT child 1 text "Choppa!"
+tick
+expect pick = "46 for Light Flat"
+expect marks = "Serpent Ricasso, Choppa!, Gladius Point"
+expect saved.foundry.moulds = "CHOPPA"
+expect pick.note ~ "Of the moulds at your level"
+close GiantsFoundryMould.CONTENT
+
+# A sword set down in storage: take it back.
+varbit GIANTS_FOUNDRY_PREFORM_STORED 1
+varbit GIANTS_FOUNDRY_PREFORM_COMPLETION 400
+tick
+expect step = "Take the preform from storage"
+expect object = storage
+
+# In hand again, and too damaged to keep working: hand it in anyway.
+varbit GIANTS_FOUNDRY_PREFORM_STORED 0
+items WORN GIANTS_FOUNDRY_PREFORM 1
+foundry stages HAMMER POLISH GRIND HAMMER POLISH GRIND
+varbit GIANTS_FOUNDRY_PREFORM_TEMPERATURE 500
+tick
+expect step = "Use the grindstone"
+expect detail ~ "Stage 3 of 6"
+chat GAMEMESSAGE "This sword is too damaged to keep working. You should give it to Kovac and try again."
+tick
+expect step = "Hand the sword to Kovac"
+expect detail ~ "Too damaged"

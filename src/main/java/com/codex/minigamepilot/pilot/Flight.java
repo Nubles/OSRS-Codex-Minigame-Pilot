@@ -28,6 +28,8 @@ public final class Flight
 	public WorldPoint destination;
 	/** Other objects worth a quieter mark, such as the rest of the furniture still to fix. */
 	public final List<TileObject> others = new ArrayList<>();
+	/** Lines of an open interface to ring, by their text, such as the moulds to set in the jig. */
+	public final List<String> marks = new ArrayList<>();
 
 	public Flight(View.Activity activity, Step step, View view)
 	{

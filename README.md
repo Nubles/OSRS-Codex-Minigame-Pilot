@@ -1,6 +1,6 @@
 # Codex Minigame Pilot
 
-**One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes, Guardians of the Rift and Tempoross.** The Pilot watches the minigame you are in and always shows the single thing to do next: what to click, lit in gold in the world, the path there drawn on the ground and the minimap, and a line on why. You still do every click. It only reads the game and draws.
+**One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes, Guardians of the Rift, Tempoross and the Giants' Foundry.** The Pilot watches the minigame you are in and always shows the single thing to do next: what to click, lit in gold in the world, the path there drawn on the ground and the minimap, and a line on why. You still do every click. It only reads the game and draws.
 
 It is part of the **Codex** suite of RuneLite plugins and shares their look: warm ink, aged gold and the game's own fonts.
 
@@ -40,6 +40,22 @@ It is part of the **Codex** suite of RuneLite plugins and shares their look: war
 - **The right altar for you, not just the open one.** Of the two open altars it never picks one your Runecraft level or your quests shut you out of (cosmic needs Lost City, law Troll Stronghold, death Mourning's End Part II, blood Sins of the Father), and it says so: "The death altar is not yours yet". Of those you can use it follows the wiki's rule for even points: blood and death first, then fire and earth, otherwise the type you have fewer points of.
 - **Your points, kept even.** It reads your elemental and catalytic points when you check the Rewards Guardian and from the totals at the end of each game, takes one of each off for every search, and adds what this game's energy is worth so far. The panel shows both in whole points, as the game reports them, with what this game's energy will add (every 100 energy is a point, and the rest is a chance of one more), the searches they pay for, and which one runs out first. Until it has seen your points it says so rather than guessing, and picks the stronger cell instead.
 - **The rift's clock.** How long the rift has been open, the guardian's power, and when the next portal to the huge guardian remains is about due (the first about 160 seconds in, then every 140, as the wiki has it). When that portal is open and your trip still needs essence, the step is to take it.
+
+### Giants' Foundry
+- **The right tool at the right heat.** Each stage of the sword asks for one machine, and each machine for one heat: the trip hammer hot, the grindstone medium, the polishing wheel cold. The step is always the one that fits: the machine when the sword is in its band, the lava pool when it is too cold, the waterfall when it is too hot. Far off the band it says dunk or quench, the fast options; close to it, heat or cool, to fine-tune, as the wiki's strategies advise, and where to stop: near the top of the band for the hammer and the wheel, which cool the sword as you work, near the bottom for the grindstone, which heats it.
+- **How long the heat lasts.** In the band, the step counts the uses its heat is good for (the hammer takes 2.5% a strike, the grindstone adds 1.5%, the wheel takes 1.7%) against the uses still needed to finish the stage, and names the next stage's machine and heat when this one is about to end. A sweet spot turns the step into "use it now".
+- **The best moulds you own.** For Kovac's commission, the forte, blade and tip with the highest score for its two words, ringed in the mould jig's list. It learns which moulds you have bought from the jig itself, checks that against the count the game keeps, and until the two agree it sets only what it is sure you own and says so. It also names the mould worth buying next: the one at your level that adds most to your mould score across all fourteen commissions, for each point of reputation it costs.
+- **The whole sword.** Commission, moulds, 28 bars' worth in the crucible (with its metal score and how many sections that makes), pour, lift the preform (a bucket of water or ice gloves), each stage, and the hand-in. A sword set down in storage, or too damaged to finish, is picked up from there.
+- **Your swords, kept.** Each sword's quality (the reputation it paid), the Smithing experience Kovac gave and the time from commission to hand-in, kept per account. Across them, reputation and experience an hour, and your best sword, judged as the game does: highest quality, then quickest.
+
+<p align="center">
+  <img src="docs/screenshots/foundry-panel-moulds.png" width="225" alt="Giants' Foundry: the moulds to set">
+  <img src="docs/screenshots/foundry-panel-heat.png" width="225" alt="Giants' Foundry: the trip hammer in its band">
+</p>
+<p align="center">
+  <img src="docs/screenshots/foundry-plaque-heat.png" alt="Plaque at the trip hammer">
+  <img src="docs/screenshots/foundry-plaque-lava.png" alt="Plaque at the waterfall">
+</p>
 
 ### Tempoross
 - **One step through the storm.** Catch harpoonfish, cook them at the shrine, fill the ammunition crate, and harpoon the spirit pool while Tempoross is down. Each step is lit in the world, the fishing spot, the shrine, the crate or the pool, with its path and a line of why.
@@ -88,7 +104,7 @@ It is part of the **Codex** suite of RuneLite plugins and shares their look: war
 
 ## The panel
 
-The helm at the top holds the next action as one large gilt word and the full instruction under it, and flares when the step changes. Under it, the minigame's loop with your place in it, its gauges (the sack with pay-dirt in flight, the furnace's coal against what the next load needs, the planks the job still takes), the furniture checklist, and the session so far: pay-dirt, ore, bars, contracts, points and experience, with hourly pace. Away from the minigames it lists all five and what is waiting at each, such as an open contract, and what your last visit to the Motherlode Mine and the Blast Furnace came to: "Last visit 3 hours ago: 1h 12m for 1,134 pay-dirt, 972 ore, 68k Mining xp and ore worth 142k."
+The helm at the top holds the next action as one large gilt word and the full instruction under it, and flares when the step changes. Under it, the minigame's loop with your place in it, its gauges (the sack with pay-dirt in flight, the furnace's coal against what the next load needs, the planks the job still takes), the furniture checklist, and the session so far: pay-dirt, ore, bars, contracts, points and experience, with hourly pace. Away from the minigames it lists all six and what is waiting at each, such as an open contract, and what your last visit to the Motherlode Mine and the Blast Furnace came to: "Last visit 3 hours ago: 1h 12m for 1,134 pay-dirt, 972 ore, 68k Mining xp and ore worth 142k."
 
 Each minigame's card also keeps your best visit, the most pay-dirt or bars an hour over at least fifteen minutes, with its experience an hour: "Best visit 5 days ago: 1,620 pay-dirt and 81k Mining xp an hour over 1h 24m." It is kept per account, and a session never carries over to another account.
 
@@ -106,7 +122,7 @@ Each round is also split into the stages of its loop (Mine, Hopper, Sack, Bank; 
 
 ## Tick coach
 
-The game runs on 0.6-second ticks, and the tick coach counts every loop in them: Motherlode's mine, hopper, sack and bank; the Blast Furnace's bank, belt and bars; a Mahogany Homes contract from the contractor through the furniture and back; a Guardians of the Rift altar trip from mining through essence and the altar to handing in; a Tempoross round from fishing through the shrine and the crate (and the spirit pool, when Tempoross goes down) back to fishing. After each loop the panel shows:
+The game runs on 0.6-second ticks, and the tick coach counts every loop in them: Motherlode's mine, hopper, sack and bank; the Blast Furnace's bank, belt and bars; a Mahogany Homes contract from the contractor through the furniture and back; a Guardians of the Rift altar trip from mining through essence and the altar to handing in; a Tempoross round from fishing through the shrine and the crate (and the spirit pool, when Tempoross goes down) back to fishing; a Giants' Foundry sword from the commission to the hand-in. After each loop the panel shows:
 
 - **The loop in ticks against your best** of the same kind ("176 ticks, +26 on best"), or "new best".
 - **Its walking against a floor.** Every walk the Pilot sends you on is measured over the game's collision map, so its shortest way is known; at run pace (two tiles a tick) that walk has a floor nobody can beat. The card sets the ticks you spent on foot against it: "On foot 19 ticks against a floor of 17 at run pace, 2 over". Mining, smelting and building have no fixed duration the wiki states, so the coach never invents a floor for them: those parts are only compared with your own best.
@@ -162,7 +178,7 @@ Both are read only, never written, and everything works without them.
 
 ## Your data
 
-Your bank's goal items and supplies as last seen, your Mahogany Homes points, your Guardians of the Rift points, your last thirty Tempoross games, the rewards you own, your round bests, your last and best visit to each minigame and what your contracts take are saved in your RuneLite profile, per account. A damaged or hand-edited value is read as far as it can be and the rest left out, so it never stops the Pilot.
+Your bank's goal items and supplies as last seen, your Mahogany Homes points, your Guardians of the Rift points, your last thirty Tempoross games, your last fifty Giants' Foundry swords and the moulds the jig has shown you own, the rewards you own, your round bests, your last and best visit to each minigame and what your contracts take are saved in your RuneLite profile, per account. A damaged or hand-edited value is read as far as it can be and the rest left out, so it never stops the Pilot.
 
 ## Field notes
 
@@ -174,7 +190,7 @@ Codex Minigame Pilot is guidance only. It reads what the game already shows you 
 
 ## Settings that matter
 
-- **Minigames:** turn each of the five off; *Cook before loading* and *Load what you hold at storm* (80%) for Tempoross; *Fragments before first craft* for Guardians of the Rift (120 by default); fix the *Blast Furnace bar* instead of letting the Pilot work it out; *Top up coffer below* (2,500 coins by default).
+- **Minigames:** turn each of the six off; *Cook before loading* and *Load what you hold at storm* (80%) for Tempoross; *Fragments before first craft* for Guardians of the Rift (120 by default); fix the *Blast Furnace bar* instead of letting the Pilot work it out; *Top up coffer below* (2,500 coins by default).
 - **Guidance:** *Step plaque*, *Path on the ground*, *Path on minimap*, *Action labels*, *Mark what comes after*, *Hint arrow* and *World map marker* for Mahogany Homes, and *Visit summary in chat*. All on by default.
 - **Goals:** what Motherlode nuggets and Mahogany Homes points are saved for, the *Blast Furnace level* to work toward (0 for the next), *Show goals* and *Reward road*.
 - **Tick coach:** *Tick coach*, on by default.

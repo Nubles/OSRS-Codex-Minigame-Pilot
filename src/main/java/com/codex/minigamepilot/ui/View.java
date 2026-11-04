@@ -18,7 +18,8 @@ public final class View
 		FURNACE("Blast Furnace"),
 		HOMES("Mahogany Homes"),
 		RIFT("Guardians of the Rift"),
-		TEMPOROSS("Tempoross");
+		TEMPOROSS("Tempoross"),
+		FOUNDRY("Giants' Foundry");
 
 		private final String title;
 
@@ -422,6 +423,8 @@ public final class View
 			"Fragments to mine, essence to craft, the best open altar for your levels and points, then hand in."));
 		v.brief(new Brief(Activity.TEMPOROSS, null,
 			"The double spot when it is up, the shrine, the crate, a tether before each wave, and your permits game by game."));
+		v.brief(new Brief(Activity.FOUNDRY, null,
+			"The best moulds you own for the commission, the right tool at the right heat for each stage, and your swords kept."));
 		return v;
 	}
 

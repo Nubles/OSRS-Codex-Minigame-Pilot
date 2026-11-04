@@ -1,0 +1,39 @@
+# A schematic Giants' Foundry for replays. Not the real map: just the things the Pilot points at,
+# laid out on one open floor so every walk is short.
+#
+# Facts:
+#  - names are RuneLite's (net.runelite.api.gameval): Kovac is NpcID.GIANTS_FOUNDRY_KOVAC; the
+#    machines GIANTS_FOUNDRY_TRIP_HAMMER, _GRINDSTONE, _POLISHING_WHEEL, _LAVA_POOL, _WATERFALL;
+#    the bank chest GIANTS_FOUNDRY_CHEST; the crucible, mould jig and preform storage are the
+#    multilocs GIANTS_FOUNDRY_CRUCIBLE_MULTI, _MOULD_JIG and _PREFORM_STORAGE
+#  - the jig shows GIANTS_FOUNDRY_JIG_EMPTY, _JIG_MOULD (set), _JIG_MOULD_FILLED,
+#    _JIG_MOULD_COOLING and _JIG_MOULD_COOLED, as RuneLite names them. Which varbit drives that
+#    multiloc in the game is not known here: GIANTS_FOUNDRY_MOULD_STATE stands in, 0 to 4, and
+#    the Pilot reads only what the jig shows
+#  - the heat bar: the Pilot reads only the widths of GiantsFoundryHud.TEMPERATURE_BAR_RECT1 (the
+#    whole bar) and GRIND_BAR (one band); 300 and 60 here make each band a fifth of the bar
+#
+#   y 5012  lavaPool                 waterfall
+#   y 5006  tripHammer  grindstone  polishingWheel
+#   y 5000  kovac  (player 3200)  storage
+#   y 4994  chest   crucible   jig
+#        x 3190                       3214
+
+scene 3150 4950
+
+npc GIANTS_FOUNDRY_KOVAC "Kovac" 3192 5000 as kovac
+
+object GIANTS_FOUNDRY_CHEST 3192 4994 as chest
+object GIANTS_FOUNDRY_CRUCIBLE_MULTI 3200 4994 2 2 as crucible
+multiloc GIANTS_FOUNDRY_MOULD_JIG GIANTS_FOUNDRY_MOULD_STATE GIANTS_FOUNDRY_JIG_EMPTY GIANTS_FOUNDRY_JIG_MOULD GIANTS_FOUNDRY_JIG_MOULD_FILLED GIANTS_FOUNDRY_JIG_MOULD_COOLING GIANTS_FOUNDRY_JIG_MOULD_COOLED
+object GIANTS_FOUNDRY_MOULD_JIG 3206 4994 2 2 as jig
+object GIANTS_FOUNDRY_PREFORM_STORAGE 3208 5000 as storage
+object GIANTS_FOUNDRY_TRIP_HAMMER 3192 5006 2 2 as tripHammer
+object GIANTS_FOUNDRY_GRINDSTONE 3200 5006 2 2 as grindstone
+object GIANTS_FOUNDRY_POLISHING_WHEEL 3208 5006 2 2 as polishingWheel
+object GIANTS_FOUNDRY_LAVA_POOL 3192 5012 2 2 as lavaPool
+object GIANTS_FOUNDRY_WATERFALL 3210 5012 2 2 as waterfall
+
+# The HUD's heat bar: a band is a fifth of it.
+widget GiantsFoundryHud.TEMPERATURE_BAR_RECT1 width 300
+widget GiantsFoundryHud.GRIND_BAR width 60

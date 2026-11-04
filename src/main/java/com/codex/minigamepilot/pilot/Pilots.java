@@ -33,6 +33,8 @@ public final class Pilots
 	private volatile boolean useRift = true;
 	private final StormPilot storm = new StormPilot();
 	private volatile boolean useStorm = true;
+	private final FoundryPilot foundry = new FoundryPilot();
+	private volatile boolean useFoundry = true;
 	private final Coach coach;
 	private final Recorder recorder;
 	private final IntUnaryOperator price;
@@ -67,10 +69,11 @@ public final class Pilots
 		motherlode.setStore(load, saveKey);
 		rift.setStore(load, saveKey);
 		storm.setStore(load, saveKey);
+		foundry.setStore(load, saveKey);
 		this.coach = new Coach(loadBests, saveBests);
 		this.recorder = new Recorder(notes);
 		this.scene = new SceneIndex(client, id -> MotherlodePilot.isWatched(id) || FurnacePilot.isWatched(id) || HomesPilot.isWatched(id)
-			|| RiftPilot.isWatched(id) || StormPilot.isWatched(id));
+			|| RiftPilot.isWatched(id) || StormPilot.isWatched(id) || FoundryPilot.isWatched(id));
 		this.homes = new HomesPilot(saved, save, load, saveKey);
 	}
 
@@ -111,6 +114,18 @@ public final class Pilots
 		storm.setStormLoad(stormLoad);
 	}
 
+	/** The "Giants' Foundry" setting. */
+	public void foundry(boolean on)
+	{
+		useFoundry = on;
+	}
+
+	/** How the Giants' Foundry reads its HUD's stage icons and sweet spot; by default it asks the game. Package-private: replays set them. */
+	void foundryHud(FoundryPilot.Hud hud)
+	{
+		foundry.setHud(hud);
+	}
+
 	/** The "Upper hopper unlocked" setting for the Motherlode Mine. */
 	public void upperHopper(boolean on)
 	{
@@ -146,6 +161,7 @@ public final class Pilots
 			homes.newAccount();
 			rift.newAccount();
 			storm.newAccount();
+			foundry.newAccount();
 			said.clear();
 			unsaid.clear();
 		}
@@ -175,6 +191,7 @@ public final class Pilots
 		homes.chat(message);
 		rift.chat(message);
 		storm.chat(message);
+		foundry.chat(message);
 	}
 
 	/** @param bankCoal coal in the open bank, or -1 when the bank is closed */
@@ -275,6 +292,13 @@ public final class Pilots
 			state = storm.lastState;
 			units = storm.units();
 		}
+		else if (useFoundry && foundry.active(client, scene))
+		{
+			activity = View.Activity.FOUNDRY;
+			flight = foundry.fly(client, scene, now);
+			state = foundry.lastState;
+			units = foundry.units();
+		}
 		else
 		{
 			activity = View.Activity.NONE;
@@ -300,10 +324,15 @@ public final class Pilots
 			{
 				storm.left(client.getTickCount(), now);
 			}
+			else if (last == View.Activity.FOUNDRY)
+			{
+				foundry.left();
+			}
 			last = activity;
 		}
 		homes.settle(client.getSkillExperience(net.runelite.api.Skill.CONSTRUCTION));
 		storm.settle(client);
+		foundry.settle(client, now);
 		Pace.Round round = coach.tick(client, flight, units, kind);
 		coach.decorate(flight.view, activity);
 		if (tickCoach)
@@ -460,6 +489,7 @@ public final class Pilots
 		v.brief(furnace.brief(lastVisit(View.Activity.FURNACE), best(View.Activity.FURNACE), now));
 		v.brief(rift.brief());
 		v.brief(storm.brief());
+		v.brief(foundry.brief());
 		return v;
 	}
 }

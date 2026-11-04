@@ -1,0 +1,142 @@
+# Giants' Foundry: one whole sword. A commission, the best moulds you own, 28 bars in the
+# crucible, pour, pick up the preform, each stage's tool at its heat (the lava pool and the
+# waterfall between), a sweet spot, the hand-in, and the sword kept with its reputation and xp.
+#
+# Facts (OSRS wiki):
+#  - Giants' Foundry/Mould List: Narrow Heavy with the default moulds is Serrated Forte (8+8),
+#    Gladius Edge (6+8) and Gladius Point (8+8), 46, the most the defaults score (Giants' Foundry)
+#  - Giants' Foundry: the crucible takes 28 bars; 18 mithril and 10 adamant is metal score 89
+#    (five sections); quality is metal plus mould score; the trip hammer needs a hot sword
+#    (+2% progress, -2.5% heat a use), the polishing wheel a cold one; the lava pool heats
+#    (Dunk-preform faster), the waterfall cools (Quench-preform faster); picking up the preform
+#    needs a bucket of water or ice gloves; "You have successfully finished the sword"
+#  - Foundry Reputation: "equal to the final sword quality"
+#  - Giants' Foundry, experience: 30 at quality 0 and 25,230 at 199, which (⌊q²/73⌋+⌊1.5q⌋+1)×30
+#    gives; 13,560 at 135
+#  - ids by RuneLite's gameval names; heat and progress run 0-1,000 and the three bands sit at a
+#    sixth, a half and five sixths of the bar, as the Easy Giants' Foundry plugin reads them (a
+#    cross-check). Commission varbit values 1 Narrow and 5 Heavy are that plugin's reading too.
+include /replays/scenes/foundry.scene
+skill HITPOINTS 10
+skill SMITHING 70
+varp GIANTS_FOUNDRY_REWARD_SHOP_POINTS 500
+at 3200 5000
+tick
+expect activity = FOUNDRY
+expect step = "Take a commission from Kovac"
+expect npc = "Kovac"
+expect stat.Reputation = "500"
+
+# Narrow Heavy: the best default moulds, ringed in the jig's list.
+varbit GIANTS_FOUNDRY_COMMISSION_WORD_1 1
+varbit GIANTS_FOUNDRY_COMMISSION_WORD_2 5
+tick
+expect place = "Narrow Heavy"
+expect step = "Set the moulds"
+expect object = jig
+expect detail = "Serrated Forte, Gladius Edge, Gladius Point (46)"
+expect marks = "Serrated Forte, Gladius Edge, Gladius Point"
+expect pick = "46 for Narrow Heavy"
+
+# Set: now the metal. None carried, so the bank chest.
+varbit GIANTS_FOUNDRY_MOULD_STATE 1
+tick
+expect step = "Take bars from the bank chest"
+expect object = chest
+expect detail ~ "28 bars' worth"
+items INV MITHRIL_BAR 18
+items INV ADAMANTITE_BAR 10
+tick
+expect step = "Fill the crucible"
+expect object = crucible
+expect gauge.Crucible = "0/28"
+varbit GIANTS_FOUNDRY_MITHRIL_COUNT 18
+varbit GIANTS_FOUNDRY_ADAMANT_COUNT 10
+items INV clear
+tick
+expect step = "Pour the crucible"
+expect detail = "Full: metal score 89, quality up to 135"
+expect gauge.Crucible = "28/28"
+expect stat.Quality_up_to = "135"
+
+# Poured: wait for it to cool, then lift it, which needs a bucket of water.
+varbit GIANTS_FOUNDRY_MITHRIL_COUNT 0
+varbit GIANTS_FOUNDRY_ADAMANT_COUNT 0
+varbit GIANTS_FOUNDRY_MOULD_STATE 3
+tick
+expect step = "Let the metal cool"
+varbit GIANTS_FOUNDRY_MOULD_STATE 4
+tick
+expect step = "Pick up the preform"
+expect detail ~ "bucket of water"
+items INV BUCKET_WATER 1
+tick
+expect step = "Pick up the preform"
+expect detail ~ "ready to work"
+
+# In hand: five stages. The first is the trip hammer, which needs it hot (73-93%).
+varbit GIANTS_FOUNDRY_MOULD_STATE 0
+items WORN GIANTS_FOUNDRY_PREFORM 1
+foundry stages HAMMER POLISH GRIND HAMMER POLISH
+varbit GIANTS_FOUNDRY_PREFORM_TEMPERATURE 300
+varbit GIANTS_FOUNDRY_PREFORM_COMPLETION 0
+tick
+expect step = "Dunk the preform in the lava"
+expect object = lavaPool
+expect detail = "Hammer at 73-93%, now 30%: stop near the top"
+expect gauge.Heat = "30/100"
+varbit GIANTS_FOUNDRY_PREFORM_TEMPERATURE 650
+tick
+expect step = "Heat the preform at the lava pool"
+varbit GIANTS_FOUNDRY_PREFORM_TEMPERATURE 900
+tick
+expect step = "Use the trip hammer"
+expect object = tripHammer
+expect detail = "Stage 1 of 5 · heat for 7 uses, 10 to finish"
+# The crucible is empty now, but the quality still counts the metal poured.
+expect stat.Quality_up_to = "135"
+
+# A sweet spot: click the same machine again now.
+foundry bonus on
+tick
+expect step = "Use the trip hammer now"
+expect verb = "Bonus"
+foundry bonus off
+
+# Near the end of the stage: one more strike, then the polishing wheel wants it cold.
+varbit GIANTS_FOUNDRY_PREFORM_COMPLETION 180
+varbit GIANTS_FOUNDRY_PREFORM_TEMPERATURE 760
+tick
+expect detail = "Stage 1 of 5 · 1 to finish, then polish (cold)"
+varbit GIANTS_FOUNDRY_PREFORM_COMPLETION 200
+varbit GIANTS_FOUNDRY_PREFORM_TEMPERATURE 735
+tick
+expect step = "Quench the preform in the waterfall"
+expect object = waterfall
+expect gauge.Progress = "20/100"
+varbit GIANTS_FOUNDRY_PREFORM_TEMPERATURE 250
+tick
+expect step = "Use the polishing wheel"
+expect object = polishingWheel
+
+# Finished: back to Kovac.
+varbit GIANTS_FOUNDRY_PREFORM_COMPLETION 1000
+chat GAMEMESSAGE "You have successfully finished the sword. You should give it to Kovac for a reward."
+tick
+expect step = "Hand the sword to Kovac"
+expect npc = "Kovac"
+
+# Handed in: 135 reputation (the sword's quality) and 13,560 Smithing xp; the sword is kept.
+items WORN clear
+varbit GIANTS_FOUNDRY_COMMISSION_WORD_1 0
+varbit GIANTS_FOUNDRY_COMMISSION_WORD_2 0
+varbit GIANTS_FOUNDRY_PREFORM_COMPLETION 0
+varp GIANTS_FOUNDRY_REWARD_SHOP_POINTS 635
+xp SMITHING 751187
+tick 3
+expect step = "Take a commission from Kovac"
+expect stat.Reputation = "635"
+expect stat.Swords = "1"
+expect saved.foundry.swords ~ ",135,13560"
+expect saved.foundry.rep = "635"
+expect ticks.loops = "1"

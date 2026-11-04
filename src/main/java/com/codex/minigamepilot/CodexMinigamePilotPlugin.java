@@ -9,6 +9,7 @@ import com.codex.minigamepilot.core.Contract;
 import com.codex.minigamepilot.core.Home;
 import com.codex.minigamepilot.core.ItemIds;
 import com.codex.minigamepilot.overlay.ItemGuide;
+import com.codex.minigamepilot.overlay.MarkGuide;
 import com.codex.minigamepilot.overlay.MinimapGuide;
 import com.codex.minigamepilot.overlay.SceneGuide;
 import com.codex.minigamepilot.overlay.StepPlaque;
@@ -71,8 +72,8 @@ import net.runelite.client.util.Text;
 	name = "Codex Minigame Pilot",
 	internalName = "codex-minigame-pilot",
 	legacyDataDirectory = "codex-minigame-pilot",
-	description = "One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes, Guardians of the Rift and Tempoross: what to click, the path there, and why",
-	tags = {"motherlode", "mlm", "blast furnace", "mahogany homes", "construction", "mining", "smithing", "guardians of the rift", "gotr", "runecraft", "tempoross", "fishing", "guide", "codex"}
+	description = "One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes, Guardians of the Rift, Tempoross and the Giants' Foundry: what to click, the path there, and why",
+	tags = {"motherlode", "mlm", "blast furnace", "mahogany homes", "construction", "mining", "smithing", "guardians of the rift", "gotr", "runecraft", "tempoross", "fishing", "giants foundry", "guide", "codex"}
 )
 public class CodexMinigamePilotPlugin extends Plugin
 {
@@ -121,6 +122,7 @@ public class CodexMinigamePilotPlugin extends Plugin
 	private SceneGuide sceneGuide;
 	private MinimapGuide minimapGuide;
 	private ItemGuide itemGuide;
+	private MarkGuide markGuide;
 	private String shown;
 	private WorldPoint arrow;
 	private WorldMapPoint mapPoint;
@@ -171,6 +173,7 @@ public class CodexMinigamePilotPlugin extends Plugin
 		pilots.rift(config.rift());
 		pilots.riftFragments(config.riftFragments());
 		pilots.tempoross(config.tempoross(), config.temporossCook(), config.temporossStormLoad());
+		pilots.foundry(config.foundry());
 		goals = new GoalWatch(key -> configManager.getRSProfileConfiguration(CodexMinigamePilotConfig.GROUP, key),
 			(key, value) -> configManager.setRSProfileConfiguration(CodexMinigamePilotConfig.GROUP, key, value),
 			this::navigatorBoard);
@@ -193,9 +196,11 @@ public class CodexMinigamePilotPlugin extends Plugin
 			() -> new SceneGuide.Settings(config.route(), config.labels(), config.others()));
 		minimapGuide = new MinimapGuide(client, () -> flight, config::minimap);
 		itemGuide = new ItemGuide(() -> flight);
+		markGuide = new MarkGuide(client, () -> flight);
 		overlayManager.add(sceneGuide);
 		overlayManager.add(minimapGuide);
 		overlayManager.add(itemGuide);
+		overlayManager.add(markGuide);
 		overlayManager.add(plaque);
 		clientThread.invokeLater(() ->
 		{
@@ -218,6 +223,7 @@ public class CodexMinigamePilotPlugin extends Plugin
 		overlayManager.remove(sceneGuide);
 		overlayManager.remove(minimapGuide);
 		overlayManager.remove(itemGuide);
+		overlayManager.remove(markGuide);
 		overlayManager.remove(plaque);
 		clientToolbar.removeNavigation(navButton);
 		clientThread.invokeLater(() ->
@@ -252,6 +258,11 @@ public class CodexMinigamePilotPlugin extends Plugin
 		if (CodexMinigamePilotConfig.GROUP.equals(event.getGroup()) && event.getKey() != null && event.getKey().startsWith("tempoross") && pilots != null)
 		{
 			pilots.tempoross(config.tempoross(), config.temporossCook(), config.temporossStormLoad());
+			return;
+		}
+		if (CodexMinigamePilotConfig.GROUP.equals(event.getGroup()) && "foundry".equals(event.getKey()) && pilots != null)
+		{
+			pilots.foundry(config.foundry());
 			return;
 		}
 		if (CodexMinigamePilotConfig.GROUP.equals(event.getGroup()) && "tickCoach".equals(event.getKey()) && pilots != null)

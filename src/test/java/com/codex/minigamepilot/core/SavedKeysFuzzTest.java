@@ -349,4 +349,20 @@ public class SavedKeysFuzzTest
 		}
 		org.junit.Assert.assertTrue(Owned.decode(many.toString()).encode().split(",").length <= 16);
 	}
+
+	@Test
+	public void foundrySwords()
+	{
+		survive("foundry.swords", "1;1760000000000,300,135,13560;1760000100000,250,130,12780", s ->
+		{
+			Swords g = Swords.decode(s);
+			sane(String.valueOf(g.repPerHour() < 0 ? 0 : Math.round(g.repPerHour())));
+			sane(String.valueOf(g.xpPerHour() < 0 ? 0 : Math.round(g.xpPerHour())));
+			for (Swords.Sword w : g.all())
+			{
+				assertTrue(w.quality >= 0 && w.xp >= 0 && w.ticks >= 0);
+			}
+			Swords.decode(g.encode());
+		});
+	}
 }

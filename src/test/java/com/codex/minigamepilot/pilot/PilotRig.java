@@ -19,6 +19,7 @@ import net.runelite.api.TileObject;
  *
  * <p>Commands it adds: {@code setting NAME on|off} (motherlode, furnace, homes, upperHopper, rift, tickCoach),
  * {@code stormload N} (Tempoross's "Load what you hold at storm"; setting names tempoross and temporossCook too),
+ * {@code foundry stages TOOL...} and {@code foundry bonus on|off} (the Giants' Foundry HUD's stage icons and sweet spot),
  * {@code fragments N} (fragments before the first Guardians of the Rift craft), {@code quest QUEST done|not}
  * (by RuneLite's {@code Quest} name), {@code hud elemental|catalytic ALTAR|none} (the rune icon the
  * Guardians of the Rift HUD shows for an open altar; the HUD component itself is a {@code widget}),
@@ -43,6 +44,9 @@ final class PilotRig implements Rig
 	private final Map<Integer, Integer> sprites = new HashMap<>();
 	/** The "Load what you hold at storm" setting for Tempoross. */
 	private int stormLoad = 80;
+	/** The Giants' Foundry HUD as the script sets it. */
+	private com.codex.minigamepilot.core.FoundryCycle.Tool[] foundryStages = new com.codex.minigamepilot.core.FoundryCycle.Tool[0];
+	private boolean foundryBonus;
 	PilotRig(FakeGame game)
 	{
 		this.game = game;
@@ -54,10 +58,25 @@ final class PilotRig implements Rig
 		settings.put("rift", true);
 		settings.put("tempoross", true);
 		settings.put("temporossCook", true);
+		settings.put("foundry", true);
 		pilots = new Pilots(game.client(), null, c -> { }, new FieldNotes(() -> null, new Gson()),
 			bests::get, bests::put, id -> 0, store::get, store::put, () -> null);
 		pilots.profile("replay");
 		pilots.riftReaders(q -> quests.contains(q), c -> sprites.getOrDefault(c, -1));
+		pilots.foundryHud(new FoundryPilot.Hud()
+		{
+			@Override
+			public com.codex.minigamepilot.core.FoundryCycle.Tool[] stages(net.runelite.api.Client client)
+			{
+				return foundryStages.clone();
+			}
+
+			@Override
+			public boolean bonus(net.runelite.api.Client client)
+			{
+				return foundryBonus;
+			}
+		});
 	}
 
 	@Override
@@ -75,7 +94,30 @@ final class PilotRig implements Rig
 				pilots.tickCoach(settings.get("tickCoach"));
 				pilots.rift(settings.get("rift"));
 				pilots.tempoross(settings.get("tempoross"), settings.get("temporossCook"), stormLoad);
+				pilots.foundry(settings.get("foundry"));
 				return true;
+			case "foundry":
+			{
+				// foundry stages HAMMER GRIND ... | foundry bonus on|off: the HUD's stage icons and
+				// sweet spot, which FakeGame's widgets cannot draw.
+				if ("stages".equals(args.get(0)))
+				{
+					foundryStages = new com.codex.minigamepilot.core.FoundryCycle.Tool[args.size() - 1];
+					for (int i = 1; i < args.size(); i++)
+					{
+						foundryStages[i - 1] = com.codex.minigamepilot.core.FoundryCycle.Tool.valueOf(args.get(i));
+					}
+				}
+				else if ("bonus".equals(args.get(0)))
+				{
+					foundryBonus = "on".equals(args.get(1));
+				}
+				else
+				{
+					throw new IllegalArgumentException("foundry stages TOOL... | foundry bonus on|off");
+				}
+				return true;
+			}
 			case "stormload":
 				stormLoad = Integer.parseInt(args.get(0));
 				pilots.tempoross(settings.get("tempoross"), settings.get("temporossCook"), stormLoad);
@@ -198,6 +240,10 @@ final class PilotRig implements Rig
 			r.put("detail", f.step.getDetail());
 		}
 		r.putAll(f.view.readings());
+		if (!f.marks.isEmpty())
+		{
+			r.put("marks", String.join(", ", f.marks));
+		}
 		View.TickCard t = f.view.ticks();
 		if (t != null)
 		{

@@ -234,6 +234,18 @@ public interface CodexMinigamePilotConfig extends Config
 		return 80;
 	}
 
+	@ConfigItem(
+		keyName = "foundry",
+		name = "Giants' Foundry",
+		description = "Guide the Giants' Foundry: the best moulds you own for the commission, the crucible, the tool each stage needs at the heat it needs, and your swords kept",
+		section = MINIGAMES,
+		position = 11
+	)
+	default boolean foundry()
+	{
+		return true;
+	}
+
 	@ConfigItem(keyName = "plaque", name = "Step plaque", description = "Show the next step on a small plaque in the game view", section = GUIDANCE, position = 0)
 	default boolean plaque()
 	{
