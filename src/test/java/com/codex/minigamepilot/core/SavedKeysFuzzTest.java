@@ -383,4 +383,39 @@ public class SavedKeysFuzzTest
 			MixRounds.decode(g.encode());
 		});
 	}
+
+	@Test
+	public void contractLog()
+	{
+		survive("homes.log", "1;1760000000000,LARRY,EXPERT,2950,190;1760000200000,BOB,ADEPT,0,0", s ->
+		{
+			ContractLog g = ContractLog.decode(s);
+			sane(String.valueOf(g.pointsPerHour() < 0 ? 0 : Math.round(g.pointsPerHour())));
+			sane(String.valueOf(g.xpPerHour() < 0 ? 0 : Math.round(g.xpPerHour())));
+			for (ContractLog.Entry e : g.all())
+			{
+				assertTrue(e.xp >= 0 && e.seconds >= 0 && e.home != null && e.tier != null);
+				sane(HomeWay.clock(e.seconds));
+			}
+			ContractLog.decode(g.encode());
+		});
+	}
+
+	@Test
+	public void wayfinderAtlas()
+	{
+		String good = "{\"version\":1,\"savedAt\":1760000000000,\"walkSecondsPerTile\":0.3,\"teleports\":[{\"name\":\"Falador Teleport\","
+			+ "\"source\":\"Falador teleport\",\"kind\":\"SPELL\",\"x\":2966,\"y\":3379,\"plane\":0,\"seconds\":4,\"carried\":true,"
+			+ "\"timed\":false}],\"networks\":{\"FAIRY_RING\":true},\"timedTrips\":0}";
+		survive("codexwayfinder/atlasV1", good, s ->
+		{
+			WayfinderAtlas a = WayfinderAtlas.parse(GSON, s);
+			HomeWay.Plan p = HomeWay.plan(Home.LARRY, 3200, 3200, 0, a);
+			if (p != null)
+			{
+				sane(p.line());
+				assertTrue(a.getWalkSecondsPerTile() > 0);
+			}
+		});
+	}
 }

@@ -40,7 +40,7 @@ public class ContractTest
 		s.constructionLevel = 72;
 		Step step = Contract.next(null, s);
 		assertEquals(Step.Target.CONTRACTOR, step.getTarget());
-		assertTrue(step.getDetail().contains("an expert contract"));
+		assertEquals("Get an expert contract", step.getTitle());
 	}
 
 	@Test

@@ -3,10 +3,14 @@ package com.codex.minigamepilot.pilot;
 import com.codex.minigamepilot.core.BankStock;
 import com.codex.minigamepilot.core.Contract;
 import com.codex.minigamepilot.core.ContractBook;
+import com.codex.minigamepilot.core.ContractLog;
+import com.codex.minigamepilot.core.HomeWay;
 import com.codex.minigamepilot.core.Home;
 import com.codex.minigamepilot.core.ItemIds;
 import com.codex.minigamepilot.core.Step;
 import com.codex.minigamepilot.core.Supplies;
+import com.codex.minigamepilot.core.TierAdvice;
+import com.codex.minigamepilot.core.WayfinderAtlas;
 import com.codex.minigamepilot.ui.Theme;
 import com.codex.minigamepilot.ui.View;
 import java.util.ArrayList;
@@ -19,6 +23,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.IntUnaryOperator;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.runelite.api.Client;
@@ -52,6 +57,14 @@ public final class HomesPilot
 	private static final int[] PLANK_SACK_VARBITS = {
 		VarbitID.PLANK_SACK_PLAIN, VarbitID.PLANK_SACK_OAK, VarbitID.PLANK_SACK_TEAK, VarbitID.PLANK_SACK_MAHOGANY
 	};
+	/** Every kind of plank the sack keeps a count of, the four above and the newer woods, for how full it is. */
+	private static final int[] PLANK_SACK_ALL = {
+		VarbitID.PLANK_SACK_PLAIN, VarbitID.PLANK_SACK_OAK, VarbitID.PLANK_SACK_TEAK, VarbitID.PLANK_SACK_MAHOGANY,
+		VarbitID.PLANK_SACK_CAMPHOR, VarbitID.PLANK_SACK_IRONWOOD, VarbitID.PLANK_SACK_ROSEWOOD
+	};
+	private static final String[] SACK_NAMES = {"plain", "oak", "teak", "mahogany", "camphor", "ironwood", "rosewood"};
+	/** Contracts' worth of planks below which a hand-in says so in the chat. */
+	static final int LOW_CONTRACTS = 2;
 
 	/** Teleports that land near each city's houses, by the start of the item's name. */
 	private static final Map<Home.City, String[]> TELEPORTS = new HashMap<>();
@@ -65,6 +78,10 @@ public final class HomesPilot
 	}
 
 	private final Session session = new Session(Skill.CONSTRUCTION);
+	/** Codex Wayfinder's atlas of the teleports you own, or null without Wayfinder. */
+	private Supplier<WayfinderAtlas> atlas = () -> null;
+	/** Your bank's supplies as last seen, or null. */
+	private Supplier<BankStock> stock = () -> null;
 
 	/** Another account logged in: the session and its counts start over on its first tick. */
 	void newAccount()
@@ -89,6 +106,18 @@ public final class HomesPilot
 
 	/** Where the contract book is saved for this account. */
 	static final String BOOK_KEY = "homes.book";
+	/** Where each contract, one by one, is kept for this account. */
+	static final String LOG_KEY = "homes.log";
+	private ContractLog log = new ContractLog();
+	/** A line for the chat when the planks left run low after a hand-in, or null. */
+	private String lowNote;
+	/** The tier the last tick advised asking for, while there is no contract. */
+	private TierAdvice.Advice advised;
+	/** The contract handed in and waiting for its experience: its house, tier, and whether its experience was measured. */
+	private Home settleHome;
+	private boolean settleMeasured;
+	/** A hand-in seen in the chat whose time is taken on the next tick. */
+	private boolean handInPending;
 	/** Ticks after the hand-in message before its experience is read, so the reward has landed. */
 	static final int SETTLE_TICKS = 3;
 	private final Function<String, String> load;
@@ -124,15 +153,37 @@ public final class HomesPilot
 	void reloadBook()
 	{
 		book = ContractBook.decode(load == null ? null : load.apply(BOOK_KEY));
+		log = ContractLog.decode(load == null ? null : load.apply(LOG_KEY));
 		meterHome = null;
 		meterXp = -1;
 		settleIn = -1;
 		lastHandIn = 0;
+		handInPending = false;
 	}
 
 	ContractBook getBook()
 	{
 		return book;
+	}
+
+	ContractLog getLog()
+	{
+		return log;
+	}
+
+	/** Where Codex Wayfinder's atlas and the bank's supplies are read from. */
+	void readers(Supplier<WayfinderAtlas> atlas, Supplier<BankStock> stock)
+	{
+		this.atlas = atlas == null ? () -> null : atlas;
+		this.stock = stock == null ? () -> null : stock;
+	}
+
+	/** The low-planks line from the last hand-in, once, or null. */
+	String takeLowNote()
+	{
+		String n = lowNote;
+		lowNote = null;
+		return n;
 	}
 
 	/**
@@ -183,35 +234,93 @@ public final class HomesPilot
 		}
 	}
 
-	/** The hand-in message: a measured contract waits a few ticks for its experience to land. */
-	private void handedIn(long now)
+	/**
+	 * The hand-in message: the contract waits a few ticks for its experience to land, then is
+	 * filed. Its time is taken on the next tick, on the same clock as every other tick.
+	 */
+	private void handedIn()
 	{
-		if (contract != null && contract.getHome() == meterHome && meterXp >= 0)
+		if (contract != null && contract.getTier() != null)
 		{
 			settleIn = SETTLE_TICKS;
+			settleHome = contract.getHome();
+			settleTier = contract.getTier();
+			settleMeasured = contract.getHome() == meterHome && meterXp >= 0 && meterTier == contract.getTier();
 			settleXp = meterXp;
 			settlePlanks = meterPlanks;
 			settleSteel = meterSteel;
-			settleTier = meterTier;
-			settleSeconds = lastHandIn > 0 ? (now - lastHandIn) / 1000 : 0;
 		}
-		lastHandIn = now;
+		handInPending = true;
 		meterHome = null;
 		meterXp = -1;
 	}
 
-	/** Every tick, wherever you are: files a handed-in contract once its experience has landed. */
+	/**
+	 * Every tick, wherever you are: files a handed-in contract once its experience has landed, in
+	 * the book (when measured) and the log, and notes when the planks left run low.
+	 */
 	void settle(long xp)
 	{
+		settle(xp, System.currentTimeMillis());
+	}
+
+	void settle(long xp, long now)
+	{
+		if (handInPending)
+		{
+			handInPending = false;
+			settleSeconds = lastHandIn > 0 ? (now - lastHandIn) / 1000 : 0;
+			lastHandIn = now;
+		}
 		if (settleIn < 0 || --settleIn > 0)
 		{
 			return;
 		}
 		settleIn = -1;
-		if (xp > 0 && book.record(settleTier, xp - settleXp, settlePlanks, settleSteel, settleSeconds) && saveKey != null)
+		if (xp <= 0)
+		{
+			return;
+		}
+		long gained = settleMeasured ? xp - settleXp : 0;
+		if (settleMeasured && book.record(settleTier, gained, settlePlanks, settleSteel, settleSeconds) && saveKey != null)
 		{
 			saveKey.accept(BOOK_KEY, book.encode());
 		}
+		log.add(new ContractLog.Entry(now, settleHome, settleTier,
+			gained > 0 && gained <= Integer.MAX_VALUE ? (int) gained : 0, (int) Math.min(Integer.MAX_VALUE, settleSeconds)));
+		if (saveKey != null)
+		{
+			saveKey.accept(LOG_KEY, log.encode());
+		}
+		lowNote = lowLine(settleTier, stock.get(), lastPlanks, book);
+	}
+
+	/**
+	 * "Mahogany Homes: your teak planks cover about 1 more contract (14 left)" when what is left in
+	 * the bank and carried is under {@link #LOW_CONTRACTS} contracts; null when plenty, or when no
+	 * bank has been seen.
+	 */
+	static String lowLine(Contract.Tier tier, BankStock stock, int carried, ContractBook book)
+	{
+		if (tier == null || stock == null)
+		{
+			return null;
+		}
+		long planks = stock.count(tier.getPlank()) + Math.max(0, carried);
+		double per = TierAdvice.planksPer(tier, book);
+		long covers = (long) Math.floor(planks / per);
+		if (covers >= LOW_CONTRACTS)
+		{
+			return null;
+		}
+		String name = tier.planks(2).substring(2);
+		if (covers == 0)
+		{
+			return "Mahogany Homes: not enough " + name + " for another " + tier.getName().toLowerCase(Locale.ENGLISH)
+				+ " contract (" + Session.format(planks) + " left)";
+		}
+		return "Mahogany Homes: your " + name + " cover " + (per == com.codex.minigamepilot.core.Home.mostPlanks() ? "at least" : "about")
+			+ " 1 more contract (" + Session.format(planks) + " left)";
 	}
 
 	Contract getContract()
@@ -305,7 +414,7 @@ public final class HomesPilot
 		}
 		if (FINISHED.matcher(text).find())
 		{
-			handedIn(System.currentTimeMillis());
+			handedIn();
 			if (contract != null)
 			{
 				contracts++;
@@ -398,6 +507,22 @@ public final class HomesPilot
 			}
 		}
 		s.steelBars = pack.count(Contract.STEEL_BAR);
+		s.sack = pack.carries(ItemIds.PLANK_SACK);
+		int[] sackHeld = new int[PLANK_SACK_ALL.length];
+		if (s.sack)
+		{
+			for (int i = 0; i < PLANK_SACK_ALL.length; i++)
+			{
+				sackHeld[i] = Math.max(0, client.getVarbitValue(PLANK_SACK_ALL[i]));
+				s.sackPlanks += sackHeld[i];
+			}
+		}
+		BankStock banked = stock.get();
+		if (contract == null)
+		{
+			s.advice = TierAdvice.advise(s.constructionLevel, plankStock(client, pack, s.sack, banked), book);
+		}
+		advised = s.advice;
 		meter(contract, s.values, client.getSkillExperience(Skill.CONSTRUCTION));
 		lastPlanks = s.planks;
 		Home home = contract == null ? null : contract.getHome();
@@ -463,11 +588,7 @@ public final class HomesPilot
 			case HOME:
 			{
 				stage = 2;
-				int teleport = teleport(client, home.getCity());
-				if (teleport > 0 && home.distanceTo(at.getX(), at.getY()) > 60)
-				{
-					step = step.withItems(teleport).withDetail(step.getDetail() + ". Your " + client.getItemDefinition(teleport).getName() + " is the quickest way");
-				}
+				step = travel(client, step, home, at);
 				flight = new Flight(View.Activity.HOMES, step, null);
 				WorldPoint door = new WorldPoint(home.getDoorX(), home.getDoorY(), 0);
 				flight.destination = door;
@@ -490,6 +611,14 @@ public final class HomesPilot
 					}
 				}
 				Ground.Way<TileObject> way = ground == null ? null : ground.nearest(todo, null);
+				List<TileObject> mends = new ArrayList<>();
+				for (TileObject o : todo)
+				{
+					if (s.values[home.indexOf(o.getId())] == 1)
+					{
+						mends.add(o);
+					}
+				}
 				if (way != null)
 				{
 					int value = s.values[home.indexOf(way.thing.getId())];
@@ -513,6 +642,7 @@ public final class HomesPilot
 						flight.others.add(o);
 					}
 				}
+				flight.mends.addAll(mends);
 				break;
 			}
 		}
@@ -531,14 +661,22 @@ public final class HomesPilot
 					s.steelBars >= steel ? "Enough" : (steel - s.steelBars) + " short", s.steelBars >= steel ? Theme.GREEN : Theme.EMBER));
 			}
 		}
+		if (s.sack)
+		{
+			view.gauge(sackGauge(sackHeld, s.sackPlanks));
+		}
 		if (contract != null && Contract.known(s.values))
 		{
 			view.lines("Furniture", (contract.remaining(s.values).size()) + " left", furniture(client, scene, home, s.values, flight.object));
 		}
+		else if (log.count() > 0)
+		{
+			view.lines("Your contracts", historyNote(log), history(log));
+		}
 		if (session.begun())
 		{
 			view.stat(new View.Stat(String.valueOf(contracts - contractsBefore), "Contracts", session.perHour(contracts - contractsBefore, now), Theme.GOLD));
-			view.stat(new View.Stat(String.valueOf(points - pointsBefore), "Points", "From contracts", Theme.TEAL));
+			view.stat(new View.Stat(String.valueOf(points - pointsBefore), "Points", session.perHour(points - pointsBefore, now), Theme.TEAL));
 			int xp = session.xp(client);
 			view.stat(new View.Stat(Session.format(xp), "Con xp", session.perHour(xp, now), Theme.GREEN));
 			view.stat(new View.Stat(session.elapsed(now), "Time", "On contracts", Theme.TEXT_MUTED));
@@ -549,6 +687,7 @@ public final class HomesPilot
 		out.route = flight.route;
 		out.destination = flight.destination;
 		out.others.addAll(flight.others);
+		out.mends.addAll(flight.mends);
 		return out;
 	}
 
@@ -613,7 +752,8 @@ public final class HomesPilot
 		{
 			return null;
 		}
-		Contract.Tier tier = contract != null && contract.getTier() != null ? contract.getTier() : Contract.Tier.forLevel(constructionLevel);
+		Contract.Tier tier = contract != null && contract.getTier() != null ? contract.getTier()
+			: advised != null ? advised.getTier() : Contract.Tier.forLevel(constructionLevel);
 		boolean sameTier = contract != null && contract.getTier() == tier;
 		long planks = stock.count(tier.getPlank()) + (sameTier ? lastPlanks : 0);
 		long steel = stock.count(Contract.STEEL_BAR);
@@ -727,10 +867,100 @@ public final class HomesPilot
 		return s.isEmpty() ? s : Character.toUpperCase(s.charAt(0)) + s.substring(1);
 	}
 
-	/** The best teleport carried or worn for a city, or -1. */
-	private static int teleport(Client client, Home.City city)
+	/**
+	 * The travel step with the quickest way there: from Codex Wayfinder's atlas when it is
+	 * installed (cast and walk, and a quicker teleport left in the bank), else the best teleport
+	 * carried for the city, else the one the wiki recommends.
+	 */
+	private Step travel(Client client, Step step, Home home, WorldPoint at)
 	{
-		String[] names = TELEPORTS.get(city);
+		HomeWay.Plan plan = HomeWay.plan(home, at.getX(), at.getY(), at.getPlane(), atlas.get());
+		if (plan != null)
+		{
+			String line = plan.line();
+			if (line == null)
+			{
+				return step;
+			}
+			Step out = step.withDetail(step.getDetail() + ". " + line);
+			HomeWay.Way best = plan.getBest();
+			int item = best == null || best.getTeleport() == null ? -1 : teleport(client, new String[]{best.getTeleport().getSource()});
+			return item > 0 ? out.withItems(item) : out;
+		}
+		if (home.distanceTo(at.getX(), at.getY()) <= 60)
+		{
+			return step;
+		}
+		int teleport = teleport(client, TELEPORTS.get(home.getCity()));
+		if (teleport > 0)
+		{
+			return step.withItems(teleport).withDetail(step.getDetail() + ". Your " + client.getItemDefinition(teleport).getName() + " is the quickest way");
+		}
+		return step.withDetail(step.getDetail() + ". The wiki's way there: " + HomeWay.wikiWay(home.getCity()));
+	}
+
+	/** Each tier's planks: in the bank as last seen, carried, and in the plank sack; null with no bank seen. */
+	private static long[] plankStock(Client client, Pack pack, boolean sack, BankStock banked)
+	{
+		if (banked == null)
+		{
+			return null;
+		}
+		Contract.Tier[] tiers = Contract.Tier.values();
+		long[] out = new long[tiers.length];
+		for (Contract.Tier t : tiers)
+		{
+			out[t.ordinal()] = banked.count(t.getPlank()) + pack.count(t.getPlank())
+				+ (sack ? Math.max(0, client.getVarbitValue(PLANK_SACK_VARBITS[t.ordinal()])) : 0);
+		}
+		return out;
+	}
+
+	/** The plank sack's fill: "12 teak, 2 oak" against its 28. */
+	static View.Gauge sackGauge(int[] held, int total)
+	{
+		StringBuilder b = new StringBuilder();
+		for (int i = 0; i < held.length && i < SACK_NAMES.length; i++)
+		{
+			if (held[i] > 0)
+			{
+				b.append(b.length() == 0 ? "" : ", ").append(held[i]).append(' ').append(SACK_NAMES[i]);
+			}
+		}
+		String note = total == 0 ? "Empty: fill it at the bank" : total >= Contract.SACK_CAPACITY ? b + ", full" : b.toString();
+		return new View.Gauge("Plank sack", Math.min(total, Contract.SACK_CAPACITY), 0, Contract.SACK_CAPACITY, note,
+			total >= Contract.SACK_CAPACITY ? Theme.GREEN : Theme.GOLD);
+	}
+
+	/** "2 kept" or, once contracts are timed, "98 points an hour". */
+	static String historyNote(ContractLog log)
+	{
+		double pointsHour = log.pointsPerHour();
+		if (pointsHour >= 0)
+		{
+			return Session.format(Math.round(pointsHour)) + " points an hour";
+		}
+		return log.count() == 1 ? "1 kept" : log.count() + " kept";
+	}
+
+	/** Your last contracts, newest first, the quickest of each tier ticked. */
+	static List<View.Line> history(ContractLog log)
+	{
+		List<View.Line> lines = new ArrayList<>();
+		List<ContractLog.Entry> all = log.all();
+		for (int i = all.size() - 1; i >= 0 && i >= all.size() - 5; i--)
+		{
+			ContractLog.Entry e = all.get(i);
+			String text = e.home.getName() + " · " + e.tier.getName() + (e.seconds > 0 ? " · " + HomeWay.clock(e.seconds) : "");
+			String trailing = e.xp > 0 ? Session.format(e.xp) + " xp" : e.points() + " pts";
+			lines.add(new View.Line(text, trailing, log.quickest(e.tier) == e ? View.Line.Mark.DONE : View.Line.Mark.IDLE));
+		}
+		return lines;
+	}
+
+	/** The first teleport carried or worn whose name starts with one of these, or -1. */
+	private static int teleport(Client client, String[] names)
+	{
 		for (String want : names)
 		{
 			for (int container : new int[]{InventoryID.INV, InventoryID.WORN})
@@ -747,7 +977,7 @@ public final class HomesPilot
 						continue;
 					}
 					ItemComposition def = client.getItemDefinition(item.getId());
-					if (def != null && def.getName() != null && def.getName().startsWith(want))
+					if (def != null && def.getName() != null && def.getName().toLowerCase(Locale.ENGLISH).startsWith(want.toLowerCase(Locale.ENGLISH)))
 					{
 						return item.getId();
 					}

@@ -1,0 +1,37 @@
+# A schematic of Larry's house, north of the Falador fountain, for Mahogany Homes replays. Not the
+# real map: the house's outline (Home.LARRY, 3033-3042 by 3360-3368) with its seven pieces of
+# furniture set out on one open floor, and Larry inside.
+#
+# Facts:
+#  - the furniture is RuneLite's CON_CONTRACT_FALADOR_NORTH_HOTSPOT1 to _HOTSPOT7
+#    (net.runelite.api.gameval.ObjectID), in the order the game's eight hotspot varbits
+#    (VarbitID.CON_CONTRACT_HOTSPOT_1_DISPLAY to _8) describe them
+#  - Larry is NpcID.CON_CONTRACT_CLIENT_5
+#  - the wiki's Larry table: drawers (2 planks each), grandfather clock (1), hat stand (1), two
+#    tables (3 each) and a range (1 steel bar); the names below are the pieces' own
+#
+#   y 3367  drawers2                       clock
+#   y 3365        larry
+#   y 3362  range   table1      table2     hatStand
+#   y 3360  ---------- door 3038 -------------
+#        x 3034                           3041
+
+scene 2960 3300
+
+npc CON_CONTRACT_CLIENT_5 "Larry" 3037 3365 as larry
+
+object CON_CONTRACT_FALADOR_NORTH_HOTSPOT1 3034 3362 as range
+object CON_CONTRACT_FALADOR_NORTH_HOTSPOT2 3034 3367 as drawers1
+object CON_CONTRACT_FALADOR_NORTH_HOTSPOT3 3036 3367 as drawers2
+object CON_CONTRACT_FALADOR_NORTH_HOTSPOT4 3036 3362 as table1
+object CON_CONTRACT_FALADOR_NORTH_HOTSPOT5 3041 3367 as clock
+object CON_CONTRACT_FALADOR_NORTH_HOTSPOT6 3039 3362 as table2
+object CON_CONTRACT_FALADOR_NORTH_HOTSPOT7 3041 3362 as hatStand
+
+name CON_CONTRACT_FALADOR_NORTH_HOTSPOT1 "Range"
+name CON_CONTRACT_FALADOR_NORTH_HOTSPOT2 "Drawers"
+name CON_CONTRACT_FALADOR_NORTH_HOTSPOT3 "Drawers"
+name CON_CONTRACT_FALADOR_NORTH_HOTSPOT4 "Table"
+name CON_CONTRACT_FALADOR_NORTH_HOTSPOT5 "Grandfather clock"
+name CON_CONTRACT_FALADOR_NORTH_HOTSPOT6 "Table"
+name CON_CONTRACT_FALADOR_NORTH_HOTSPOT7 "Hat stand"

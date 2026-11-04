@@ -18,6 +18,8 @@ final class Ink
 	static final BasicStroke THICK = new BasicStroke(2f);
 
 	static final Color OTHER_RIM = Theme.alpha(Theme.GOLD, 90);
+	/** Furniture one click mends, apart from the gold of what is taken out and built. */
+	static final Color MEND_RIM = Theme.alpha(Theme.TEAL, 150);
 	static final Color END_FILL = Theme.alpha(Theme.TEAL, 40);
 	static final Color END_RIM = Theme.alpha(Theme.TEAL, 200);
 	static final Color MINIMAP_BEAD = Theme.alpha(Theme.TEAL, 200);

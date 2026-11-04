@@ -369,6 +369,12 @@ public interface CodexMinigamePilotConfig extends Config
 		return true;
 	}
 
+	@ConfigItem(keyName = "homesLowPlanks", name = "Low planks in chat", description = "After a Mahogany Homes contract, say in the chat when the planks left in your bank and pack cover fewer than two more", section = GUIDANCE, position = 8)
+	default boolean homesLowPlanks()
+	{
+		return true;
+	}
+
 	@ConfigItem(
 		keyName = "motherlodeGoal",
 		name = "Motherlode goal",

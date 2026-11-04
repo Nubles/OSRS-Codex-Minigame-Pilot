@@ -99,7 +99,15 @@ public final class Contract
 		/** Whether the player is inside the client's house, on any floor. */
 		public boolean atHome;
 		public int constructionLevel = 1;
+		/** The tier to ask for when there is no contract, or null to go by level alone. */
+		public TierAdvice.Advice advice;
+		/** Whether a plank sack is carried, and the planks of every kind in it. */
+		public boolean sack;
+		public int sackPlanks;
 	}
+
+	/** Planks the plank sack holds, of any kind together (OSRS wiki, Plank sack: "a total of 28 planks of any type"). */
+	public static final int SACK_CAPACITY = 28;
 
 	private final Home home;
 	private final Tier tier;
@@ -235,10 +243,11 @@ public final class Contract
 	{
 		if (contract == null)
 		{
-			Tier best = Tier.forLevel(s.constructionLevel);
-			return Step.of("Contract", "Get a Mahogany Homes contract",
-				"Ask Amy in Falador, Marlo in Varrock, Ellie in East Ardougne or Angelo in Hosidius for "
-					+ (best == Tier.EXPERT || best == Tier.ADEPT ? "an " : "a ") + best.getName().toLowerCase() + " contract",
+			Tier best = s.advice != null ? s.advice.getTier() : Tier.forLevel(s.constructionLevel);
+			String why = s.advice == null ? null : s.advice.getWhy();
+			return Step.of("Contract", "Get " + TierAdvice.article(best) + " contract",
+				"Ask Amy in Falador, Marlo in Varrock, Ellie in East Ardougne or Angelo in Hosidius"
+					+ (why == null ? "" : ". " + why),
 				Step.Target.CONTRACTOR);
 		}
 		return contract.next(s);
@@ -271,9 +280,11 @@ public final class Contract
 				}
 				int[] items = shortSteel > 0 && shortPlanks > 0 ? new int[]{tier.getPlank(), STEEL_BAR}
 					: shortSteel > 0 ? new int[]{STEEL_BAR} : new int[]{tier.getPlank()};
+				String room = s.sack && shortPlanks > 0 && s.sackPlanks < SACK_CAPACITY
+					? ". Your plank sack has room for " + (SACK_CAPACITY - s.sackPlanks) : "";
 				return Step.items("Fetch", "Bring " + what,
 					"The job needs " + tier.planks(planks) + (steel > 0 ? " and " + steel + " steel" : "") + "; you have " + s.planks
-						+ (steel > 0 ? " and " + s.steelBars : ""), items);
+						+ (steel > 0 ? " and " + s.steelBars : "") + room, items);
 			}
 		}
 

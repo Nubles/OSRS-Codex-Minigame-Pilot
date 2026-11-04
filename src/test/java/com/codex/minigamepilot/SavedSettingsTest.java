@@ -25,6 +25,8 @@ public class SavedSettingsTest
 		assertEquals(new TreeSet<>(Arrays.asList(
 			"motherlode", "furnace", "homes", "bar", "cofferLow", "upperHopper",
 			"plaque", "route", "minimap", "labels", "others", "hintArrow", "worldMap", "visitChat",
+			// Mahogany Homes.
+			"homesLowPlanks",
 			"motherlodeGoal", "homesGoal", "furnaceGoal", "showGoals", "rewardRoad",
 			// The tick coach.
 			"tickCoach",

@@ -80,6 +80,7 @@ public final class Pilots
 			|| RiftPilot.isWatched(id) || StormPilot.isWatched(id) || FoundryPilot.isWatched(id)
 			|| MixologyPilot.isWatched(id));
 		this.homes = new HomesPilot(saved, save, load, saveKey);
+		homes.readers(null, stock);
 	}
 
 	private volatile boolean tickCoach = true;
@@ -88,6 +89,18 @@ public final class Pilots
 	public void tickCoach(boolean on)
 	{
 		tickCoach = on;
+	}
+
+	/** Where Codex Wayfinder's shared atlas is read, for the quickest way to a Mahogany Homes client. */
+	public void atlas(Supplier<com.codex.minigamepilot.core.WayfinderAtlas> atlas)
+	{
+		homes.readers(atlas, stock);
+	}
+
+	/** After a Mahogany Homes hand-in, a line when the planks left run low, once, or null. */
+	public String takeLowPlanks()
+	{
+		return homes.takeLowNote();
 	}
 
 	/** The "Guardians of the Rift" setting. */
@@ -362,7 +375,7 @@ public final class Pilots
 			}
 			last = activity;
 		}
-		homes.settle(client.getSkillExperience(net.runelite.api.Skill.CONSTRUCTION));
+		homes.settle(client.getSkillExperience(net.runelite.api.Skill.CONSTRUCTION), now);
 		storm.settle(client);
 		foundry.settle(client, now);
 		Pace.Round round = coach.tick(client, flight, units, kind);
