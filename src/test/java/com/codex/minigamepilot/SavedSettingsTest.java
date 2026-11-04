@@ -50,6 +50,8 @@ public class SavedSettingsTest
 			"roguesDen", "roguesDenTraps",
 			// Barbarian Assault.
 			"barbarianAssault", "assaultReward",
+			// Wintertodt.
+			"wintertodt", "wintertodtFletch", "wintertodtWarmth", "wintertodtReward",
 			"fieldNotes")), keys);
 		assertEquals("codexminigamepilot", CodexMinigamePilotConfig.GROUP);
 	}

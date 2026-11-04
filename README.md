@@ -1,6 +1,6 @@
 # Codex Minigame Pilot
 
-**One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes, Guardians of the Rift, Tempoross, the Giants' Foundry, Mastering Mixology, Vale Totems, the Tithe Farm, stealing artefacts, stealing valuables and the Rogues' Den maze, with a Barbarian Assault companion.** The Pilot watches the minigame you are in and always shows the single thing to do next: what to click, lit in gold in the world, the path there drawn on the ground and the minimap, and a line on why. You still do every click. It only reads the game and draws.
+**One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes, Guardians of the Rift, Tempoross, the Giants' Foundry, Mastering Mixology, Vale Totems, the Tithe Farm, stealing artefacts, stealing valuables, the Rogues' Den maze and the Wintertodt, with a Barbarian Assault companion.** The Pilot watches the minigame you are in and always shows the single thing to do next: what to click, lit in gold in the world, the path there drawn on the ground and the minimap, and a line on why. You still do every click. It only reads the game and draws.
 
 It is part of the **Codex** suite of RuneLite plugins and shares their look: warm ink, aged gold and the game's own fonts.
 
@@ -172,6 +172,26 @@ It is part of the **Codex** suite of RuneLite plugins and shares their look: war
   <img src="docs/screenshots/roguesden-plaque-tile.png" alt="Plaque with the wrong tile">
 </p>
 
+### Wintertodt
+RuneLite's own Wintertodt plugin already tells you when a round is about to start and when you are interrupted; the Pilot does not repeat any of it. It puts the same moments into one next step, and keeps what your rounds come to.
+- **One step at a time.** Chop bruma roots to a full pack, fletch them into kindling (25 points a piece fed, against 10 for a root; turn *Fletch kindling* off to feed roots as they are), then feed the brazier. Your brazier (the nearest) comes first when it needs you: fixed when broken, its Pyromancer healed when she is down (75 points, and her brazier cannot be lit until she is up), then lit. The brazier, the roots or the Pyromancer is lit in the world with the path there.
+- **Warmth before anything.** At the warmth you choose (*Warm up at*, 40% by default) the step is to eat or drink: food that heals 4 or more gives 35%, a rejuvenation dose 30%, and at 0% you die. If the game told you on entry that you wear too few warm items, the panel keeps that in view.
+- **Nothing left unburnt.** As the energy runs down, the step turns to feeding once what you hold is two less than the energy left, the wiki's own rule of thumb, so the round does not end with points in your pack.
+- **Your points against the rewards.** The points bar runs to the next reward: none below 500, two at 500 and one more for every 500 after, with the chance of one more between.
+- **Between rounds.** The tools you lack, from the free crates (tinderbox, axe, knife, hammer), then a wait by your brazier with the countdown.
+- **Every round kept.** Per account: points, time, the wait before it, knocks taken, and the rewards it earned; a round you left or logged out of is kept as lost, as the game counts it. Points and rewards an hour at your own pace, the minute's wait between rounds in.
+- **The reward you are after.** Choose it under *Wintertodt reward*: the pyromancer outfit (the default), warm gloves, the bruma torch, the tome of fire or the phoenix. The Pilot knows the reward cart's real order and rates (1 in 150 for the gloves, the torch and an outfit piece, always the piece you have least of; 1 in 1,000 for the tome; 1 in 5,000 for the phoenix), so it says what each reward's chance is, how many rewards, rounds and hours that comes to at your pace, and the chance it has come by now across your kept rounds. Pieces seen in your bank, pack or worn are ticked off.
+- **The cart after.** Out in the camp with rewards owed from your rounds, the reward cart is lit, with Big-search's five a click.
+
+<p align="center">
+  <img src="docs/screenshots/wintertodt-panel-round.png" width="225" alt="Wintertodt: a round, fletching">
+  <img src="docs/screenshots/wintertodt-panel-between.png" width="225" alt="Wintertodt: between rounds">
+</p>
+<p align="center">
+  <img src="docs/screenshots/wintertodt-plaque-round.png" alt="Plaque while fletching">
+  <img src="docs/screenshots/wintertodt-plaque-cold.png" alt="Plaque when warmth is low">
+</p>
+
 ### Barbarian Assault (a companion, outside the fight)
 The calls, the eggs and the healers are left to RuneLite's own Barbarian Assault plugin. The Pilot keeps the rest: what your games come to, and what to play next.
 - **Every game kept.** Each game, per account: its waves, the role you played in each (read from the role's horn), each wave's time from its "---- Wave: N ----" line to its end, lost waves and retries, and the honour points the game gave every role, read from the game's own point counters as they rise. The panel shows the game under way wave by wave, your last games, the quickest full game and queen wave, and honour points an hour.
@@ -322,9 +342,9 @@ Codex Minigame Pilot is guidance only. It reads what the game already shows you 
 
 ## Settings that matter
 
-- **Minigames:** turn each of the eleven off; *Mark patrols* for stealing artefacts; *Mark homeowners* for stealing valuables; *Tithe plants a round* for the Tithe Farm; *Vale totem wood* and *Claim offerings as you pass* for Vale Totems; *Mixology orders to make* (every order, or the most resin per paste) and *Mixology station cues*; *Cook before loading* and *Load what you hold at storm* (80%) for Tempoross; *Fragments before first craft* for Guardians of the Rift (120 by default); fix the *Blast Furnace bar* instead of letting the Pilot work it out; *Top up coffer below* (2,500 coins by default); *Barbarian Assault* for the companion.
+- **Minigames:** turn each one off; *Mark patrols* for stealing artefacts; *Mark homeowners* for stealing valuables; *Tithe plants a round* for the Tithe Farm; *Vale totem wood* and *Claim offerings as you pass* for Vale Totems; *Mixology orders to make* (every order, or the most resin per paste) and *Mixology station cues*; *Cook before loading* and *Load what you hold at storm* (80%) for Tempoross; *Fragments before first craft* for Guardians of the Rift (120 by default); fix the *Blast Furnace bar* instead of letting the Pilot work it out; *Top up coffer below* (2,500 coins by default); *Barbarian Assault* for the companion; *Wintertodt*, *Fletch kindling* and *Warm up at* (40%) for the Wintertodt.
 - **Guidance:** *Step plaque*, *Path on the ground*, *Path on minimap*, *Action labels*, *Mark what comes after*, *Hint arrow*, *World map marker* and *Low planks in chat* for Mahogany Homes, and *Visit summary in chat*. All on by default.
-- **Goals:** what Motherlode nuggets and Mahogany Homes points are saved for, the *Mixology reward* your resin is saved for, the *Vale Totems reward* your research points are saved for, the *Tithe Farm reward* your points are saved for, the *Barbarian Assault reward* your honour points are saved for (the fighter torso by default, or every role to level 5), the *Stealing artefacts level* and *Stealing valuables level* (0 for the next), the *Blast Furnace level* to work toward (0 for the next), *Show goals* and *Reward road*.
+- **Goals:** what Motherlode nuggets and Mahogany Homes points are saved for, the *Mixology reward* your resin is saved for, the *Vale Totems reward* your research points are saved for, the *Tithe Farm reward* your points are saved for, the *Barbarian Assault reward* your honour points are saved for (the fighter torso by default, or every role to level 5), the *Wintertodt reward* (the pyromancer outfit by default), the *Stealing artefacts level* and *Stealing valuables level* (0 for the next), the *Blast Furnace level* to work toward (0 for the next), *Show goals* and *Reward road*.
 - **Tick coach:** *Tick coach*, on by default.
 - **Field notes:** *Keep field notes*, off by default.
 

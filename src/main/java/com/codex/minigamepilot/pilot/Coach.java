@@ -392,6 +392,16 @@ final class Coach
 				return "the wall safe";
 			case COMMANDER:
 				return "Commander Connad";
+			case ROOTS:
+				return "the bruma roots";
+			case BRAZIER:
+				return "the brazier";
+			case PYROMANCER:
+				return "the Pyromancer";
+			case TOOL_CRATE:
+				return "the crate";
+			case REWARD_CART:
+				return "the reward cart";
 			default:
 				return null;
 		}

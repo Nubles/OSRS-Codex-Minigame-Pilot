@@ -26,7 +26,8 @@ public final class View
 		ARTEFACTS("Stealing Artefacts"),
 		HOUSES("Stealing Valuables"),
 		ROGUES_DEN("Rogues' Den"),
-		BARBARIAN_ASSAULT("Barbarian Assault");
+		BARBARIAN_ASSAULT("Barbarian Assault"),
+		WINTERTODT("Wintertodt");
 
 		private final String title;
 
@@ -634,6 +635,8 @@ public final class View
 			"The maze one leg at a time with its traps marked, the right tile and the shortcut at 80 Thieving, every run kept, and the rogue set's time at your pace."));
 		v.brief(new Brief(Activity.BARBARIAN_ASSAULT, null,
 			"Every game kept with its waves, roles and times, your honour points in each role against the reward you want, and the role to play next to get there soonest."));
+		v.brief(new Brief(Activity.WINTERTODT, null,
+			"Chop, fletch and feed one step at a time, your brazier lit, fixed and its Pyromancer healed, warmth watched, every round kept, and the pyromancer outfit's odds at your pace."));
 		return v;
 	}
 

@@ -26,6 +26,8 @@ import net.runelite.api.TileObject;
  * setting names stealingArtefacts and artefactsPatrols), {@code valuables level N} (the same for stealing valuables;
  * setting names stealingValuables and valuablesOwners), setting names roguesDen and roguesDenTraps (the Rogues' Den),
  * {@code assault reward REWARD|none} (Barbarian Assault, by {@code Assault.Reward} name; setting name barbarianAssault),
+ * {@code wintertodt reward REWARD|none} and {@code wintertodt warmth N} (the Wintertodt, by {@code Wintertodt.Reward} name;
+ * setting names wintertodt and wintertodtFletch),
  * {@code mixology plan ALL|PER_PASTE}, {@code mixology reward REWARD|none} and {@code mixology cue SPOTANIM} (a Mastering
  * Mixology setting, or a spot animation appearing, by its {@code SpotanimID} name; setting names mixology and mixologyCues),
  * {@code bank ITEM COUNT} (the bank as last seen), {@code teleport "Name" "Source" X Y SECONDS carried|banked},
@@ -102,6 +104,8 @@ final class PilotRig implements Rig
 		settings.put("roguesDen", true);
 		settings.put("roguesDenTraps", true);
 		settings.put("barbarianAssault", true);
+		settings.put("wintertodt", true);
+		settings.put("wintertodtFletch", true);
 		pilots = new Pilots(game.client(), null, c -> { }, new FieldNotes(() -> null, new Gson()),
 			bests::get, bests::put, game::price, store::get, store::put, () -> bank);
 		pilots.atlas(() -> teleports == null ? null : com.codex.minigamepilot.core.WayfinderAtlas.of(walkPace, teleports));
@@ -146,6 +150,23 @@ final class PilotRig implements Rig
 				valuables();
 				den();
 				assault();
+				wintertodt();
+				return true;
+			case "wintertodt":
+				// wintertodt reward REWARD|none, or wintertodt warmth N
+				if ("reward".equals(args.get(0)))
+				{
+					wintertodtReward = "none".equals(args.get(1)) ? null : com.codex.minigamepilot.core.Wintertodt.Reward.valueOf(args.get(1));
+				}
+				else if ("warmth".equals(args.get(0)))
+				{
+					wintertodtWarmth = Integer.parseInt(args.get(1));
+				}
+				else
+				{
+					throw new IllegalArgumentException("wintertodt reward REWARD|none, or wintertodt warmth N");
+				}
+				wintertodt();
 				return true;
 			case "assault":
 				// assault reward REWARD|none
@@ -354,6 +375,14 @@ final class PilotRig implements Rig
 	}
 
 	private com.codex.minigamepilot.core.Assault.Reward assaultReward = com.codex.minigamepilot.core.Assault.Reward.FIGHTER_TORSO;
+
+	private com.codex.minigamepilot.core.Wintertodt.Reward wintertodtReward = com.codex.minigamepilot.core.Wintertodt.Reward.PYROMANCER_OUTFIT;
+	private int wintertodtWarmth = 40;
+
+	private void wintertodt()
+	{
+		pilots.wintertodt(settings.get("wintertodt"), settings.get("wintertodtFletch"), wintertodtWarmth, wintertodtReward);
+	}
 
 	private void assault()
 	{

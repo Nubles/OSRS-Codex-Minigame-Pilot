@@ -130,7 +130,18 @@ public final class Step
 		WALL_SAFE,
 		// Barbarian Assault
 		/** Commander Connad, who keeps the rewards shop and the role levels. */
-		COMMANDER
+		COMMANDER,
+		// Wintertodt
+		/** Bruma roots, to chop. */
+		ROOTS,
+		/** A brazier, to light, fix or feed. */
+		BRAZIER,
+		/** A pyromancer, to heal. */
+		PYROMANCER,
+		/** The crates of free tools in the prison. */
+		TOOL_CRATE,
+		/** The reward cart in the camp. */
+		REWARD_CART
 	}
 
 	private final String verb;
