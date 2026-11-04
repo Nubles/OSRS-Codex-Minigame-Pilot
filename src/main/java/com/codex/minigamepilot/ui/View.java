@@ -19,7 +19,8 @@ public final class View
 		HOMES("Mahogany Homes"),
 		RIFT("Guardians of the Rift"),
 		TEMPOROSS("Tempoross"),
-		FOUNDRY("Giants' Foundry");
+		FOUNDRY("Giants' Foundry"),
+		MIXOLOGY("Mastering Mixology");
 
 		private final String title;
 
@@ -356,6 +357,14 @@ public final class View
 		/** True when the detail is a shortfall, drawn in ember. */
 		final boolean warn;
 		final String note;
+		String title = "In the bank";
+
+		/** The card's heading, "In the bank" unless set. */
+		public Supply titled(String t)
+		{
+			title = t;
+			return this;
+		}
 
 		public Supply(String trailing, List<Line> lines, String headline, String detail, boolean warn, String note)
 		{
@@ -425,6 +434,8 @@ public final class View
 			"The double spot when it is up, the shrine, the crate, a tether before each wave, and your permits game by game."));
 		v.brief(new Brief(Activity.FOUNDRY, null,
 			"The best moulds you own for the commission, the right tool at the right heat for each stage, and your swords kept."));
+		v.brief(new Brief(Activity.MIXOLOGY, null,
+			"Which orders your paste can fill, the levers for each, the right station with its cue, the paste to refine next, and your resin towards a reward."));
 		return v;
 	}
 
@@ -530,6 +541,25 @@ public final class View
 		{
 			r.put("pick", pick.trailing);
 			r.put("pick.note", pick.note);
+		}
+		if (!lines.isEmpty())
+		{
+			StringBuilder b = new StringBuilder();
+			for (Line l : lines)
+			{
+				b.append(b.length() == 0 ? "" : ", ").append(l.text).append(' ').append(l.mark);
+			}
+			r.put("lines", b.toString());
+			r.put("lines.note", String.valueOf(linesNote));
+		}
+		for (GoalCard g : goals)
+		{
+			r.put("goal", g.have + "/" + g.need);
+			r.put("goal.note", g.note);
+		}
+		if (supply != null)
+		{
+			r.put("supply.headline", String.valueOf(supply.headline));
 		}
 		return r;
 	}

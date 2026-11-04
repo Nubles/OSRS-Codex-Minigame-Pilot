@@ -1,0 +1,92 @@
+# Mastering Mixology: which orders the paste in the hopper can fill, the plan for the most resin
+# per paste, the paste to refine next, and the hopper fed from herbs, paste carried or the bank.
+# Your rounds from earlier sessions give the time to a reward.
+#
+# Facts (OSRS wiki, Mastering Mixology, Mastering Mixology/Strategies and Lye paste):
+#  - liplack liquor is L L L (60 Herblore), mystic mana amalgam M M A (63), megalite liquid M L L
+#    (75); 10 paste a pull; ordered points 0/0/20, 20/10/0 and 10/0/20
+#  - "make every potion in an order except single-paste ones (MMM, AAA, LLL), unless a MAL is
+#    present" for the most points per paste
+#  - at 75 Herblore mox, aga and lye are ordered about 39:35:31
+#  - herbs and unfinished potions are refined into paste at the refiner, and paste goes in the
+#    hopper; an avantoe makes 30 lye paste
+#  - the apprentice potion pack costs 420 mox, 70 aga and 30 lye resin
+#  - varbit values (LLL 7, MMA 2, MLL 8; stations 1 agitator, 2 retort, 3 alembic) as the Mastering
+#    Mixology plugin by hex-agon reads them (a cross-check)
+include /replays/scenes/mixology.scene
+skill HITPOINTS 10
+skill HERBLORE 75
+varp MIXOLOGY_MOX_POINTS 300
+varp MIXOLOGY_AGA_POINTS 70
+varp MIXOLOGY_LYE_POINTS 30
+saved mixology.rounds "1;1767000000000,100,20,10,10,500,3;1767000060000,100,40,0,20,600,2"
+mixology reward APPRENTICE_PACK
+varbit MM_AVAILABLE_MOX 600
+varbit MM_AVAILABLE_AGA 600
+varbit MM_AVAILABLE_LYE 0
+varbit MM_LAB_ORDER_1_TYPE 7
+varbit MM_LAB_ORDER_1_MODIFIER 2
+varbit MM_LAB_ORDER_2_TYPE 2
+varbit MM_LAB_ORDER_2_MODIFIER 1
+varbit MM_LAB_ORDER_3_TYPE 8
+varbit MM_LAB_ORDER_3_MODIFIER 3
+at 1394 9327
+tick
+# No lye: only the mystic mana amalgam can be made, and lye is what to refine.
+expect place = "1 of 3 orders"
+expect lines = "Liplack liquor IDLE, Mystic mana amalgam NEXT, Megalite liquid IDLE"
+expect step = "Pull the mox lever"
+expect pick = "Lye first"
+expect pick.note ~ "Refine lye next"
+expect gauge.Lye = "0/3000"
+# Two rounds kept, a minute each: 60 mox, 10 aga, 30 lye in two minutes is 1,800 mox an hour.
+expect stat.Resin_an_hour = "3,000"
+expect goal = "400/520"
+expect goal.note = "About 4m at your pace, mox last"
+
+# Lye in: every order, by the plain plan.
+varbit MM_AVAILABLE_LYE 1000
+tick
+expect place = "3 of 3 orders · +40% resin"
+expect step = "Pull the lye lever"
+# At 75 mox is ordered most (39:35:31), so with mox and aga level, mox runs out first.
+expect pick = "Mox first"
+
+# The most resin per paste: the liplack liquor is skipped, two orders at +20%.
+mixology plan PER_PASTE
+tick
+expect place = "2 of 3 orders · +20% resin"
+expect lines = "Liplack liquor IDLE, Mystic mana amalgam NEXT, Megalite liquid TODO"
+expect step = "Pull the mox lever"
+mixology plan ALL
+
+# An empty hopper: herbs carried go in the refiner, then the paste in the hopper.
+varbit MM_AVAILABLE_MOX 0
+varbit MM_AVAILABLE_AGA 0
+varbit MM_AVAILABLE_LYE 0
+tick
+expect place = "0 of 3 orders"
+expect step = "Bank for herbs that make lye paste"
+expect object = bank
+items INV AVANTOE 10
+tick
+expect step = "Refine your herbs"
+expect object = refiner
+expect detail = "The orders need more lye paste; then put it in the hopper"
+expect gauge.Lye = "0/3000"
+items INV clear
+items INV MM_LYE_PASTE 300 stacked
+tick
+expect step = "Put your paste in the hopper"
+expect object = hopper
+items INV clear
+varbit MM_AVAILABLE_LYE 300
+varbit MM_AVAILABLE_MOX 300
+varbit MM_AVAILABLE_AGA 300
+tick
+expect step = "Pull the lye lever"
+
+# Mastering Mixology turned off: the Pilot lets the lab be.
+setting mixology off
+tick
+expect activity = NONE

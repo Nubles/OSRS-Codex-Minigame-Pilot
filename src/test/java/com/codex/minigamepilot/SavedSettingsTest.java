@@ -34,6 +34,8 @@ public class SavedSettingsTest
 			"tempoross", "temporossCook", "temporossStormLoad",
 			// Giants' Foundry.
 			"foundry",
+			// Mastering Mixology.
+			"mixology", "mixologyPlan", "mixologyCues", "mixologyReward",
 			"fieldNotes")), keys);
 		assertEquals("codexminigamepilot", CodexMinigamePilotConfig.GROUP);
 	}

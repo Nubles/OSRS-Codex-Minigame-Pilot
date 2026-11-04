@@ -74,7 +74,17 @@ public final class Step
 		POLISHING_WHEEL,
 		LAVA_POOL,
 		WATERFALL,
-		PREFORM_STORAGE
+		PREFORM_STORAGE,
+		// Mastering Mixology (the paste hopper is HOPPER, the lab's bank chest BANK)
+		/** One of the mox, aga and lye levers, as the step's title names it. */
+		LEVER,
+		MIXING_VESSEL,
+		AGITATOR,
+		RETORT,
+		ALEMBIC,
+		CONVEYOR,
+		REFINER,
+		DIGWEED
 	}
 
 	private final String verb;
@@ -121,6 +131,12 @@ public final class Step
 	public Step withItems(int... newItems)
 	{
 		return new Step(verb, title, detail, target, newItems, waiting);
+	}
+
+	/** The same step about a thing in the world too, such as items to put in it. */
+	public Step withTarget(Target newTarget)
+	{
+		return new Step(verb, title, detail, newTarget, items, waiting);
 	}
 
 	/** A short word for the label over the target, such as "Deposit". */

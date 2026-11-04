@@ -365,4 +365,22 @@ public class SavedKeysFuzzTest
 			Swords.decode(g.encode());
 		});
 	}
+
+	@Test
+	public void mixologyRounds()
+	{
+		survive("mixology.rounds", "1;1760000000000,120,40,30,20,2000,3;1760000100000,0,20,0,0,190,1", s ->
+		{
+			MixRounds g = MixRounds.decode(s);
+			sane(String.valueOf(g.resinPerHour() < 0 ? 0 : Math.round(g.resinPerHour())));
+			sane(String.valueOf(g.xpPerHour() < 0 ? 0 : Math.round(g.xpPerHour())));
+			double h = g.hoursTo(Mixology.Reward.GOGGLES, new int[3]);
+			sane(String.valueOf(h < 0 ? 0 : Math.round(h)));
+			for (MixRounds.Round r : g.all())
+			{
+				assertTrue(r.resin() >= 0 && r.xp >= 0 && r.ticks >= 0 && r.orders >= 0);
+			}
+			MixRounds.decode(g.encode());
+		});
+	}
 }

@@ -1,6 +1,8 @@
 package com.codex.minigamepilot;
 
 import com.codex.minigamepilot.core.Goals;
+import com.codex.minigamepilot.core.MixCycle;
+import com.codex.minigamepilot.core.Mixology;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
@@ -98,6 +100,43 @@ public interface CodexMinigamePilotConfig extends Config
 		public String toString()
 		{
 			return choice.toString();
+		}
+	}
+
+	/** What Mastering Mixology resin is saved for. */
+	enum MixologyReward
+	{
+		NONE(null),
+		APPRENTICE_PACK(Mixology.Reward.APPRENTICE_PACK),
+		ADEPT_PACK(Mixology.Reward.ADEPT_PACK),
+		EXPERT_PACK(Mixology.Reward.EXPERT_PACK),
+		GOGGLES(Mixology.Reward.GOGGLES),
+		LABCOAT(Mixology.Reward.LABCOAT),
+		PANTS(Mixology.Reward.PANTS),
+		GLOVES(Mixology.Reward.GLOVES),
+		REAGENT_POUCH(Mixology.Reward.REAGENT_POUCH),
+		POTION_STORAGE(Mixology.Reward.POTION_STORAGE),
+		CHUGGING_BARREL(Mixology.Reward.CHUGGING_BARREL),
+		AMULET(Mixology.Reward.AMULET),
+		ALDARIUM(Mixology.Reward.ALDARIUM);
+
+		private final Mixology.Reward reward;
+
+		MixologyReward(Mixology.Reward reward)
+		{
+			this.reward = reward;
+		}
+
+		/** The reward, or null for none. */
+		public Mixology.Reward reward()
+		{
+			return reward;
+		}
+
+		@Override
+		public String toString()
+		{
+			return reward == null ? "None" : reward.getTitle();
 		}
 	}
 
@@ -246,6 +285,42 @@ public interface CodexMinigamePilotConfig extends Config
 		return true;
 	}
 
+	@ConfigItem(
+		keyName = "mixology",
+		name = "Mastering Mixology",
+		description = "Guide Mastering Mixology: which orders your paste can fill, the levers, the vessel, the station each order names, the conveyor belt, the paste to refine next, and every delivery kept",
+		section = MINIGAMES,
+		position = 12
+	)
+	default boolean mixology()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "mixologyPlan",
+		name = "Mixology orders to make",
+		description = "Every order (the most from the 40% bonus for filling all three), or the most resin per paste (skip mammoth-might mix, alco-augmentator and liplack liquor unless a mixalot is ordered)",
+		section = MINIGAMES,
+		position = 13
+	)
+	default MixCycle.Plan mixologyPlan()
+	{
+		return MixCycle.Plan.ALL;
+	}
+
+	@ConfigItem(
+		keyName = "mixologyCues",
+		name = "Mixology station cues",
+		description = "Light the agitator and the alembic the moment their quick action is live, and say to keep clicking the retort",
+		section = MINIGAMES,
+		position = 14
+	)
+	default boolean mixologyCues()
+	{
+		return true;
+	}
+
 	@ConfigItem(keyName = "plaque", name = "Step plaque", description = "Show the next step on a small plaque in the game view", section = GUIDANCE, position = 0)
 	default boolean plaque()
 	{
@@ -332,11 +407,23 @@ public interface CodexMinigamePilotConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = "mixologyReward",
+		name = "Mixology reward",
+		description = "The Mastering Mixology reward your resin is saved for: the panel shows each resin against its price and the time to it at your pace",
+		section = GOALS,
+		position = 3
+	)
+	default MixologyReward mixologyReward()
+	{
+		return MixologyReward.NONE;
+	}
+
+	@ConfigItem(
 		keyName = "showGoals",
 		name = "Show goals",
 		description = "Show the goal card on the panel",
 		section = GOALS,
-		position = 3
+		position = 4
 	)
 	default boolean showGoals()
 	{
@@ -348,7 +435,7 @@ public interface CodexMinigamePilotConfig extends Config
 		name = "Reward road",
 		description = "In each minigame, show its rewards as a road (at the Blast Furnace, the bars each Smithing level opens): what you own, what you can have now and how far off the rest is at your pace",
 		section = GOALS,
-		position = 4
+		position = 5
 	)
 	default boolean rewardRoad()
 	{
