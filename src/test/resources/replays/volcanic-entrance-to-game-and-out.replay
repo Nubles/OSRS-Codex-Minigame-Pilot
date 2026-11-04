@@ -1,0 +1,116 @@
+# Volcanic Mine: the entrance's one next step, the shop's balance read, a whole game shown as
+# plain figures only (no plaque, no cue), and the game kept with its points and experience.
+#
+# Facts (OSRS wiki, Volcanic Mine; Petrified Pete; Prospector boots; Death):
+#  - "To enter the mine, players must have level 50 Mining."
+#  - "players must pay Petrified Pete 30 numulite each time to enter the mine."
+#  - "A one-time fee of 3,000 numulite can also be paid for permanent access."
+#  - Prospector boots "from Volcanic Mine for 21,000 points"; the kit 26,000 + 39,000 + 34,000 + 21,000.
+#  - Petrified Pete is NPC 7776 (FOSSIL_MINEGUARD).
+# RuneLite: the mine is regions 15263 and 15262 (Discord plugin); the entrance at 3812, 3810
+# (world map). The varbits' meanings are inferred from their RuneLite names (FOSSIL_MINE_*),
+# cross-checked against the Plugin Hub's Volcanic Mine plugins. The scene is schematic.
+scene 3760 3760
+at 3812 3808
+npc FOSSIL_MINEGUARD "Petrified Pete" 3815 3812 as pete
+object FOSSIL_VOLCANO_BANK_CHEST 3818 3806 as bankchest
+name FOSSIL_VOLCANO_BANK_CHEST "Bank chest"
+item FOSSIL_NUMULITE "Numulite" stacks
+skill MINING 49
+tick
+expect activity = VOLCANIC_MINE
+expect step = "Train Mining to 50"
+expect detail = "The mine lets you in at 50 Mining; you have 49"
+expect quiet = false
+
+# 70 Mining, but 12 numulite: not enough for the fee.
+skill MINING 70 737627
+items INV FOSSIL_NUMULITE 12 stacked
+tick
+expect step = "Bring 30 numulite"
+expect target = VOLCANO_BANK
+expect detail = "Petrified Pete takes 30 a game, or 3,000 once for good; you carry 12"
+# Points not known yet: the reward card asks for the shop once.
+expect stat.Points = "?"
+expect goal.note ~ "Open Petrified Pete's shop once"
+expect goal.pieces = "Prospector helmet TODO, Prospector jacket TODO, Prospector legs TODO, Prospector boots TODO"
+
+items INV set FOSSIL_NUMULITE 100
+tick
+expect step = "Pay Petrified Pete and go in"
+expect target = PETRIFIED_PETE
+expect npc = "Petrified Pete"
+expect detail = "30 numulite a game; you carry 100"
+
+# The shop: its points line is the balance.
+widget FossilVolcanicShop.POINTS text "Points: <col=ffa82f>18,500</col>"
+tick
+expect stat.Points = "18,500"
+expect saved.volcanic.points ~ "1;18500;"
+expect goal = "18500/120000"
+expect goal.note ~ "101,500 points to go. Play a game and the time to it follows from your pace."
+expect goal.note ~ "First the prospector boots, 21,000."
+close FossilVolcanicShop.POINTS
+
+# Paying Pete: 30 numulite go, then in.
+items INV set FOSSIL_NUMULITE 70
+tick
+scene 3760 10140
+at 3800 10190
+varbit FOSSIL_MINE_PROGRESS_STATUS 1
+varbit FOSSIL_MINE_TEMP_PTS 0
+varbit FOSSIL_MINE_NUMBERPLAYERS 3
+varbit FOSSIL_MINE_CURRENT_STABILITY 100
+varbit FOSSIL_MINE_VENTA_STATUS 127
+varbit FOSSIL_MINE_VENTB_STATUS 127
+varbit FOSSIL_MINE_VENTC_STATUS 127
+widget FossilVolcanicMine.TIME text "10:28"
+tick
+# Inside: figures only, never a plaque or a target.
+always quiet = true
+always target = NONE
+expect step = "Before the game"
+expect stat.Time_left = "10:28"
+expect gauge.Stability = "100/100"
+expect lines = "Chamber A IDLE, Chamber B IDLE, Chamber C IDLE, Players IDLE"
+expect stat.Points = "18,500"
+
+varbit FOSSIL_MINE_PROGRESS_STATUS 2
+varbit FOSSIL_MINE_VENTA_STATUS 52
+varbit FOSSIL_MINE_CURRENT_STABILITY 86
+widget FossilVolcanicMine.TIME text "7:12"
+varbit FOSSIL_MINE_TEMP_PTS 900
+xp MINING 749627
+tick 200
+expect step = "Volcanic Mine game"
+expect detail = "7:12 left · 900 points this game"
+expect stat.Game_points = "900"
+expect stat.Time_left = "7:12"
+expect gauge.Stability = "86/100"
+expect lines ~ "Mining experience IDLE"
+expect stat.Points = "19,400"
+
+varbit FOSSIL_MINE_TEMP_PTS 2400
+xp MINING 767627
+widget FossilVolcanicMine.TIME text "0:41"
+tick 700
+expect stat.Game_points = "2,400"
+
+# Out by the exit, before the eruption: the game is kept a few ticks later, with its experience.
+forget
+close FossilVolcanicMine.TIME
+scene 3760 3760
+at 3812 3808
+npc FOSSIL_MINEGUARD "Petrified Pete" 3815 3812 as pete
+varbit FOSSIL_MINE_PROGRESS_STATUS 0
+tick 4
+expect quiet = false
+expect saved.volcanic.kept ~ ",2400,30000,3,l"
+expect stat.Points = "20,900"
+expect stat.Games_today = "1"
+expect supply.headline = "Best game: 2,400 points, 3 players"
+# Paid 30 to go in: not taken for permanent access.
+expect saved.volcanic.owned !~ "A"
+expect goal.note ~ "99,100 points to go"
+expect goal.note ~ "at your pace in the mine (about 42 games)."
+expect step = "Pay Petrified Pete and go in"

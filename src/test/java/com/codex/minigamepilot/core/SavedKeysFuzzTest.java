@@ -512,6 +512,28 @@ public class SavedKeysFuzzTest
 	}
 
 	@Test
+	public void volcanicKept()
+	{
+		survive("volcanic.kept", "1;1767000000000,1000,2400,33000,3,l;1767000720000,178,406,4200,1,o;1767001440000,900,800,0,0,e", s ->
+		{
+			VolcanicLog g = VolcanicLog.decode(s);
+			for (double h : new double[]{g.pointsPerHour(), g.xpPerHour(), g.pointsPerHourSitting(), g.xpPerHourSitting()})
+			{
+				assertTrue(!Double.isNaN(h) && !Double.isInfinite(h));
+				sane(String.valueOf(h < 0 ? 0 : Math.round(h)));
+			}
+			for (VolcanicLog.Game x : g.all())
+			{
+				assertTrue(x.ticks >= 0 && x.ticks <= VolcanicLog.LONGEST && x.points >= 0 && x.points <= VolcanicLog.POINTS_MAX);
+				assertTrue(x.xp >= 0 && x.xp <= VolcanicLog.XP_MAX && x.players >= 0 && x.end != null);
+				sane(x.team());
+			}
+			assertTrue(g.pointsSince(0) >= 0 && g.averagePoints() >= 0);
+			VolcanicLog.decode(g.encode());
+		});
+	}
+
+	@Test
 	public void nmzKills()
 	{
 		survive("nmz.kills", "1;H|Count Draynor|1|2600;N|Elvarg|3|7200", s ->

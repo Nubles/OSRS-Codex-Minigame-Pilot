@@ -416,6 +416,10 @@ final class Coach
 				return "the Rewards chest";
 			case DREAM_COFFER:
 				return "the coffer";
+			case PETRIFIED_PETE:
+				return "Petrified Pete";
+			case VOLCANO_BANK:
+				return "the bank chest";
 			default:
 				return null;
 		}
