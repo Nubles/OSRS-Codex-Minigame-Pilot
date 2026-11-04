@@ -1,0 +1,37 @@
+# Tempoross: hopping worlds (or logging out) in the middle of a game ends that game. It is kept as
+# not won, and the next game starts afresh rather than running on from the last one's start and
+# points.
+#
+# Before the fix, a hop set the Pilot's minigame to none without ending the game under way: it was
+# never kept, and the next game took on its start tick and its 1,500 points.
+#
+# Facts: the HUD is InterfaceID.TemporossHud and the points its POINTS_TEXT (RuneLite gameval);
+# everything else here is the Pilot's own bookkeeping.
+include /replays/scenes/tempoross.scene
+skill FISHING 60
+items INV HARPOON 1
+at 3040 2990
+tick
+expect activity = TEMPOROSS
+widget TemporossHud.POINTS_TEXT text "Points: 1,500"
+tick 60
+expect stat.Points_this_game = "1,500"
+
+# Hop: the cove is gone, and the game with it.
+state HOPPING
+state LOGGED_IN
+widget TemporossHud.CONTENT hidden true
+actors
+tick 3
+expect activity = NONE
+expect saved.tempoross.games ~ ",1500,0,0"
+
+# Back for another game: its points are its own.
+include /replays/scenes/tempoross.scene
+at 3040 2990
+widget TemporossHud.POINTS_TEXT text "Points: 300"
+tick 60
+expect stat.Points_this_game = "300"
+widget TemporossHud.CONTENT hidden true
+tick
+expect saved.tempoross.games ~ ",300,0,0"

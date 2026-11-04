@@ -48,8 +48,13 @@ public final class StormPilot
 	 * reads them (a cross-check, not a source); the tether varbit and a time limit also end it.
 	 */
 	static final String[] WAVE_OVER = {"the rope keeps you securely", "the wave slams into you"};
-	/** After three energy rounds (OSRS wiki, Tempoross/Strategies). */
-	static final String OUT_OF_CONTROL = "The storm is out of control";
+	/**
+	 * Storm intensity at which the game is lost and its points with it (OSRS wiki, Tempoross: "If
+	 * storm intensity hits 100% before Tempoross's energy is fully depleted, the encounter fails").
+	 * The "storm is out of control" message after three energy rounds is not the end: the wiki's
+	 * strategy page says the game can still be saved by loading two cannons.
+	 */
+	static final int WASHED_AT = 100;
 	/** No wave the Pilot has been told of lasts longer than this, in ticks: its own patience, not a game fact. */
 	static final int WAVE_PATIENCE = 20;
 	/** A fire this close to a tile of your walk, or to where you are going, is in the way. */
@@ -212,10 +217,6 @@ public final class StormPilot
 				wavePending = false;
 			}
 		}
-		if (message.contains(OUT_OF_CONTROL))
-		{
-			washed = true;
-		}
 	}
 
 	/** Out of the cove: a game under way ends here. */
@@ -367,6 +368,10 @@ public final class StormPilot
 			}
 			gameLast = tick;
 			gamePoints = Math.max(gamePoints, points);
+			if (s.storm >= WASHED_AT && s.essence != 0)
+			{
+				washed = true;
+			}
 			if (s.essence == 0)
 			{
 				won = true;

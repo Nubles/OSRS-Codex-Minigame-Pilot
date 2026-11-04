@@ -1,0 +1,27 @@
+# Guardians of the Rift: hopping worlds in the middle of a game ends it for the Pilot. On the new
+# world the rift has not opened yet, so the step is to wait for it, not to mine on.
+#
+# Before the fix, a hop left the last game marked as under way: back in the temple on a world
+# still waiting for its rift, the Pilot said to mine fragments.
+#
+# Facts: as rift-start-to-first-craft.replay (OSRS wiki, Guardians of the Rift); the opening
+# message is as the Guardians of the Rift Helper plugin reads it (unconfirmed by the wiki).
+include /replays/scenes/rift.scene
+skill RUNECRAFT 50
+skill MINING 60
+items INV RUNE_PICKAXE 1
+items INV GOTR_CELL_UNCHARGED 1
+at 3606 9492
+tick 2
+expect step = "Wait for the rift to open"
+chat GAMEMESSAGE "The rift becomes active!"
+tick
+expect step = "Mine guardian fragments"
+expect stat.Rift_open ~ ":"
+
+state HOPPING
+state LOGGED_IN
+tick
+expect activity = RIFT
+expect step = "Wait for the rift to open"
+expect stat.Rift_open = "-"

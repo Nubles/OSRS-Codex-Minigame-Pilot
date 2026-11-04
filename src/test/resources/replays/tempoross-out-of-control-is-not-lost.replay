@@ -1,0 +1,42 @@
+# Tempoross: "The storm is out of control!" is a warning, not the end. A game saved after it and
+# subdued is kept as won with its points and permits; a game whose storm reaches 100% is lost with
+# its points.
+#
+# Before the fix, the message alone marked the game washed away: subdued after it, the game was
+# kept as lost with 0 points and 0 permits.
+#
+# Facts:
+#  - OSRS wiki, Tempoross/Strategies: "Tempoross has gathered too much energy. The storm is out of
+#    control!" comes after three energy rounds; the encounter then fails "unless at least two
+#    cannons have enough fish loaded to force Tempoross to submerge again"
+#  - OSRS wiki, Tempoross: if storm intensity hits 100% before Tempoross is subdued the encounter
+#    fails and the points are lost
+#  - permits: one for the first 2,000 points and one more each 700 beyond (OSRS wiki, Tempoross)
+include /replays/scenes/tempoross.scene
+skill FISHING 60
+items INV HARPOON 1
+at 3040 2990
+tick
+chat GAMEMESSAGE "Tempoross has gathered too much energy. The storm is out of control!"
+widget TemporossHud.STORM_INTENSITY_TITLE text "Storm Intensity: 92%"
+widget TemporossHud.POINTS_TEXT text "Points: 4,350"
+tick
+widget TemporossHud.ESSENCE_TITLE text "Essence: 0%"
+npc TEMPOROSS_INSTANCE_HOST_E_VICTORY "Spirit Angler" 3044 2990 as host
+tick
+widget TemporossHud.CONTENT hidden true
+tick
+expect saved.tempoross.games ~ ",4350,4,1"
+
+# Next game: the storm reaches 100% and washes everyone away. The points are lost.
+widget TemporossHud.CONTENT hidden false
+widget TemporossHud.ESSENCE_TITLE text "Essence: 60%"
+widget TemporossHud.STORM_INTENSITY_TITLE text "Storm Intensity: 50%"
+widget TemporossHud.POINTS_TEXT text "Points: 900"
+remove host
+tick 60
+widget TemporossHud.STORM_INTENSITY_TITLE text "Storm Intensity: 100%"
+tick
+widget TemporossHud.CONTENT hidden true
+tick
+expect saved.tempoross.games ~ ",0,0,0"
