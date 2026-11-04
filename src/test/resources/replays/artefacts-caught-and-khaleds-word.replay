@@ -1,0 +1,75 @@
+# Stealing artefacts: caught by a patrol, Captain Khaled's own words winning over the task varbit,
+# a house out of sight with the arrow pointing at it, and an artefact lost to a logout.
+#
+# Facts (OSRS wiki, Stealing artefacts; Transcript:Captain Khaled):
+#  - if caught, "the artefact will be confiscated", and "Players must travel back to Captain
+#    Khaled on foot because any teleportation, including random events" or logging out removes it
+#  - Khaled: "It can be found in the [location]."; "Congratulations, you're a failure."
+#  - "The artefact is located in a drawer ... upstairs in the others"
+#  - the task varbit PISCARILIUS_BURGLARY_TARGET: 1 north, 4 south-west, 7 failed and 8 deliver as
+#    the Stealing Artefacts plugin reads it (unconfirmed, hence Khaled's words win)
+include /replays/scenes/artefacts.scene
+skill HITPOINTS 10
+skill THIEVING 60
+items INV set LOCKPICK 1 COINS 500
+varbit PISCARILIUS_BURGLARY_TARGET 1
+tick
+
+# The task under way when the Pilot starts: the north house's drawers, on the ground floor.
+expect step = "Pick the lock of the drawers"
+expect object = northDrawers
+items INV set LOCKPICK 1 COINS 500 PISCARILIUS_STOLEN_PENDANT 1
+varbit PISCARILIUS_BURGLARY_TARGET 8
+at 1766 3750
+npc PISCARILIUS_PATROLMAN_N_2 "Patrolman" 1766 3747 as patrol
+tick
+expect step = "Take the artefact to Captain Khaled"
+expect wary = 1
+# A patrol three tiles south, facing south (0): away from you.
+expect detail = "Keep clear of the patrol nearby; if caught the artefact is confiscated"
+
+# Caught: the artefact is confiscated and no experience comes.
+items INV set LOCKPICK 1 COINS 500
+varbit PISCARILIUS_BURGLARY_TARGET 7
+at 1785 3745
+tick 4
+expect saved.artefacts.kept ~ ",NORTH,0,0,0"
+expect stat.Lost = "1"
+expect stat.Delivered = "0"
+expect step = "Back to Captain Khaled for a new house"
+expect target = KHALED
+
+# A new task: the varbit reads 1 (north), but Captain Khaled says the south-west house.
+widget ChatLeft.TEXT text "You need to recover an artefact for me. It can be found in the South West House."
+varbit PISCARILIUS_BURGLARY_TARGET 1
+tick
+close ChatLeft.TEXT
+expect step = "Go to the south-west house"
+expect target = HOUSE
+expect detail = "Its drawers are upstairs, by the ladder (as Captain Khaled said)"
+expect lines.note = "Khaled's words: south-west house"
+# Its drawers were seen upstairs: the arrow points there, on the ground floor.
+expect destination = "1749 3734"
+expect district = "target SW, 1 patrol, Khaled"
+never step = "Pick the lock of the drawers"
+tick 2
+forget
+
+# Upstairs in the south-west house, with the artefact, and then a logout: it is lost.
+at 1749 3736 1
+tick
+expect step = "Pick the lock of the drawers"
+expect object = southWestDrawers
+items INV set LOCKPICK 1 COINS 500 PISCARILIUS_STOLEN_BOX 1
+tick
+expect step = "Climb down the ladder"
+state LOGIN_SCREEN
+state LOGGED_IN
+items INV set LOCKPICK 1 COINS 500
+varbit PISCARILIUS_BURGLARY_TARGET 8
+at 1785 3745
+tick 3
+expect saved.artefacts.kept ~ ",SOUTH_WEST,0,"
+expect step = "Back to Captain Khaled for a new house"
+expect detail = "No artefact in your pack; he hands out another task"
+expect supply.headline = "null"

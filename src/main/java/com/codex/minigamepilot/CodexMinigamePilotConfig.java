@@ -503,6 +503,30 @@ public interface CodexMinigamePilotConfig extends Config
 		return TithePlants.TWENTY;
 	}
 
+	@ConfigItem(
+		keyName = "stealingArtefacts",
+		name = "Stealing artefacts",
+		description = "Guide stealing artefacts in Port Piscarilius: the house Captain Khaled names, its ladder and drawers, the artefact back to him on foot, and every trip kept with experience and coins an hour",
+		section = MINIGAMES,
+		position = 20
+	)
+	default boolean stealingArtefacts()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "artefactsPatrols",
+		name = "Mark patrols",
+		description = "While you carry an artefact, outline the patrols near you in ember with a wedge on the ground the way each faces",
+		section = MINIGAMES,
+		position = 21
+	)
+	default boolean artefactsPatrols()
+	{
+		return true;
+	}
+
 	@ConfigItem(keyName = "plaque", name = "Step plaque", description = "Show the next step on a small plaque in the game view", section = GUIDANCE, position = 0)
 	default boolean plaque()
 	{
@@ -533,13 +557,13 @@ public interface CodexMinigamePilotConfig extends Config
 		return true;
 	}
 
-	@ConfigItem(keyName = "hintArrow", name = "Hint arrow", description = "Point the game's hint arrow at a Mahogany Homes client's house, or at the next Vale totem site when it is out of sight", section = GUIDANCE, position = 5)
+	@ConfigItem(keyName = "hintArrow", name = "Hint arrow", description = "Point the game's hint arrow at a Mahogany Homes client's house, at the next Vale totem site when it is out of sight, or at the house of your artefact task", section = GUIDANCE, position = 5)
 	default boolean hintArrow()
 	{
 		return true;
 	}
 
-	@ConfigItem(keyName = "worldMap", name = "World map marker", description = "Mark a Mahogany Homes client's house, or the next Vale totem site out of sight, on the world map", section = GUIDANCE, position = 6)
+	@ConfigItem(keyName = "worldMap", name = "World map marker", description = "Mark a Mahogany Homes client's house, the next Vale totem site out of sight, or the house of your artefact task on the world map", section = GUIDANCE, position = 6)
 	default boolean worldMap()
 	{
 		return true;
@@ -631,11 +655,24 @@ public interface CodexMinigamePilotConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = "artefactsLevel",
+		name = "Stealing artefacts level",
+		description = "The Thieving level to work toward when stealing artefacts, in artefacts and time at your pace, with 0 for the next level",
+		section = GOALS,
+		position = 6
+	)
+	@Range(max = 99)
+	default int artefactsLevel()
+	{
+		return 0;
+	}
+
+	@ConfigItem(
 		keyName = "showGoals",
 		name = "Show goals",
 		description = "Show the goal card on the panel",
 		section = GOALS,
-		position = 6
+		position = 7
 	)
 	default boolean showGoals()
 	{
@@ -647,7 +684,7 @@ public interface CodexMinigamePilotConfig extends Config
 		name = "Reward road",
 		description = "In each minigame, show its rewards as a road (at the Blast Furnace, the bars each Smithing level opens): what you own, what you can have now and how far off the rest is at your pace",
 		section = GOALS,
-		position = 7
+		position = 8
 	)
 	default boolean rewardRoad()
 	{

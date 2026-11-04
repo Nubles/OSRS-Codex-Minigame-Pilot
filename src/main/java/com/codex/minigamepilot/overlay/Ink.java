@@ -30,6 +30,9 @@ final class Ink
 	static final Color RING_SHADOW = Theme.alpha(Theme.INK_DEEP, 200);
 	static final BasicStroke HEAVY = new BasicStroke(4f);
 	static final Color HULL_RIM = Theme.alpha(Theme.GOLD_BRIGHT, 220);
+	/** A character to keep clear of, such as a patrol while you carry an artefact. */
+	static final Color WARY_RIM = Theme.alpha(Theme.EMBER, 210);
+	static final Color WARY_FILL = Theme.alpha(Theme.EMBER, 45);
 
 	/** The target's fill as it pulses, from 30 to 70 alpha, for gold and for teal. */
 	static final Color[] GOLD_PULSE = pulse(Theme.GOLD, 30, 40);

@@ -404,6 +404,29 @@ public class SavedKeysFuzzTest
 	}
 
 	@Test
+	public void artefactsKept()
+	{
+		survive("artefacts.kept", "1;1760000000000,100,NORTH,1,4710,800;1760000100000,0,-,0,750,0", s ->
+		{
+			ArtefactLog g = ArtefactLog.decode(s);
+			sane(String.valueOf(g.perHour() < 0 ? 0 : Math.round(g.perHour())));
+			sane(String.valueOf(g.xpPerHour() < 0 ? 0 : Math.round(g.xpPerHour())));
+			sane(String.valueOf(g.coinsPerHour() < 0 ? 0 : Math.round(g.coinsPerHour())));
+			double h = g.hoursFor(400_000);
+			sane(String.valueOf(h < 0 ? 0 : Math.round(h)));
+			for (Artefacts.House house : Artefacts.House.values())
+			{
+				sane(String.valueOf(Math.max(0, g.typical(house))));
+			}
+			for (ArtefactLog.Run r : g.all())
+			{
+				assertTrue(r.xp >= 0 && r.ticks >= 0 && r.coins >= 0 && r.coins <= Artefacts.COINS_MAX);
+			}
+			ArtefactLog.decode(g.encode());
+		});
+	}
+
+	@Test
 	public void totemsKept()
 	{
 		survive("totems.kept", "1;1760000000000,200,MAGIC,5000,1000;1760000100000,0,-,190,0", s ->

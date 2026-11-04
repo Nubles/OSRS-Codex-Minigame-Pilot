@@ -136,6 +136,15 @@ public class PilotPanel extends PluginPanel
 			body.add(card);
 		}
 
+		if (v.district != null && !v.district.houses.isEmpty())
+		{
+			body.add(new SectionHeader(v.district.title, v.district.note));
+			Card card = new Card(new BorderLayout());
+			card.setBorder(new javax.swing.border.EmptyBorder(4, 4, 4, 4));
+			card.add(new DistrictMap(v.district, WIDTH - 24), BorderLayout.CENTER);
+			body.add(card);
+		}
+
 		if (!v.lines.isEmpty())
 		{
 			body.add(new SectionHeader(v.linesTitle == null ? "To do" : v.linesTitle, v.linesNote));

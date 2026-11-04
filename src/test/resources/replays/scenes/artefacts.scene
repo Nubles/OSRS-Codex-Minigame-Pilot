@@ -1,0 +1,33 @@
+# A schematic Port Piscarilius for replays. Not the real map: Captain Khaled a little east of the
+# houses (in the game he is in the foodhall, "the large eastern building"), the north house's
+# drawers on the ground floor, the west house with its ladder and its drawers upstairs, and the
+# south-west house's drawers upstairs with no ladder in the scene.
+#
+# Facts:
+#  - names are RuneLite's (net.runelite.api.gameval): the drawers PISCARILIUS_BURGLARY_DRAWERS_N,
+#    _W and _SW (the wiki's Drawers (stealing artefacts): 27771, 27775, 27774), the ladders
+#    PISCARILIUS_LADDER_BOTTOM and PISCARILIUS_LADDER_TOP_01, and Captain Khaled
+#    PISCARILIUS_CAPTAIN_KHALED_DEFAULT
+#  - OSRS wiki, Stealing artefacts: "The artefact is located in a drawer on the ground floor in the
+#    northern house, and upstairs in the others"
+#  - where each house stands is as the Stealing Artefacts plugin has it (unconfirmed); the rest
+#    of the layout is made up
+#
+#   y 3752  ladder (1752, both floors)
+#   y 3750  N drawers (1768)                 Khaled (1790, 3745)
+#   y 3749  W drawers (1750, upstairs)
+#   y 3734  SW drawers (1749, upstairs)
+
+scene 1720 3700
+
+# The ground floor.
+at 1785 3745
+object PISCARILIUS_BURGLARY_DRAWERS_N 1768 3750 as northDrawers
+object PISCARILIUS_LADDER_BOTTOM 1752 3752 as westLadderUp
+npc PISCARILIUS_CAPTAIN_KHALED_DEFAULT "Captain Khaled" 1790 3745 as khaled
+# Upstairs (objects take the floor you stand on).
+at 1752 3753 1
+object PISCARILIUS_LADDER_TOP_01 1752 3752 as westLadderDown
+object PISCARILIUS_BURGLARY_DRAWERS_W 1750 3749 as westDrawers
+object PISCARILIUS_BURGLARY_DRAWERS_SW 1749 3734 as southWestDrawers
+at 1785 3745

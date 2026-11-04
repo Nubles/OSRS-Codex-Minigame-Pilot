@@ -22,7 +22,8 @@ public final class View
 		FOUNDRY("Giants' Foundry"),
 		MIXOLOGY("Mastering Mixology"),
 		TOTEMS("Vale Totems"),
-		TITHE("Tithe Farm");
+		TITHE("Tithe Farm"),
+		ARTEFACTS("Stealing Artefacts");
 
 		private final String title;
 
@@ -457,6 +458,84 @@ public final class View
 		}
 	}
 
+	/**
+	 * Port Piscarilius's houses on the panel, north up, in world tiles: the house of the task
+	 * ringed, Captain Khaled, the patrols with the way each faces, and where you stand.
+	 */
+	public static final class District
+	{
+		/** One house: where its drawers are (or about), a short label, and whether it is the task's. */
+		public static final class Place
+		{
+			final int x;
+			final int y;
+			final String label;
+			final boolean target;
+			/** Its drawers have been seen there, so the spot is the game's, not an estimate. */
+			final boolean seen;
+
+			public Place(int x, int y, String label, boolean target, boolean seen)
+			{
+				this.x = x;
+				this.y = y;
+				this.label = label;
+				this.target = target;
+				this.seen = seen;
+			}
+		}
+
+		/** A patrol: where it stands and the way it faces (the game's orientation, 0 south, 512 west). */
+		public static final class Patrol
+		{
+			final int x;
+			final int y;
+			final int orientation;
+
+			public Patrol(int x, int y, int orientation)
+			{
+				this.x = x;
+				this.y = y;
+				this.orientation = orientation;
+			}
+		}
+
+		final String title;
+		final String note;
+		final List<Place> houses;
+		final List<Patrol> patrols;
+		/** Captain Khaled, where last seen, or null. */
+		final int[] khaled;
+		/** Where you stand, or null. */
+		final int[] you;
+		/** You carry an artefact: the patrols matter. */
+		final boolean hot;
+
+		public District(String title, String note, List<Place> houses, List<Patrol> patrols, int[] khaled, int[] you, boolean hot)
+		{
+			this.title = title;
+			this.note = note;
+			this.houses = houses == null ? Collections.emptyList() : houses;
+			this.patrols = patrols == null ? Collections.emptyList() : patrols;
+			this.khaled = khaled;
+			this.you = you;
+			this.hot = hot;
+		}
+
+		/** "target North house, 2 patrols" style, for replays and tests. */
+		public String summary()
+		{
+			String t = "none";
+			for (Place p : houses)
+			{
+				if (p.target)
+				{
+					t = p.label;
+				}
+			}
+			return "target " + t + ", " + patrols.size() + (patrols.size() == 1 ? " patrol" : " patrols") + (khaled != null ? ", Khaled" : "");
+		}
+	}
+
 	final boolean loggedIn;
 	final Activity activity;
 	final Step step;
@@ -477,6 +556,7 @@ public final class View
 	PickCard pick;
 	Supply supply;
 	Field field;
+	District district;
 
 	/**
 	 * @param place where, such as "Falador" or "Lower level", or null
@@ -521,6 +601,8 @@ public final class View
 			"The next totem site and the logs to bring, the three spirits each totem wants ringed in the carving choices, the offerings waiting, and your research points towards a reward."));
 		v.brief(new Brief(Activity.TITHE, null,
 			"The seed your Farming grows, the next patch to plant, water or harvest read from the patches themselves, the water you carry, and your points towards a reward."));
+		v.brief(new Brief(Activity.ARTEFACTS, null,
+			"The house Captain Khaled names, its ladder and drawers lit, the patrols marked on the way back, and every artefact kept with experience and coins an hour."));
 		return v;
 	}
 
@@ -538,6 +620,12 @@ public final class View
 	public View pick(PickCard p)
 	{
 		pick = p;
+		return this;
+	}
+
+	public View district(District d)
+	{
+		district = d;
 		return this;
 	}
 
@@ -647,6 +735,15 @@ public final class View
 		{
 			r.put("goal", g.have + "/" + g.need);
 			r.put("goal.note", g.note);
+			if (!g.pieces.isEmpty())
+			{
+				StringBuilder b = new StringBuilder();
+				for (Line l : g.pieces)
+				{
+					b.append(b.length() == 0 ? "" : ", ").append(l.text).append(' ').append(l.mark);
+				}
+				r.put("goal.pieces", b.toString());
+			}
 		}
 		if (supply != null)
 		{
@@ -655,6 +752,20 @@ public final class View
 		if (field != null)
 		{
 			r.put("field", field.summary());
+		}
+		if (district != null)
+		{
+			r.put("district", district.summary());
+		}
+		if (pick != null && !pick.picks.isEmpty())
+		{
+			for (Pick p : pick.picks)
+			{
+				if (p.current)
+				{
+					r.put("pick.current", p.name + " " + p.figure);
+				}
+			}
 		}
 		return r;
 	}
@@ -722,6 +833,26 @@ public final class View
 			if (field.you != null)
 			{
 				b.append(field.you[0]).append(',').append(field.you[1]);
+			}
+		}
+		if (district != null)
+		{
+			b.append("|district").append(district.title).append(district.note).append(district.hot);
+			for (District.Place p : district.houses)
+			{
+				b.append(p.x).append(',').append(p.y).append(p.target ? '*' : '.').append(p.seen ? '+' : '.');
+			}
+			for (District.Patrol p : district.patrols)
+			{
+				b.append(p.x).append(',').append(p.y).append('/').append(p.orientation / 256);
+			}
+			if (district.khaled != null)
+			{
+				b.append('k').append(district.khaled[0]).append(',').append(district.khaled[1]);
+			}
+			if (district.you != null)
+			{
+				b.append('y').append(district.you[0]).append(',').append(district.you[1]);
 			}
 		}
 		if (supply != null)

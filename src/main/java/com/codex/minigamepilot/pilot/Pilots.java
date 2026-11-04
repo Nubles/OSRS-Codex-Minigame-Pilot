@@ -41,6 +41,8 @@ public final class Pilots
 	private volatile boolean useTotems = true;
 	private final TithePilot tithe = new TithePilot();
 	private volatile boolean useTithe = true;
+	private final ArtefactsPilot artefacts = new ArtefactsPilot();
+	private volatile boolean useArtefacts = true;
 	private final Coach coach;
 	private final Recorder recorder;
 	private final IntUnaryOperator price;
@@ -80,11 +82,13 @@ public final class Pilots
 		mixology.setPrice(price);
 		totems.setStore(load, saveKey);
 		tithe.setStore(load, saveKey);
+		artefacts.setStore(load, saveKey);
 		this.coach = new Coach(loadBests, saveBests);
 		this.recorder = new Recorder(notes);
 		this.scene = new SceneIndex(client, id -> MotherlodePilot.isWatched(id) || FurnacePilot.isWatched(id) || HomesPilot.isWatched(id)
 			|| RiftPilot.isWatched(id) || StormPilot.isWatched(id) || FoundryPilot.isWatched(id)
-			|| MixologyPilot.isWatched(id) || TotemsPilot.isWatched(id) || TithePilot.isWatched(id));
+			|| MixologyPilot.isWatched(id) || TotemsPilot.isWatched(id) || TithePilot.isWatched(id)
+			|| ArtefactsPilot.isWatched(id));
 		this.homes = new HomesPilot(saved, save, load, saveKey);
 		homes.readers(null, stock);
 	}
@@ -166,6 +170,13 @@ public final class Pilots
 		tithe.settings(plan, reward);
 	}
 
+	/** The "Stealing artefacts" settings: on, mark the patrols, and the Thieving level to work toward (0 for the next). */
+	public void artefacts(boolean on, boolean patrols, int level)
+	{
+		useArtefacts = on;
+		artefacts.settings(patrols, level);
+	}
+
 	/** A spot animation appeared in the scene: Mastering Mixology's station cues. */
 	public void spotanim(int id)
 	{
@@ -217,6 +228,7 @@ public final class Pilots
 			mixology.newAccount();
 			totems.newAccount();
 			tithe.newAccount();
+			artefacts.newAccount();
 			said.clear();
 			unsaid.clear();
 		}
@@ -298,6 +310,17 @@ public final class Pilots
 		}
 	}
 
+	/** The characters in the scene. */
+	private List<NPC> npcs()
+	{
+		List<NPC> out = new ArrayList<>();
+		for (NPC n : client.getTopLevelWorldView().npcs())
+		{
+			out.add(n);
+		}
+		return out;
+	}
+
 	/** Works out this tick's guidance. Only ever reads the game. */
 	public Flight fly(boolean useMotherlode, boolean useFurnace, boolean useHomes, Bar bar, int cofferLow, long now)
 	{
@@ -376,6 +399,13 @@ public final class Pilots
 			state = tithe.lastState;
 			units = tithe.units();
 		}
+		else if (useArtefacts && artefacts.active(client, npcs()))
+		{
+			activity = View.Activity.ARTEFACTS;
+			flight = artefacts.fly(client, scene, npcs(), now);
+			state = artefacts.lastState;
+			units = artefacts.units();
+		}
 		else
 		{
 			activity = View.Activity.NONE;
@@ -416,6 +446,10 @@ public final class Pilots
 			else if (last == View.Activity.TITHE)
 			{
 				tithe.left(now);
+			}
+			else if (last == View.Activity.ARTEFACTS)
+			{
+				artefacts.left();
 			}
 			last = activity;
 		}
@@ -489,6 +523,11 @@ public final class Pilots
 		{
 			// Logged out or hopped: the farm's game is over, and its sack with it.
 			tithe.left(now);
+		}
+		else if (last == View.Activity.ARTEFACTS)
+		{
+			// Logging out takes the artefact: one carried is lost.
+			artefacts.relogged(now);
 		}
 		motherlode.relogged();
 		furnace.relogged();
@@ -608,6 +647,7 @@ public final class Pilots
 		v.brief(mixology.brief());
 		v.brief(totems.brief());
 		v.brief(tithe.brief());
+		v.brief(artefacts.brief());
 		return v;
 	}
 }
