@@ -1,0 +1,75 @@
+# Tithe Farm: a sack filled to a hundred is kept with its points, experience and time, a chosen
+# reward counts down at that pace (less the pieces you own), and a hop mid-sack keeps the sack as
+# it stood, since leaving resets the farm's game.
+#
+# Facts (OSRS wiki, Tithe Farm; Farmer's outfit; Seed box):
+#  - "For every 3 plants a player deposits in the sack, they will earn 1 point" and "2 bonus
+#    points are awarded to players when they add the 100th fruit": 35 for a full sack
+#  - fruit is deposited "in batches of up to 100"; "Upon leaving the farm through the door, the
+#    game and score will be completely reset"
+#  - Seed box: "purchased from Farmer Gricoller at the Tithe Farm for 250 points"; the farmer's
+#    outfit "costs a total of 400 points": strawhat 75, jacket or shirt 150, boro trousers 125,
+#    boots 50
+#  - Bologano seed: 54 Farming; below 34 the farm cannot be played
+#  - the sack is varbit HOSIDIUS_TITHE_SCORE (RuneLite's TITHE_FARM_SACK_AMOUNT) and the points
+#    HOSIDIUS_TITHE_REWARDPOINTS (its TITHE_FARM_POINTS)
+include /replays/scenes/tithe.scene
+skill HITPOINTS 10
+skill FARMING 30
+items INV set SPADE 1 DIBBER 1 WATERING_CAN_8 8 HOSIDIUS_TITHE_SEED_B 60 stacked
+varbit HOSIDIUS_TITHE_SCORE 90
+varbit HOSIDIUS_TITHE_REWARDPOINTS 180
+at 1804 3497
+tick
+expect activity = TITHE
+expect step = "The Tithe Farm needs 34 Farming"
+expect waiting = true
+skill FARMING 60
+tithe reward SEED_BOX
+tick
+expect step = "Plant 1 of 20"
+expect gauge.Sack = 90/100
+expect goal = 180/250
+expect goal.note = "About 2 full sacks; its time shows after your first"
+
+# The first seed starts the sack's clock.
+remove b1
+object HOSIDIUS_TITHE_B_1_DRY 1806 3500 3 3 as b1
+tick 200
+varbit HOSIDIUS_TITHE_SCORE 99
+varbit HOSIDIUS_TITHE_REWARDPOINTS 213
+tick
+# The hundredth fruit: the sack empties, and the run is kept.
+varbit HOSIDIUS_TITHE_SCORE 0
+varbit HOSIDIUS_TITHE_REWARDPOINTS 215
+xp FARMING 300000
+tick
+expect saved.tithe.kept ~ ",201,BOLOGANO,100,35,"
+expect stat.Full_sacks = "1"
+expect stat.Points = "215"
+expect stat.Fruit_in_sacks = "10"
+expect supply.headline = "Quickest sack: 2:00"
+# 35 points in two minutes: the 35 still needed for the seed box are a sack away.
+expect goal = 215/250
+expect goal.note = "About 2m at your pace, 1 sack"
+
+# The farmer's outfit, with the strawhat worn: only the other pieces count.
+tithe reward FARMERS_OUTFIT
+items WORN set TITHE_REWARD_HAT_MALE 1
+tick
+expect goal = 215/325
+expect goal.note ~ "at your pace, 4 sacks"
+
+# A hop with thirty fruit in a new sack: the farm's game is over, and that sack is kept as it stood.
+remove b2
+object HOSIDIUS_TITHE_B_1_DRY 1806 3503 3 3 as b2
+tick 10
+varbit HOSIDIUS_TITHE_SCORE 30
+varbit HOSIDIUS_TITHE_REWARDPOINTS 225
+tick
+state HOPPING
+state LOGGED_IN
+scene 1760 3460
+tick 2
+expect activity = NONE
+expect saved.tithe.kept ~ ",BOLOGANO,30,10,"

@@ -1,0 +1,201 @@
+# Tithe Farm: from the seed table to a whole round of four, planted, watered three times each,
+# harvested and deposited, and the next round planted in the order you chose.
+#
+# Facts (OSRS wiki, Tithe Farm, Tithe Farm/Strategies, Watering can, Blighted Golovanova seedling):
+#  - "requiring level 34 Farming to play"; Golovanova 34, Bologano 54, Logavano 74 Farming;
+#    "players should pick the highest tier they qualify for"
+#  - "Each seed must be watered three times; before minutes 1, 2 and 3 respectively, or they will
+#    wilt and die"; "Fully grown plants cannot die"; a minute is a hundred ticks
+#  - "Plant and water on the first round"; "Requires 8+ filled watering can" for 20 plants, and
+#    "If 20 is tedious, players can cut off at 16"; "A watering can holds eight doses"
+#  - a full sack of logavano gives 37,030 experience; "For every 3 plants a player deposits in
+#    the sack, they will earn 1 point"; "2 bonus points ... when they add the 100th fruit"
+#  - blighted plants have the option "Clear"
+#  - the patch objects are RuneLite's HOSIDIUS_TITHE_C_1_DRY ("Logavano seedling") to
+#    HOSIDIUS_TITHE_C_4 ("Logavano plant"); the sack is varbit HOSIDIUS_TITHE_SCORE, RuneLite's
+#    TITHE_FARM_SACK_AMOUNT, and the points HOSIDIUS_TITHE_REWARDPOINTS, its TITHE_FARM_POINTS
+skill HITPOINTS 10
+skill FARMING 80
+
+# The room before the farm: a schematic seed table by the farm door.
+scene 1760 3460
+object TITHE_PLANT_SEED_TABLE 1800 3480 as table
+object HOSIDIUS_TITHE_FARM_DOOR 1804 3488 as door
+at 1801 3482
+items INV set SPADE 1 DIBBER 1 WATERING_CAN_8 6
+tithe plants SIXTEEN
+tick
+expect activity = TITHE
+expect step = "Take logavano seeds"
+expect detail = "Your Farming (80) grows logavano, from 74: 37k xp a sack of 100"
+expect object = table
+expect lines = "Logavano seeds NEXT, Watering cans DONE, Spade DONE, Seed dibber DONE"
+expect lines.note = "16 plants · 6 cans"
+# Golovanova seeds carried: still the logavano, the best a level of 80 grows.
+items INV set SPADE 1 DIBBER 1 WATERING_CAN_8 6 HOSIDIUS_TITHE_SEED_A 50 stacked
+tick
+expect detail ~ "The golovanova seeds you carry give less"
+items INV set SPADE 1 DIBBER 1 WATERING_CAN_8 4 HOSIDIUS_TITHE_SEED_C 4 stacked
+tick
+expect step = "Fill your watering cans"
+expect detail = "32 doses carried; 16 plants take 48 (6 full cans)"
+items INV set SPADE 1 DIBBER 1 WATERING_CAN_8 6 HOSIDIUS_TITHE_SEED_C 4 stacked
+tick
+expect step = "Enter the farm"
+expect object = door
+
+# In the farm, with four seeds: a round of four.
+include /replays/scenes/tithe.scene
+at 1804 3497
+tick
+expect place = "The farm · logavano"
+expect step = "Plant 1 of 4"
+expect detail = "A new round of 4 logavano: plant, water at once, then the next"
+expect object = b1
+expect field = "empty"
+remove b1
+object HOSIDIUS_TITHE_C_1_DRY 1806 3500 3 3 as b1
+items INV set SPADE 1 DIBBER 1 WATERING_CAN_8 6 HOSIDIUS_TITHE_SEED_C 3 stacked
+tick
+expect step = "Water 1 of 1 (first)"
+expect object = b1
+expect field = "dry 1"
+remove b1
+object HOSIDIUS_TITHE_C_1_WET 1806 3500 3 3 as b1
+items INV set SPADE 1 DIBBER 1 WATERING_CAN_8 5 WATERING_CAN_7 1 HOSIDIUS_TITHE_SEED_C 3 stacked
+tick
+expect step = "Plant 2 of 4"
+expect object = b2
+remove b2
+object HOSIDIUS_TITHE_C_1_DRY 1806 3503 3 3 as b2
+items INV set SPADE 1 DIBBER 1 WATERING_CAN_8 5 WATERING_CAN_7 1 HOSIDIUS_TITHE_SEED_C 2 stacked
+tick
+remove b2
+object HOSIDIUS_TITHE_C_1_WET 1806 3503 3 3 as b2
+tick
+expect step = "Plant 3 of 4"
+expect object = b3
+# You choose another patch than the one lit: the Pilot follows you and remembers it.
+remove a2
+object HOSIDIUS_TITHE_C_1_DRY 1800 3503 3 3 as a2
+items INV set SPADE 1 DIBBER 1 WATERING_CAN_8 5 WATERING_CAN_6 1 HOSIDIUS_TITHE_SEED_C 1 stacked
+tick
+expect step = "Water 3 of 3 (first)"
+expect object = a2
+remove a2
+object HOSIDIUS_TITHE_C_1_WET 1800 3503 3 3 as a2
+tick
+expect step = "Plant 4 of 4"
+remove a1
+object HOSIDIUS_TITHE_C_1_DRY 1800 3500 3 3 as a1
+items INV set SPADE 1 DIBBER 1 WATERING_CAN_8 5 WATERING_CAN_5 1
+tick
+remove a1
+object HOSIDIUS_TITHE_C_1_WET 1800 3500 3 3 as a1
+items INV set SPADE 1 DIBBER 1 WATERING_CAN_8 5 WATERING_CAN_4 1
+tick
+# Every seed in and watered: wait by the first, which needs its second watering first.
+expect waiting = true
+expect step ~ "Wait: it needs water in 0:5"
+expect object = b1
+expect field = "wet 4"
+expect gauge.Water = 8/8
+# A minute after planting, the first seedling grows into a dry plant.
+tick 3
+remove b1
+object HOSIDIUS_TITHE_C_2_DRY 1806 3500 3 3 as b1
+tick
+expect step = "Water 1 of 4 (second)"
+expect detail = "1:00 left in its stage"
+remove b1
+object HOSIDIUS_TITHE_C_2_WET 1806 3500 3 3 as b1
+remove b2
+object HOSIDIUS_TITHE_C_2_DRY 1806 3503 3 3 as b2
+tick
+expect step = "Water 2 of 4 (second)"
+# Left dry: with fifteen seconds to go it turns red on the map and comes first.
+remove a2
+object HOSIDIUS_TITHE_C_2_DRY 1800 3503 3 3 as a2
+tick 76
+expect step = "Water 2 of 4 (second)"
+expect detail = "Only 0:14 left before it wilts"
+expect field = "urgent 2 wet 2"
+# It wilted.
+remove b2
+object HOSIDIUS_TITHE_C_2_DEAD 1806 3503 3 3 as b2
+tick
+expect step = "Water 3 of 4 (second)"
+expect field ~ "dead 1"
+remove a2
+object HOSIDIUS_TITHE_C_2_WET 1800 3503 3 3 as a2
+remove a1
+object HOSIDIUS_TITHE_C_2_WET 1800 3500 3 3 as a1
+tick
+expect step = "Clear the blighted plant"
+expect object = b2
+remove b2
+object HOSIDIUS_TITHE_EMPTY 1806 3503 3 3 as b2
+tick
+expect waiting = true
+# Third waterings, then grown: harvest in your order.
+remove b1
+object HOSIDIUS_TITHE_C_4 1806 3500 3 3 as b1
+remove a2
+object HOSIDIUS_TITHE_C_3_DRY 1800 3503 3 3 as a2
+tick
+expect step = "Water 3 of 4 (third)"
+remove a2
+object HOSIDIUS_TITHE_C_4 1800 3503 3 3 as a2
+remove a1
+object HOSIDIUS_TITHE_C_4 1800 3500 3 3 as a1
+tick
+expect step = "Harvest 1 of 4"
+expect object = b1
+expect field = "grown 3"
+expect others = "a2, a1"
+remove b1
+object HOSIDIUS_TITHE_EMPTY 1806 3500 3 3 as b1
+remove a2
+object HOSIDIUS_TITHE_EMPTY 1800 3503 3 3 as a2
+items INV set SPADE 1 DIBBER 1 WATERING_CAN_8 5 WATERING_CAN_1 1 HOSIDIUS_TITHE_FRUIT_C 2 stacked
+tick
+expect step = "Harvest 4 of 4"
+remove a1
+object HOSIDIUS_TITHE_EMPTY 1800 3500 3 3 as a1
+items INV set SPADE 1 DIBBER 1 WATERING_CAN_8 5 WATERING_CAN_1 1 HOSIDIUS_TITHE_FRUIT_C 3 stacked
+tick
+# The round is over: the order you planted in is your route, kept for the account.
+expect saved.tithe.route = "6,0;6,3;0,3;0,0"
+expect step = "Deposit the fruit"
+expect detail = "3 fruit; the sack holds 100 more before it pays its bonus"
+expect object = sack
+expect gauge.Sack = 0/100
+items INV set SPADE 1 DIBBER 1 WATERING_CAN_8 5 WATERING_CAN_1 1
+varbit HOSIDIUS_TITHE_SCORE 3
+varbit HOSIDIUS_TITHE_REWARDPOINTS 1
+xp FARMING 2000000
+tick
+expect stat.Fruit_in_sacks = "3"
+expect stat.Points = "1"
+# No seeds left: out to the table for more.
+expect step = "Leave for logavano seeds"
+expect object = door
+items INV set SPADE 1 DIBBER 1 WATERING_CAN_8 5 WATERING_CAN_1 1 HOSIDIUS_TITHE_SEED_C 20 stacked
+tick
+# 41 doses cover 13 plants; the barrel is in sight, so fill up first.
+expect step = "Fill your watering cans"
+expect object = barrel
+items INV set SPADE 1 DIBBER 1 WATERING_CAN_8 6 HOSIDIUS_TITHE_SEED_C 20 stacked
+tick
+# The next round goes your way, wherever you stand.
+at 1804 3512
+tick
+expect step = "Plant 1 of 16"
+expect object = b1
+remove b1
+object HOSIDIUS_TITHE_C_1_DRY 1806 3500 3 3 as b1
+tick
+remove b1
+object HOSIDIUS_TITHE_C_1_WET 1806 3500 3 3 as b1
+tick
+expect object = b2

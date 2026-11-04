@@ -89,7 +89,14 @@ public final class Step
 		/** A totem site: the totem to build, carve or decorate there. */
 		TOTEM,
 		/** A site's offerings, to claim. */
-		OFFERINGS
+		OFFERINGS,
+		// Tithe Farm (the fruit sack is SACK)
+		/** A tithe patch: to plant, water, harvest or clear. */
+		PLOT,
+		SEED_TABLE,
+		WATER_BARREL,
+		/** The farm door, between the seed table's room and the patches. */
+		FARM_DOOR
 	}
 
 	private final String verb;

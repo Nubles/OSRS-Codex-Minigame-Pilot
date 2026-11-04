@@ -1,0 +1,35 @@
+# A schematic Tithe Farm for replays. Not the real map: eight of the farm's patches in two
+# columns of four with a path between, the fruit sack at the south end of the path, a water
+# barrel at the north end and the farm door south of the sack.
+#
+# Facts:
+#  - names are RuneLite's (net.runelite.api.gameval): the empty patch HOSIDIUS_TITHE_EMPTY
+#    ("Tithe patch"), the sack TITHE_SACK_OF_FRUIT_EMPTY ("Sack"), the farm door
+#    HOSIDIUS_TITHE_FARM_DOOR ("Farm door") and the water barrel WATER_BARREL1 (5598 on the wiki,
+#    whose Water barrel page counts four in the Tithe Farm)
+#  - OSRS wiki, Tithe Farm: fruit "can then be deposited into any of several sacks around the farm"
+#  - patches are three tiles square here, as the game's patch objects are drawn; the real farm's
+#    layout is not copied
+#
+#   y 3513           barrel (1804)
+#   y 3509  a4 (1800)              b4 (1806)
+#   y 3506  a3                     b3
+#   y 3503  a2                     b2
+#   y 3500  a1                     b1
+#   y 3496           sack (1804)
+#   y 3490           door (1804)
+#        x 1800                    1806
+
+scene 1760 3460
+
+object HOSIDIUS_TITHE_EMPTY 1800 3500 3 3 as a1
+object HOSIDIUS_TITHE_EMPTY 1800 3503 3 3 as a2
+object HOSIDIUS_TITHE_EMPTY 1800 3506 3 3 as a3
+object HOSIDIUS_TITHE_EMPTY 1800 3509 3 3 as a4
+object HOSIDIUS_TITHE_EMPTY 1806 3500 3 3 as b1
+object HOSIDIUS_TITHE_EMPTY 1806 3503 3 3 as b2
+object HOSIDIUS_TITHE_EMPTY 1806 3506 3 3 as b3
+object HOSIDIUS_TITHE_EMPTY 1806 3509 3 3 as b4
+object TITHE_SACK_OF_FRUIT_EMPTY 1804 3496 as sack
+object WATER_BARREL1 1804 3513 as barrel
+object HOSIDIUS_TITHE_FARM_DOOR 1804 3490 as door
