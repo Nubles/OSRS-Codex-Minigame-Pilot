@@ -71,8 +71,8 @@ import net.runelite.client.util.Text;
 	name = "Codex Minigame Pilot",
 	internalName = "codex-minigame-pilot",
 	legacyDataDirectory = "codex-minigame-pilot",
-	description = "One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes and Guardians of the Rift: what to click, the path there, and why",
-	tags = {"motherlode", "mlm", "blast furnace", "mahogany homes", "construction", "mining", "smithing", "guardians of the rift", "gotr", "runecraft", "guide", "codex"}
+	description = "One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes, Guardians of the Rift and Tempoross: what to click, the path there, and why",
+	tags = {"motherlode", "mlm", "blast furnace", "mahogany homes", "construction", "mining", "smithing", "guardians of the rift", "gotr", "runecraft", "tempoross", "fishing", "guide", "codex"}
 )
 public class CodexMinigamePilotPlugin extends Plugin
 {
@@ -170,6 +170,7 @@ public class CodexMinigamePilotPlugin extends Plugin
 		pilots.tickCoach(config.tickCoach());
 		pilots.rift(config.rift());
 		pilots.riftFragments(config.riftFragments());
+		pilots.tempoross(config.tempoross(), config.temporossCook(), config.temporossStormLoad());
 		goals = new GoalWatch(key -> configManager.getRSProfileConfiguration(CodexMinigamePilotConfig.GROUP, key),
 			(key, value) -> configManager.setRSProfileConfiguration(CodexMinigamePilotConfig.GROUP, key, value),
 			this::navigatorBoard);
@@ -246,6 +247,11 @@ public class CodexMinigamePilotPlugin extends Plugin
 		{
 			pilots.rift(config.rift());
 			pilots.riftFragments(config.riftFragments());
+			return;
+		}
+		if (CodexMinigamePilotConfig.GROUP.equals(event.getGroup()) && event.getKey() != null && event.getKey().startsWith("tempoross") && pilots != null)
+		{
+			pilots.tempoross(config.tempoross(), config.temporossCook(), config.temporossStormLoad());
 			return;
 		}
 		if (CodexMinigamePilotConfig.GROUP.equals(event.getGroup()) && "tickCoach".equals(event.getKey()) && pilots != null)

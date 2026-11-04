@@ -1,0 +1,41 @@
+# A schematic Tempoross Cove for replays. Not the real map (the cove is an instance): just the
+# things the Pilot points at, on one open island so every walk is short.
+#
+# Facts:
+#  - names are RuneLite's (net.runelite.api.gameval). Fishing spots, the spirit pool, the
+#    ammunition crates and fires are NPCs: TEMPOROSS_HARPOONFISH_FISHINGSPOT_NORTH/_SOUTH ("Fishing
+#    spot"), TEMPOROSS_NPC_CRATE_AMMUNITION_1 ("Ammunition crate"; OSRS wiki, Ammunition crate:
+#    NPC ids 10576-10579). The shrine (TEMPOROSS_SHRINE_FIRE, "Shrine"), totem poles and masts
+#    (TEMPOROSS_TOTEM_NORTH, TEMPOROSS_MAST_BOTTOM_WEST, as the game spawns them) and the supply
+#    crates (TEMPOROSS_CRATE_ROPE/HARPOON/BUCKET) and pump (TEMPOROSS_WATER_PUMP) are objects
+#  - the HUD is InterfaceID.TemporossHud; the Pilot reads only the first "N%" of each bar's title
+#    and the number in the points text, so the wording around them here is a stand-in
+#
+#   y 3005          northSpot
+#   y 2998  totem
+#   y 2995                                mast
+#   y 2990  shrine        (player 3040)        ammoCrate
+#   y 2985                          pump  ropes harpoons buckets
+#   y 2975          southSpot
+#        x 3030                                3064
+
+scene 2990 2940
+
+npc TEMPOROSS_HARPOONFISH_FISHINGSPOT_NORTH "Fishing spot" 3040 3005 as northSpot
+npc TEMPOROSS_HARPOONFISH_FISHINGSPOT_SOUTH "Fishing spot" 3040 2975 as southSpot
+npc TEMPOROSS_NPC_CRATE_AMMUNITION_1 "Ammunition crate" 3062 2990 as ammoCrate
+
+object TEMPOROSS_SHRINE_FIRE 3030 2990 2 2 as shrine
+object TEMPOROSS_TOTEM_NORTH 3034 2998 as totem
+object TEMPOROSS_MAST_BOTTOM_WEST 3056 2995 as mast
+object TEMPOROSS_WATER_PUMP 3054 2985 as pump
+object TEMPOROSS_CRATE_ROPE 3058 2985 as ropes
+object TEMPOROSS_CRATE_HARPOON 3060 2985 as harpoons
+object TEMPOROSS_CRATE_BUCKET 3062 2985 as buckets
+
+# The HUD: a game under way, the storm calm.
+widget TemporossHud.CONTENT hidden false
+widget TemporossHud.ENERGY_TITLE text "Energy: 100%"
+widget TemporossHud.ESSENCE_TITLE text "Essence: 100%"
+widget TemporossHud.STORM_INTENSITY_TITLE text "Storm Intensity: 10%"
+widget TemporossHud.POINTS_TEXT text "Points: 0"

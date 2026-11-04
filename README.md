@@ -1,6 +1,6 @@
 # Codex Minigame Pilot
 
-**One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes and Guardians of the Rift.** The Pilot watches the minigame you are in and always shows the single thing to do next: what to click, lit in gold in the world, the path there drawn on the ground and the minimap, and a line on why. You still do every click. It only reads the game and draws.
+**One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes, Guardians of the Rift and Tempoross.** The Pilot watches the minigame you are in and always shows the single thing to do next: what to click, lit in gold in the world, the path there drawn on the ground and the minimap, and a line on why. You still do every click. It only reads the game and draws.
 
 It is part of the **Codex** suite of RuneLite plugins and shares their look: warm ink, aged gold and the game's own fonts.
 
@@ -41,6 +41,23 @@ It is part of the **Codex** suite of RuneLite plugins and shares their look: war
 - **Your points, kept even.** It reads your elemental and catalytic points when you check the Rewards Guardian and from the totals at the end of each game, takes one of each off for every search, and adds what this game's energy is worth so far. The panel shows both in whole points, as the game reports them, with what this game's energy will add (every 100 energy is a point, and the rest is a chance of one more), the searches they pay for, and which one runs out first. Until it has seen your points it says so rather than guessing, and picks the stronger cell instead.
 - **The rift's clock.** How long the rift has been open, the guardian's power, and when the next portal to the huge guardian remains is about due (the first about 160 seconds in, then every 140, as the wiki has it). When that portal is open and your trip still needs essence, the step is to take it.
 
+### Tempoross
+- **One step through the storm.** Catch harpoonfish, cook them at the shrine, fill the ammunition crate, and harpoon the spirit pool while Tempoross is down. Each step is lit in the world, the fishing spot, the shrine, the crate or the pool, with its path and a line of why.
+- **The double spot first.** When a spot of jumping harpoonfish is up, that is where you fish, even with raw fish still to cook: it can give two a catch, and the wiki's strategies say to fish there wherever possible.
+- **Tether before the wave.** When the game calls "A colossal wave closes in...", the next step is the nearest totem pole or mast that is not broken, and nothing else until you are tied on. No rope? It points you to the rope crate, and knows the whole spirit angler outfit counts as one. The tick coach times each tether from the call.
+- **Fires in your way, not every fire.** A fire next to your walk to the next step is the step until it is out, if you carry a bucket of water; otherwise the pump. Fires elsewhere are left to the wave.
+- **The storm watched.** Energy, essence and storm intensity from the game's own bar, and once the storm passes a level you choose (80% by default) the step is to load what you hold now, as at 100% the wave washes you away and the game's points with it.
+- **Points and permits, game by game.** This game's points, the permits they are sure to pay (the first at 2,000, then one every 700) and the chance of one more, the permits you hold, and each game you play kept per account: points, permits (corrected to the game's own count when it pays), time and whether Tempoross was subdued. Across games, permits an hour and your best game.
+
+<p align="center">
+  <img src="docs/screenshots/tempoross-panel.png" width="225" alt="Tempoross: fishing at the double spot">
+  <img src="docs/screenshots/tempoross-panel-wave.png" width="225" alt="Tempoross: a wave is coming">
+</p>
+<p align="center">
+  <img src="docs/screenshots/tempoross-plaque.png" alt="Plaque at the double spot">
+  <img src="docs/screenshots/tempoross-plaque-wave.png" alt="Plaque before a wave">
+</p>
+
 <p align="center">
   <img src="docs/screenshots/rift-panel.png" width="225" alt="Guardians of the Rift: picking the altar">
   <img src="docs/screenshots/rift-panel-altar.png" width="225" alt="Guardians of the Rift: inside the fire altar">
@@ -71,7 +88,7 @@ It is part of the **Codex** suite of RuneLite plugins and shares their look: war
 
 ## The panel
 
-The helm at the top holds the next action as one large gilt word and the full instruction under it, and flares when the step changes. Under it, the minigame's loop with your place in it, its gauges (the sack with pay-dirt in flight, the furnace's coal against what the next load needs, the planks the job still takes), the furniture checklist, and the session so far: pay-dirt, ore, bars, contracts, points and experience, with hourly pace. Away from the minigames it lists all four and what is waiting at each, such as an open contract, and what your last visit to the Motherlode Mine and the Blast Furnace came to: "Last visit 3 hours ago: 1h 12m for 1,134 pay-dirt, 972 ore, 68k Mining xp and ore worth 142k."
+The helm at the top holds the next action as one large gilt word and the full instruction under it, and flares when the step changes. Under it, the minigame's loop with your place in it, its gauges (the sack with pay-dirt in flight, the furnace's coal against what the next load needs, the planks the job still takes), the furniture checklist, and the session so far: pay-dirt, ore, bars, contracts, points and experience, with hourly pace. Away from the minigames it lists all five and what is waiting at each, such as an open contract, and what your last visit to the Motherlode Mine and the Blast Furnace came to: "Last visit 3 hours ago: 1h 12m for 1,134 pay-dirt, 972 ore, 68k Mining xp and ore worth 142k."
 
 Each minigame's card also keeps your best visit, the most pay-dirt or bars an hour over at least fifteen minutes, with its experience an hour: "Best visit 5 days ago: 1,620 pay-dirt and 81k Mining xp an hour over 1h 24m." It is kept per account, and a session never carries over to another account.
 
@@ -89,7 +106,7 @@ Each round is also split into the stages of its loop (Mine, Hopper, Sack, Bank; 
 
 ## Tick coach
 
-The game runs on 0.6-second ticks, and the tick coach counts every loop in them: Motherlode's mine, hopper, sack and bank; the Blast Furnace's bank, belt and bars; a Mahogany Homes contract from the contractor through the furniture and back; a Guardians of the Rift altar trip from mining through essence and the altar to handing in. After each loop the panel shows:
+The game runs on 0.6-second ticks, and the tick coach counts every loop in them: Motherlode's mine, hopper, sack and bank; the Blast Furnace's bank, belt and bars; a Mahogany Homes contract from the contractor through the furniture and back; a Guardians of the Rift altar trip from mining through essence and the altar to handing in; a Tempoross round from fishing through the shrine and the crate (and the spirit pool, when Tempoross goes down) back to fishing. After each loop the panel shows:
 
 - **The loop in ticks against your best** of the same kind ("176 ticks, +26 on best"), or "new best".
 - **Its walking against a floor.** Every walk the Pilot sends you on is measured over the game's collision map, so its shortest way is known; at run pace (two tiles a tick) that walk has a floor nobody can beat. The card sets the ticks you spent on foot against it: "On foot 19 ticks against a floor of 17 at run pace, 2 over". Mining, smelting and building have no fixed duration the wiki states, so the coach never invents a floor for them: those parts are only compared with your own best.
@@ -145,7 +162,7 @@ Both are read only, never written, and everything works without them.
 
 ## Your data
 
-Your bank's goal items and supplies as last seen, your Mahogany Homes points, your Guardians of the Rift points, the rewards you own, your round bests, your last and best visit to each minigame and what your contracts take are saved in your RuneLite profile, per account. A damaged or hand-edited value is read as far as it can be and the rest left out, so it never stops the Pilot.
+Your bank's goal items and supplies as last seen, your Mahogany Homes points, your Guardians of the Rift points, your last thirty Tempoross games, the rewards you own, your round bests, your last and best visit to each minigame and what your contracts take are saved in your RuneLite profile, per account. A damaged or hand-edited value is read as far as it can be and the rest left out, so it never stops the Pilot.
 
 ## Field notes
 
@@ -157,7 +174,7 @@ Codex Minigame Pilot is guidance only. It reads what the game already shows you 
 
 ## Settings that matter
 
-- **Minigames:** turn each of the four off; *Fragments before first craft* for Guardians of the Rift (120 by default); fix the *Blast Furnace bar* instead of letting the Pilot work it out; *Top up coffer below* (2,500 coins by default).
+- **Minigames:** turn each of the five off; *Cook before loading* and *Load what you hold at storm* (80%) for Tempoross; *Fragments before first craft* for Guardians of the Rift (120 by default); fix the *Blast Furnace bar* instead of letting the Pilot work it out; *Top up coffer below* (2,500 coins by default).
 - **Guidance:** *Step plaque*, *Path on the ground*, *Path on minimap*, *Action labels*, *Mark what comes after*, *Hint arrow* and *World map marker* for Mahogany Homes, and *Visit summary in chat*. All on by default.
 - **Goals:** what Motherlode nuggets and Mahogany Homes points are saved for, the *Blast Furnace level* to work toward (0 for the next), *Show goals* and *Reward road*.
 - **Tick coach:** *Tick coach*, on by default.

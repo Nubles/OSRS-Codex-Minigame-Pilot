@@ -128,6 +128,8 @@ final class Coach
 				return Skill.CONSTRUCTION;
 			case RIFT:
 				return Skill.RUNECRAFT;
+			case TEMPOROSS:
+				return Skill.FISHING;
 			default:
 				return null;
 		}
@@ -283,6 +285,22 @@ final class Coach
 				return "the portal";
 			case HUGE_REMAINS:
 				return "the huge remains";
+			case FISHING_SPOT:
+				return "the fishing spot";
+			case SHRINE:
+				return "the shrine";
+			case AMMO_CRATE:
+				return "the ammunition crate";
+			case TETHER:
+				return "the totem";
+			case FIRE:
+				return "the fire";
+			case SPIRIT_POOL:
+				return "the spirit pool";
+			case SUPPLY_CRATE:
+				return "the crate";
+			case WATER_PUMP:
+				return "the pump";
 			default:
 				return null;
 		}

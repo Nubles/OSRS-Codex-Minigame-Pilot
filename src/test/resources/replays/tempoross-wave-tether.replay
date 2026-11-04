@@ -1,0 +1,81 @@
+# Tempoross: a colossal wave is called while fishing. Tether before it hits, hold fast while it
+# passes, then back to the fish. The tick coach times the tether from the call.
+#
+# Facts:
+#  - OSRS wiki, Tempoross: "A colossal wave closes in..." warns of the wave; players tether to
+#    masts or totem poles with a rope to avoid being swept away, and lose minigame items untethered
+#  - OSRS wiki, Totem pole: a damaged totem or mast cannot be tethered to until repaired
+#  - OSRS wiki, Spirit angler outfit: "Wearing the complete set also acts as a rope for tethering"
+#  - VarbitID.TEMPOROSS_TETHERED (RuneLite gameval) is set while tethered
+#  - the wave's end messages are as the Easy Tempoross plugin reads them (a cross-check)
+include /replays/scenes/tempoross.scene
+skill FISHING 60
+items INV HARPOON 1
+items INV ROPE 1
+at 3040 2990
+tick
+expect activity = TEMPOROSS
+expect step = "Catch harpoonfish"
+expect npc = "Fishing spot"
+expect detail ~ "26 free slots"
+never step = "Douse the fire"
+
+# The wave is called: tether first, to the nearest unbroken totem or mast.
+chat GAMEMESSAGE "A colossal wave closes in..."
+tick
+expect step = "Tether before the wave hits"
+expect object = totem
+expect place = "A wave is coming"
+expect detail ~ "tether or lose your fish"
+expect route != 0
+walk 3035 2997
+varbit TEMPOROSS_TETHERED 1
+tick
+expect step = "Hold fast: the wave is passing"
+expect waiting = true
+expect stat.Tether_time ~ "t"
+expect stat.Tether_time !~ "-"
+
+# The wave passes: the rope lets go and it is back to the fish.
+varbit TEMPOROSS_TETHERED 0
+tick
+expect step = "Catch harpoonfish"
+
+# A second wave, the totem broken by the last one: the mast is the way.
+remove totem
+object TEMPOROSS_TOTEM_NORTH_BROKEN 3034 2998 as brokenTotem
+chat GAMEMESSAGE "A colossal wave closes in..."
+tick
+expect step = "Tether before the wave hits"
+expect object = mast
+varbit TEMPOROSS_TETHERED 1
+tick
+expect stat.Tether_time = "1t"
+expect route = 0
+# Only "the rope keeps you securely" is matched; the rest of the line is a stand-in.
+chat GAMEMESSAGE "As the wave hits, the rope keeps you securely in place."
+varbit TEMPOROSS_TETHERED 0
+tick
+expect step = "Catch harpoonfish"
+
+# No rope: take one from the crate before the wave.
+items INV clear
+items INV HARPOON 1
+chat GAMEMESSAGE "A colossal wave closes in..."
+tick
+expect step = "Take a rope"
+expect object = ropes
+
+# The whole spirit angler outfit is a rope.
+items WORN SPIRIT_ANGLER_HAT 1
+items WORN SPIRIT_ANGLER_TOP 1
+items WORN SPIRIT_ANGLER_LEGS 1
+tick
+expect step = "Take a rope"
+items WORN SPIRIT_ANGLER_BOOTS 1
+tick
+expect step = "Tether before the wave hits"
+
+# Nobody tethers and nothing more is said: the Pilot lets the wave go after a while.
+tick 25
+expect step = "Catch harpoonfish"

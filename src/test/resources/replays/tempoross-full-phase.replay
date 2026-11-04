@@ -1,0 +1,126 @@
+# Tempoross: one whole phase. Fish (the double spot when it is up), cook at the shrine (a fire in
+# the way doused first), load the ammunition crate, harpoon the spirit pool while Tempoross is
+# down, and the game kept with its points and permits.
+#
+# Facts (OSRS wiki):
+#  - Tempoross: 35 Fishing; "Fishing at these spots allows for the chance of catching two
+#    harpoonfish at a time"; raw harpoonfish drain 10 energy, cooked 15; cooked at the shrine;
+#    at storm intensity 100% the wave washes you away and the points are lost; dousing a fire is
+#    40 points; "One reward permit is given for the first 2,000 points scored, with an additional
+#    permit awarded for every 700 points beyond 2,000"
+#  - Tempoross/Strategies: "Always fish at the double spots where possible"
+#  - Spirit pool: NPC 10571, "made active by draining Tempoross' energy to 0%", 55 points a scatter
+#  - the double spot is NpcID.TEMPOROSS_HARPOONFISH_FISHINGSPOT_SPECIAL (RuneLite gameval; the
+#    Easy Tempoross plugin reads it as the double spot: a cross-check); the victory hosts are
+#    NpcID.TEMPOROSS_INSTANCE_HOST_*_VICTORY; permits held are VarbitID.TEMPOROSS_REWARDPERMITS
+include /replays/scenes/tempoross.scene
+skill FISHING 70
+varbit TEMPOROSS_REWARDPERMITS 3
+items INV HARPOON 1
+items INV ROPE 1
+items INV BUCKET_WATER 1
+items INV HAMMER 1
+at 3040 2990
+tick
+expect step = "Catch harpoonfish"
+expect detail ~ "24 free slots"
+expect gauge.Storm = "10/100"
+expect stat.Points_this_game = "0"
+expect stat.Permits_so_far = "0"
+expect stat.Permits_to_spend = "3"
+
+# The double spot comes up: fish there.
+npc TEMPOROSS_HARPOONFISH_FISHINGSPOT_SPECIAL "Fishing spot" 3048 3000 as doubleSpot
+tick
+expect step = "Fish at the double spot"
+expect npc = "Fishing spot"
+expect detail ~ "two harpoonfish"
+items INV TEMPOROSS_RAW_HARPOONFISH 12
+tick
+expect step = "Fish at the double spot"
+expect stat.Harpoonfish = "12"
+
+# A full pack, the double spot gone: cook. A fire sits by the shrine; douse it first.
+items INV TEMPOROSS_RAW_HARPOONFISH 12
+remove doubleSpot
+widget TemporossHud.POINTS_TEXT text "Points: 120"
+npc TEMPOROSS_FIRE_HITBOX "Fire" 3033 2990 as fire
+tick
+expect step = "Douse the fire"
+expect detail ~ "the shrine"
+remove fire
+tick
+expect step = "Cook at the shrine"
+expect object = shrine
+expect detail ~ "24 raw"
+
+# Cooked, load the crate.
+items INV clear
+items INV HARPOON 1
+items INV ROPE 1
+items INV BUCKET_EMPTY 1
+items INV HAMMER 1
+items INV TEMPOROSS_HARPOONFISH 24
+widget TemporossHud.POINTS_TEXT text "Points: 400"
+tick
+expect step = "Fill the ammunition crate"
+expect npc = "Ammunition crate"
+expect detail ~ "about 360 energy"
+expect gauge.Fish_held = "24/24"
+
+# Loaded; its energy is gone and the spirit pool is active: harpoon it.
+items INV clear
+items INV HARPOON 1
+items INV ROPE 1
+items INV BUCKET_EMPTY 1
+items INV HAMMER 1
+widget TemporossHud.ENERGY_TITLE text "Energy: 0%"
+widget TemporossHud.POINTS_TEXT text "Points: 2,000"
+npc TEMPOROSS_P2_FISHINGSPOT "Spirit pool" 3050 3000 as pool
+tick
+expect step = "Harpoon the spirit pool"
+expect npc = "Spirit pool"
+expect place = "Tempoross is down"
+expect gauge.Energy = "0/100"
+expect stat.Permits_so_far = "1"
+widget TemporossHud.ESSENCE_TITLE text "Essence: 40%"
+widget TemporossHud.POINTS_TEXT text "Points: 2,350"
+tick
+expect detail ~ "40% left"
+expect stat.Points_this_game = "2,350"
+expect stat.Permits_so_far ~ "1"
+
+# Tempoross recovers before the essence is gone: back to the fish, and the loop is timed.
+remove pool
+widget TemporossHud.ENERGY_TITLE text "Energy: 100%"
+tick
+expect step = "Catch harpoonfish"
+expect ticks.loops = "1"
+
+# The storm runs high: load what you hold now rather than fill the pack.
+widget TemporossHud.STORM_INTENSITY_TITLE text "Storm Intensity: 85%"
+items INV TEMPOROSS_RAW_HARPOONFISH 5
+tick
+expect step = "Fill the ammunition crate"
+expect detail ~ "The storm is at 85%"
+expect gauge.Storm = "85/100"
+stormload 0
+tick
+expect step = "Catch harpoonfish"
+stormload 80
+
+# Subdued: essence gone, the host thanks you, and the game is kept when the HUD goes.
+items INV clear
+items INV HARPOON 1
+widget TemporossHud.ESSENCE_TITLE text "Essence: 0%"
+widget TemporossHud.POINTS_TEXT text "Points: 4,350"
+npc TEMPOROSS_INSTANCE_HOST_E_VICTORY "Spirit Angler" 3044 2990 as host
+tick
+expect stat.Permits_so_far = "4"
+widget TemporossHud.CONTENT hidden true
+tick
+expect saved.tempoross.games ~ ",4350,4,1"
+# The permits come in: five, as the game's count says, and the record follows it.
+varbit TEMPOROSS_REWARDPERMITS 8
+tick
+expect saved.tempoross.games ~ ",4350,5,1"

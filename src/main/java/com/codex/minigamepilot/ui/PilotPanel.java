@@ -116,7 +116,7 @@ public class PilotPanel extends PluginPanel
 
 		if (!v.gauges.isEmpty())
 		{
-			body.add(new SectionHeader(v.activity == View.Activity.FURNACE ? "The furnace" : v.activity == View.Activity.HOMES ? "Materials" : v.activity == View.Activity.RIFT ? "The rift" : "The sack"));
+			body.add(new SectionHeader(v.activity == View.Activity.FURNACE ? "The furnace" : v.activity == View.Activity.HOMES ? "Materials" : v.activity == View.Activity.RIFT ? "The rift" : v.activity == View.Activity.TEMPOROSS ? "The storm" : "The sack"));
 			Card card = new Card(new BorderLayout());
 			StackPanel gauges = new StackPanel(6, 0);
 			for (View.Gauge gauge : v.gauges)
