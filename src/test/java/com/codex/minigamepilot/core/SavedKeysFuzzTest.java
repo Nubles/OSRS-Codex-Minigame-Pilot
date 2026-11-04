@@ -468,6 +468,36 @@ public class SavedKeysFuzzTest
 	}
 
 	@Test
+	public void wintertodtKept()
+	{
+		survive("wintertodt.kept", "1;1760000000000,420,100,1240,s,3;1760000100000,0,0,0,l,1;1760000200000,0,0,560,s,0", s ->
+		{
+			WintertodtLog g = WintertodtLog.decode(s);
+			sane(String.valueOf(g.pointsPerHour() < 0 ? 0 : Math.round(g.pointsPerHour())));
+			sane(String.valueOf(g.rewardsPerHour() < 0 ? 0 : Math.round(g.rewardsPerHour())));
+			sane(String.valueOf(g.typicalRound()));
+			assertTrue(!Double.isNaN(g.rewardsPerRound()) && !Double.isNaN(g.rewards()));
+			for (WintertodtLog.Game x : g.all())
+			{
+				assertTrue(x.ticks >= 0 && x.ticks <= WintertodtLog.LONGEST_ROUND && x.wait >= 0 && x.wait <= WintertodtLog.LONGEST_WAIT);
+				assertTrue(x.points >= 0 && x.points <= WintertodtLog.POINTS_MAX && x.hits >= 0);
+			}
+			WintertodtLog.decode(g.encode());
+		});
+	}
+
+	@Test
+	public void wintertodtOwned()
+	{
+		survive("wintertodt.owned", "1;GHWT", s ->
+		{
+			String o = Wintertodt.decodeOwned(s);
+			assertTrue(o.length() <= Wintertodt.OWNED_CODES.length());
+			assertTrue(Wintertodt.decodeOwned("1;" + o).equals(o));
+		});
+	}
+
+	@Test
 	public void roguesDenOwned()
 	{
 		survive("roguesden.owned", "MASK,TOP,BOOTS", s ->

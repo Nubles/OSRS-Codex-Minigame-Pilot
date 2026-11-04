@@ -1,6 +1,7 @@
 package com.codex.minigamepilot;
 
 import com.codex.minigamepilot.core.Assault;
+import com.codex.minigamepilot.core.Wintertodt;
 import com.codex.minigamepilot.core.Goals;
 import com.codex.minigamepilot.core.MixCycle;
 import com.codex.minigamepilot.core.Mixology;
@@ -233,6 +234,36 @@ public interface CodexMinigamePilotConfig extends Config
 				return "None";
 			}
 			return reward.price() > 0 ? reward.getTitle() + " (" + reward.price() + " each role)" : reward.getTitle();
+		}
+	}
+
+	/** What the Wintertodt's reward cart is played for. */
+	enum WintertodtReward
+	{
+		NONE(null),
+		PYROMANCER_OUTFIT(Wintertodt.Reward.PYROMANCER_OUTFIT),
+		WARM_GLOVES(Wintertodt.Reward.WARM_GLOVES),
+		BRUMA_TORCH(Wintertodt.Reward.BRUMA_TORCH),
+		TOME_OF_FIRE(Wintertodt.Reward.TOME_OF_FIRE),
+		PHOENIX(Wintertodt.Reward.PHOENIX);
+
+		private final Wintertodt.Reward reward;
+
+		WintertodtReward(Wintertodt.Reward reward)
+		{
+			this.reward = reward;
+		}
+
+		/** The reward, or null for none. */
+		public Wintertodt.Reward reward()
+		{
+			return reward;
+		}
+
+		@Override
+		public String toString()
+		{
+			return reward == null ? "None" : reward.getTitle();
 		}
 	}
 
@@ -627,6 +658,44 @@ public interface CodexMinigamePilotConfig extends Config
 		return true;
 	}
 
+	@ConfigItem(
+		keyName = "wintertodt",
+		name = "Wintertodt",
+		description = "Guide a Wintertodt round one step at a time (chop, fletch, feed; light, fix and heal at your brazier; warm up in time), keep every round with its points and rewards, and show the reward you are after at your pace. RuneLite's Wintertodt plugin keeps its own notifications",
+		section = MINIGAMES,
+		position = 27
+	)
+	default boolean wintertodt()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "wintertodtFletch",
+		name = "Fletch kindling",
+		description = "At the Wintertodt, fletch a full pack of roots into kindling before feeding it: kindling burns for 25 points, a root for 10. Off: feed the roots as they are",
+		section = MINIGAMES,
+		position = 28
+	)
+	default boolean wintertodtFletch()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "wintertodtWarmth",
+		name = "Warm up at",
+		description = "At the Wintertodt, put eating or drinking first once your warmth falls to this percentage. At 0% you die. 0 turns it off",
+		section = MINIGAMES,
+		position = 29
+	)
+	@Range(min = 0, max = 90)
+	@Units(Units.PERCENT)
+	default int wintertodtWarmth()
+	{
+		return 40;
+	}
+
 	@ConfigItem(keyName = "plaque", name = "Step plaque", description = "Show the next step on a small plaque in the game view", section = GUIDANCE, position = 0)
 	default boolean plaque()
 	{
@@ -793,11 +862,23 @@ public interface CodexMinigamePilotConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = "wintertodtReward",
+		name = "Wintertodt reward",
+		description = "The reward cart prize you are after: the panel shows what you own of it, its chance a reward, and the rounds and time to it at your pace",
+		section = GOALS,
+		position = 9
+	)
+	default WintertodtReward wintertodtReward()
+	{
+		return WintertodtReward.PYROMANCER_OUTFIT;
+	}
+
+	@ConfigItem(
 		keyName = "showGoals",
 		name = "Show goals",
 		description = "Show the goal card on the panel",
 		section = GOALS,
-		position = 9
+		position = 10
 	)
 	default boolean showGoals()
 	{
@@ -809,7 +890,7 @@ public interface CodexMinigamePilotConfig extends Config
 		name = "Reward road",
 		description = "In each minigame, show its rewards as a road (at the Blast Furnace, the bars each Smithing level opens): what you own, what you can have now and how far off the rest is at your pace",
 		section = GOALS,
-		position = 10
+		position = 11
 	)
 	default boolean rewardRoad()
 	{

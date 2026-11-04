@@ -1,0 +1,86 @@
+# Wintertodt: the reward you are after against your own rounds, and rounds that end without you.
+# Pieces of the pyromancer outfit seen in the bank are kept as yours; the odds and the rounds to
+# the rest come from your kept rounds. Leaving the prison mid-round, and logging out mid-round,
+# keep the round with no points. Too few warm items is noted from the game's own line.
+#
+# Facts (OSRS wiki, Wintertodt; Reward Cart; Pyromancer outfit; Warm gloves):
+#  - "There is a 1/150 chance to receive a piece of the pyromancer's outfit players have the least
+#    of", tried after the phoenix, dragon axe, tome of fire, warm gloves and bruma torch: about 1/152
+#  - warm gloves 1/150, tried after the phoenix, dragon axe and tome of fire
+#  - "Logging out, or leaving the prison before the end of a round will result in the loss of all
+#    points for the current round."
+#  - "If the player is not wearing a minimum of four pieces" the game says "You feel the cold wind
+#    strike you as you enter; perhaps you should find some warmer clothes."
+#  - Pyromancer garb 20704, hood 20708; the prison is map region 6462 (RuneLite's Wintertodt plugin)
+# The prison's layout here is schematic.
+scene 1580 3930
+at 1630 4000
+skill FIREMAKING 85
+object WINT_BRAZIER_LIT 1622 3998 as brazier
+object WINT_ROOTS 1618 3996 as roots
+item DRAGON_AXE "Dragon axe"
+items WORN DRAGON_AXE 1
+items INV TINDERBOX 1
+items INV KNIFE 1
+items INV HAMMER 1
+items BANK PYROMANCER_TOP 1
+items BANK PYROMANCER_HOOD 1
+# Forty kept rounds of 1,240 points: 3.48 rewards each, 139 in all; 500 ticks each with the wait.
+saved wintertodt.kept "1;1767000000000,400,100,1240,s,0;1767000000001,400,100,1240,s,0;1767000000002,400,100,1240,s,0;1767000000003,400,100,1240,s,0;1767000000004,400,100,1240,s,0;1767000000005,400,100,1240,s,0;1767000000006,400,100,1240,s,0;1767000000007,400,100,1240,s,0;1767000000008,400,100,1240,s,0;1767000000009,400,100,1240,s,0;1767000000010,400,100,1240,s,0;1767000000011,400,100,1240,s,0;1767000000012,400,100,1240,s,0;1767000000013,400,100,1240,s,0;1767000000014,400,100,1240,s,0;1767000000015,400,100,1240,s,0;1767000000016,400,100,1240,s,0;1767000000017,400,100,1240,s,0;1767000000018,400,100,1240,s,0;1767000000019,400,100,1240,s,0;1767000000020,400,100,1240,s,0;1767000000021,400,100,1240,s,0;1767000000022,400,100,1240,s,0;1767000000023,400,100,1240,s,0;1767000000024,400,100,1240,s,0;1767000000025,400,100,1240,s,0;1767000000026,400,100,1240,s,0;1767000000027,400,100,1240,s,0;1767000000028,400,100,1240,s,0;1767000000029,400,100,1240,s,0;1767000000030,400,100,1240,s,0;1767000000031,400,100,1240,s,0;1767000000032,400,100,1240,s,0;1767000000033,400,100,1240,s,0;1767000000034,400,100,1240,s,0;1767000000035,400,100,1240,s,0;1767000000036,400,100,1240,s,0;1767000000037,400,100,1240,s,0;1767000000038,400,100,1240,s,0;1767000000039,400,100,1240,s,0"
+chat GAMEMESSAGE "You feel the cold wind strike you as you enter; perhaps you should find some warmer clothes."
+widget WintStatus.ENERGY_TITLE text "Wintertodt's Energy: 64%"
+widget WintStatus.WARMTH_TITLE text "Your Warmth: 88%"
+widget WintStatus.POINTS text "Points<br>140"
+tick
+expect activity = WINTERTODT
+# Joined mid-round: not timed.
+expect lines.note = "Joined late"
+expect lines ~ "Warm clothing TODO"
+expect gauge.Warmth = "88/100"
+expect saved.wintertodt.owned = "1;GH"
+expect goal = "2/4"
+expect goal.pieces ~ "Pyromancer garb DONE"
+expect goal.pieces ~ "Pyromancer boots TODO"
+# Two pieces at 1 in 152: 304 rewards; at 3.48 a round, 88 rounds of 5:00 each.
+expect goal.note = "1 in 152 a reward, always the piece you have least of. About 304 rewards for the 2 you lack: 88 rounds, 7h 20m at your pace."
+expect goal.pieces ~ "Your 139 rewards kept"
+expect stat.Points_an_hour = "15k"
+expect stat.Rewards_an_hour = "41.8"
+
+# Warm gloves instead: one item, the chance of it by now over the 139 kept rewards.
+wintertodt reward WARM_GLOVES
+tick
+expect goal = "0/1"
+expect goal.note ~ "1 in 150 a reward. About 150 rewards on average: 44 rounds"
+expect goal.note ~ "Even odds by 104 rewards"
+expect goal.pieces = "Your 139 rewards kept IDLE"
+
+# Out of the prison mid-round: the round's points are lost.
+close WintStatus.ENERGY_TITLE
+close WintStatus.WARMTH_TITLE
+close WintStatus.POINTS
+at 1630 3950
+tick
+expect activity = NONE
+expect saved.wintertodt.kept ~ ",0,0,0,l,0"
+
+# Back in for a full round from its start, then a logout mid-round.
+at 1630 4000
+widget WintStatus.ENERGY_TITLE text "The Wintertodt returns in: 0:10"
+tick 17
+widget WintStatus.ENERGY_TITLE text "Wintertodt's Energy: 100%"
+widget WintStatus.POINTS text "Points<br>0"
+tick 20
+expect lines.note = "0:11"
+expect step = "Chop bruma roots"
+# No warmth title read: the warmth varbit, 0 to 1000 (RuneLite's status bars divide it by 10).
+varbit WINT_WARMTH 725
+tick
+expect gauge.Warmth = "72/100"
+widget WintStatus.POINTS text "Points<br>260"
+tick
+state LOGIN_SCREEN
+tick
+# The first left round is no longer the last; the logged-out one is timed, its points still lost.
+expect saved.wintertodt.kept ~ ",0,0,0,l,0;"
+expect saved.wintertodt.kept ~ ",17,0,l,0"

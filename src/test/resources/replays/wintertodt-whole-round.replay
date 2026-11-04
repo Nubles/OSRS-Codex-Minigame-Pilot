@@ -1,0 +1,178 @@
+# Wintertodt: a whole round. A knife from the crate between rounds, the wait by the brazier, the
+# brazier lit, a pack of roots chopped, fletched and fed, warming up when the cold bites, the
+# brazier fixed and its Pyromancer healed, the last roots burnt as the energy runs out, the round
+# kept with its points and rewards, and the reward cart searched in the camp.
+#
+# Facts (OSRS wiki, Wintertodt; Reward Cart; Brazier; Pyromancer; Guide:Efficient Wintertodt;
+# and the game's client scripts in runelite/cs2-scripts):
+#  - "50 Firemaking is required to fight the Wintertodt"
+#  - points: lighting a brazier 25, a bruma root fed 10, bruma kindling fed 25, repairing a
+#    destroyed brazier 25, healing a pyromancer 75
+#  - "Players must collect a minimum of 500 points to be rewarded anything"; "500 points = 2
+#    rolls", "1000 points = 3 rolls"; "For every 5 points past 500 points player gets 1% extra"
+#  - "If the braziers are unlit, they cannot be lit until the Pyromancer is healed"
+#  - "run to the brazier when the number of logs is two less than the remaining energy"
+#  - Brazier objects 29312 unlit, 29313 broken, 29314 burning; Pyromancer 7371, incapacitated 7372
+#  - the HUD: "Wintertodt's Energy: N%", "Your Warmth: N%", "Points<br>N", and between rounds
+#    "The Wintertodt returns in: M:SS" (wint_update, wint_timer_countdown)
+#  - the prison is map region 6462 (RuneLite's Wintertodt plugin)
+# The prison's layout here is schematic: only the region, the brazier, the roots and the crates matter.
+scene 1580 3930
+at 1630 4000
+skill FIREMAKING 70
+skill WOODCUTTING 60
+object WINT_BRAZIER_LIT 1622 3998 as brazier
+object WINT_ROOTS 1618 3996 as roots
+object WINT_CHEST_KNIFE 1634 3990 as knifeCrate
+object WINT_CHEST_AXE 1636 3990 as axeCrate
+npc WINT_WIZARD "Pyromancer" 1621 3996 as pyro
+item RUNE_AXE "Rune axe"
+items INV RUNE_AXE 1
+items INV TINDERBOX 1
+items INV HAMMER 1
+items INV WINT_POTION4 1
+widget WintStatus.ENERGY_TITLE text "The Wintertodt returns in: 0:45"
+widget WintStatus.POINTS text "Points<br>0"
+tick
+expect activity = WINTERTODT
+expect place = "Wintertodt · between rounds"
+expect step = "Take a knife"
+expect target = TOOL_CRATE
+expect object = knifeCrate
+expect lines ~ "Knife NEXT"
+expect lines ~ "Rejuvenation DONE"
+never step = "Train Firemaking to 50"
+
+items INV KNIFE 1
+widget WintStatus.ENERGY_TITLE text "The Wintertodt returns in: 0:40"
+tick
+expect step = "Wait by your brazier"
+expect detail = "Back in 0:40 · light it as the round starts (+25)"
+expect waiting = true
+
+# The round starts; the brazier went out between rounds.
+tick 30
+remove brazier
+object WINT_BRAZIER 1622 3998 as brazier
+widget WintStatus.ENERGY_TITLE text "Wintertodt's Energy: 100%"
+widget WintStatus.WARMTH_TITLE text "Your Warmth: 100%"
+tick
+expect place = "Wintertodt"
+expect step = "Light the brazier"
+expect object = brazier
+expect gauge.Energy = "100/100"
+expect gauge.Points = "0/500"
+expect lines ~ "Your brazier NEXT"
+
+# Lit: chop.
+remove brazier
+object WINT_BRAZIER_LIT 1622 3998 as brazier
+widget WintStatus.POINTS text "Points<br>25"
+tick
+expect step = "Chop bruma roots"
+expect object = roots
+expect detail = "23 free slots · 475 to 500"
+expect stat.Rewards = "0"
+
+# A full pack: fletch, then feed.
+items INV WINT_BRUMA_ROOT 23
+tick
+expect step = "Fletch the roots into kindling"
+expect lines ~ "23 roots TODO"
+items INV clear
+items INV RUNE_AXE 1
+items INV TINDERBOX 1
+items INV HAMMER 1
+items INV WINT_POTION4 1
+items INV KNIFE 1
+items INV WINT_BRUMA_KINDLING 24
+widget WintStatus.ENERGY_TITLE text "Wintertodt's Energy: 70%"
+tick
+expect step = "Feed the brazier"
+expect detail = "24 to burn · +600 points · 475 to 500"
+expect object = brazier
+
+# The cold bites: warm up first.
+widget WintStatus.WARMTH_TITLE text "Your Warmth: 35%"
+chat GAMEMESSAGE "The cold of the Wintertodt seeps into your bones."
+tick
+expect step = "Warm up: eat or drink"
+expect detail = "Warmth 35%: food 4+ gives 35%, a dose 30%"
+expect gauge.Warmth = "35/100"
+expect lines.note ~ "1 knock"
+
+widget WintStatus.WARMTH_TITLE text "Your Warmth: 65%"
+
+# Fed: 625 points. The brazier shatters and its Pyromancer falls.
+items INV clear
+items INV RUNE_AXE 1
+items INV TINDERBOX 1
+items INV HAMMER 1
+items INV WINT_POTION3 1
+items INV KNIFE 1
+widget WintStatus.POINTS text "Points<br>625"
+remove brazier
+object WINT_BRAZIER_BROKEN 1622 3998 as brazier
+remove pyro
+npc WINT_WIZARD_DOWN "Incapacitated Pyromancer" 1621 3996 as pyro
+tick
+expect step = "Fix the brazier"
+expect stat.Rewards = "2"
+expect gauge.Points = "625/1000"
+remove brazier
+object WINT_BRAZIER 1622 3998 as brazier
+widget WintStatus.POINTS text "Points<br>650"
+tick
+expect step = "Heal the Pyromancer"
+expect npc = "Incapacitated Pyromancer"
+remove pyro
+npc WINT_WIZARD "Pyromancer" 1621 3996 as pyro
+widget WintStatus.POINTS text "Points<br>725"
+tick
+expect step = "Light the brazier"
+remove brazier
+object WINT_BRAZIER_LIT 1622 3998 as brazier
+widget WintStatus.POINTS text "Points<br>750"
+
+# Chopping as the energy runs low: six roots, energy 8, so burn them now.
+items INV WINT_BRUMA_ROOT 6
+widget WintStatus.ENERGY_TITLE text "Wintertodt's Energy: 9%"
+tick
+expect step = "Chop bruma roots"
+widget WintStatus.ENERGY_TITLE text "Wintertodt's Energy: 8%"
+tick
+expect step = "Feed the brazier"
+expect detail ~ "Energy 8%: burn your 6"
+expect place = "Wintertodt · the round is ending"
+
+# Subdued at 810 points: 2 rewards and a 62% chance of a third, kept.
+items INV set RUNE_AXE 1 TINDERBOX 1 HAMMER 1 WINT_POTION3 1 KNIFE 1
+widget WintStatus.POINTS text "Points<br>810"
+widget WintStatus.ENERGY_TITLE text "Wintertodt's Energy: 0%"
+tick
+expect saved.wintertodt.kept ~ ",810,s,1"
+expect stat.Rounds = "1"
+expect stat.Rewards_earned = "2.6"
+widget WintStatus.ENERGY_TITLE text "The Wintertodt returns in: 0:59"
+tick
+expect step = "Wait by your brazier"
+expect supply.headline = "Best round: 810 points"
+
+# Out to the camp: the reward cart, 2 rewards owed.
+close WintStatus.ENERGY_TITLE
+close WintStatus.POINTS
+close WintStatus.WARMTH_TITLE
+at 1630 3950
+object WINT_REWARD_PILE_1 1632 3952 as cart
+tick
+expect activity = WINTERTODT
+expect place = "Wintertodt Camp"
+expect step = "Search the reward cart"
+expect detail = "2 rewards owed, +62% of one more · Big-search takes 5 a click"
+expect object = cart
+chat GAMEMESSAGE "You found some loot: 12 x Oak logs"
+tick
+expect step = "Search the reward cart"
+chat GAMEMESSAGE "You found some loot: 3 x Uncut sapphire"
+tick
+expect activity = NONE

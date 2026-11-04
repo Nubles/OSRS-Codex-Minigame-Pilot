@@ -49,6 +49,8 @@ public final class Pilots
 	private volatile boolean useDen = true;
 	private final AssaultPilot assault = new AssaultPilot();
 	private volatile boolean useAssault = true;
+	private final WintertodtPilot wintertodt = new WintertodtPilot();
+	private volatile boolean useWintertodt = true;
 	private final Coach coach;
 	private final Recorder recorder;
 	private final IntUnaryOperator price;
@@ -93,13 +95,14 @@ public final class Pilots
 		valuables.setPrice(price);
 		den.setStore(load, saveKey);
 		assault.setStore(load, saveKey);
+		wintertodt.setStore(load, saveKey);
 		this.coach = new Coach(loadBests, saveBests);
 		this.recorder = new Recorder(notes);
 		this.scene = new SceneIndex(client, id -> MotherlodePilot.isWatched(id) || FurnacePilot.isWatched(id) || HomesPilot.isWatched(id)
 			|| RiftPilot.isWatched(id) || StormPilot.isWatched(id) || FoundryPilot.isWatched(id)
 			|| MixologyPilot.isWatched(id) || TotemsPilot.isWatched(id) || TithePilot.isWatched(id)
 			|| ArtefactsPilot.isWatched(id) || HousesPilot.isWatched(id) || RoguesDenPilot.isWatched(id)
-			|| AssaultPilot.isWatched(id));
+			|| AssaultPilot.isWatched(id) || WintertodtPilot.isWatched(id));
 		this.homes = new HomesPilot(saved, save, load, saveKey);
 		homes.readers(null, stock);
 	}
@@ -209,6 +212,13 @@ public final class Pilots
 		assault.settings(reward);
 	}
 
+	/** The "Wintertodt" settings: on, fletching, the warmth to warm up at, and the reward saved for (or null). */
+	public void wintertodt(boolean on, boolean fletch, int eatAt, com.codex.minigamepilot.core.Wintertodt.Reward reward)
+	{
+		useWintertodt = on;
+		wintertodt.settings(fletch, eatAt, reward);
+	}
+
 	/** A spot animation appeared in the scene: Mastering Mixology's station cues. */
 	public void spotanim(int id)
 	{
@@ -264,6 +274,7 @@ public final class Pilots
 			valuables.newAccount();
 			den.newAccount();
 			assault.newAccount();
+			wintertodt.newAccount();
 			said.clear();
 			unsaid.clear();
 		}
@@ -296,6 +307,7 @@ public final class Pilots
 		foundry.chat(message);
 		valuables.chat(message);
 		assault.chat(message, client.getTickCount());
+		wintertodt.chat(message);
 	}
 
 	/** @param bankCoal coal in the open bank, or -1 when the bank is closed */
@@ -370,6 +382,11 @@ public final class Pilots
 		if (useAssault)
 		{
 			assault.watch(client, now);
+		}
+		// A Wintertodt round is followed every tick too, so leaving the prison mid-round is seen.
+		if (useWintertodt)
+		{
+			wintertodt.watch(client, now);
 		}
 		if (useMotherlode && MotherlodePilot.inMine(client))
 		{
@@ -462,6 +479,13 @@ public final class Pilots
 			state = den.lastState;
 			units = den.units();
 		}
+		else if (useWintertodt && wintertodt.active(client, scene))
+		{
+			activity = View.Activity.WINTERTODT;
+			flight = wintertodt.fly(client, scene, npcs(), now);
+			state = wintertodt.lastState;
+			units = wintertodt.units();
+		}
 		else if (useAssault && assault.active(client, scene, npcs()))
 		{
 			activity = View.Activity.BARBARIAN_ASSAULT;
@@ -525,6 +549,10 @@ public final class Pilots
 			else if (last == View.Activity.BARBARIAN_ASSAULT)
 			{
 				assault.left();
+			}
+			else if (last == View.Activity.WINTERTODT)
+			{
+				wintertodt.left();
 			}
 			last = activity;
 		}
@@ -616,6 +644,8 @@ public final class Pilots
 		}
 		// A Barbarian Assault game under way ends where it stood, wherever you were.
 		assault.relogged(now, client.getTickCount());
+		// A Wintertodt round under way is lost on logging out.
+		wintertodt.relogged(now, client.getTickCount());
 		motherlode.relogged();
 		furnace.relogged();
 		coach.left();
@@ -738,6 +768,7 @@ public final class Pilots
 		v.brief(valuables.brief());
 		v.brief(den.brief());
 		v.brief(assault.brief());
+		v.brief(wintertodt.brief());
 		return v;
 	}
 }
