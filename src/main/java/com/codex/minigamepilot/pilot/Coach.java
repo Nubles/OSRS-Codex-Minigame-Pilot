@@ -132,6 +132,8 @@ final class Coach
 				return Skill.FISHING;
 			case FOUNDRY:
 				return Skill.SMITHING;
+			case MIXOLOGY:
+				return Skill.HERBLORE;
 			default:
 				return null;
 		}
@@ -323,6 +325,22 @@ final class Coach
 				return "the waterfall";
 			case PREFORM_STORAGE:
 				return "the preform storage";
+			case LEVER:
+				return "the levers";
+			case MIXING_VESSEL:
+				return "the vessel";
+			case AGITATOR:
+				return "the agitator";
+			case RETORT:
+				return "the retort";
+			case ALEMBIC:
+				return "the alembic";
+			case CONVEYOR:
+				return "the conveyor belt";
+			case REFINER:
+				return "the refiner";
+			case DIGWEED:
+				return "the digweed";
 			default:
 				return null;
 		}

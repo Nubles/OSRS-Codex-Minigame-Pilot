@@ -1,0 +1,213 @@
+# Mastering Mixology: one whole round of three orders. The levers for each potion in turn, the
+# vessel, a digweed picked and used on the mixalot, each potion at the station its order names
+# (the alembic, then the retort, then the agitator, with their cues), the conveyor belt, and the
+# delivery kept with its resin and experience.
+#
+# Facts (OSRS wiki, Mastering Mixology and Mastering Mixology/Strategies):
+#  - three orders at once; mystic mana amalgam is M M A (63 Herblore), aqualux amalgam A L A (72),
+#    mixalot M A L (81); 10 paste a pull, taken from the hopper with the base
+#  - process at the alembic, then the retort, then the agitator; click the retort every tick; the
+#    agitator's cue gives a two-tick window
+#  - all three orders in one deposit pay 40% more resin; digweed doubles a potion's resin and
+#    experience, and is best used on a mixalot
+#  - ids by RuneLite's gameval names; a potion in an order or station varbit is its place in the
+#    game's list + 1 (MMA 2, ALA 6, MAL 10) and a station 1 agitator, 2 retort, 3 alembic, and a
+#    mixer slot 1 mox, 2 aga, 3 lye, as the Mastering Mixology plugin by hex-agon reads them (a
+#    cross-check). The resin paid here is an example, not a figure from the wiki.
+include /replays/scenes/mixology.scene
+skill HITPOINTS 10
+skill HERBLORE 81
+varp MIXOLOGY_MOX_POINTS 1000
+varp MIXOLOGY_AGA_POINTS 1000
+varp MIXOLOGY_LYE_POINTS 1000
+varbit MM_AVAILABLE_MOX 600
+varbit MM_AVAILABLE_AGA 600
+varbit MM_AVAILABLE_LYE 600
+varbit MM_LAB_ORDER_1_TYPE 2
+varbit MM_LAB_ORDER_1_MODIFIER 2
+varbit MM_LAB_ORDER_2_TYPE 6
+varbit MM_LAB_ORDER_2_MODIFIER 1
+varbit MM_LAB_ORDER_3_TYPE 10
+varbit MM_LAB_ORDER_3_MODIFIER 3
+# The game's own orders list, as its HUD writes it.
+widget MmOverlay.CONTENT child 0 text "Potion Orders"
+widget MmOverlay.CONTENT child 2 text "Mystic mana amalgam"
+widget MmOverlay.CONTENT child 4 text "Aqualux amalgam"
+widget MmOverlay.CONTENT child 6 text "Mixalot"
+mixology reward GOGGLES
+at 1394 9327
+tick
+expect activity = MIXOLOGY
+expect place = "3 of 3 orders · +40% resin"
+expect step = "Pull the mox lever"
+expect object = moxLever
+expect detail = "Mystic mana amalgam · Mox Mox Aga · 3 pulls to go"
+expect lines = "Mystic mana amalgam NEXT, Aqualux amalgam TODO, Mixalot TODO"
+expect lines.note = "168 resin · 870 xp"
+expect gauge.Mox = "600/3000"
+expect goal = "3000/24950"
+never activity != MIXOLOGY
+
+varbit MM_LAB_MIXER_SLOT_0 1
+tick
+expect step = "Pull the mox lever"
+expect detail ~ "2 pulls to go"
+varbit MM_LAB_MIXER_SLOT_1 1
+tick
+expect step = "Pull the aga lever"
+expect object = agaLever
+expect detail ~ "last pull"
+varbit MM_LAB_MIXER_SLOT_2 2
+varbit MM_LAB_VESSEL_READY 2
+tick
+expect step = "Take the mystic mana amalgam from the vessel"
+expect object = vessel
+
+# Taken: its paste leaves the hopper. The aqualux amalgam next, A L A.
+varbit MM_LAB_VESSEL_READY 0
+varbit MM_LAB_MIXER_SLOT_0 0
+varbit MM_LAB_MIXER_SLOT_1 0
+varbit MM_LAB_MIXER_SLOT_2 0
+varbit MM_AVAILABLE_MOX 580
+varbit MM_AVAILABLE_AGA 590
+items INV MM_POTION_MMA_UNFINISHED 1
+tick
+expect step = "Pull the aga lever"
+expect detail = "Aqualux amalgam · Aga Lye Aga · 3 pulls to go"
+varbit MM_LAB_MIXER_SLOT_0 2
+tick
+expect step = "Pull the lye lever"
+expect object = lyeLever
+varbit MM_LAB_MIXER_SLOT_1 3
+varbit MM_LAB_MIXER_SLOT_2 2
+varbit MM_LAB_VESSEL_READY 6
+tick
+expect step = "Take the aqualux amalgam from the vessel"
+varbit MM_LAB_VESSEL_READY 0
+varbit MM_LAB_MIXER_SLOT_0 0
+varbit MM_LAB_MIXER_SLOT_1 0
+varbit MM_LAB_MIXER_SLOT_2 0
+varbit MM_AVAILABLE_AGA 570
+varbit MM_AVAILABLE_LYE 590
+items INV MM_POTION_AAL_UNFINISHED 1
+
+# A wrong pull: lye in the vessel for the mixalot is fine, M A L in any order.
+varbit MM_LAB_MIXER_SLOT_0 3
+tick
+expect step = "Pull the mox lever"
+expect detail ~ "Mixalot · Mox Aga Lye · 2 pulls to go"
+varbit MM_LAB_MIXER_SLOT_1 1
+varbit MM_LAB_MIXER_SLOT_2 2
+varbit MM_LAB_VESSEL_READY 10
+tick
+expect step = "Take the mixalot from the vessel"
+varbit MM_LAB_VESSEL_READY 0
+varbit MM_LAB_MIXER_SLOT_0 0
+varbit MM_LAB_MIXER_SLOT_1 0
+varbit MM_LAB_MIXER_SLOT_2 0
+varbit MM_AVAILABLE_MOX 570
+varbit MM_AVAILABLE_AGA 560
+varbit MM_AVAILABLE_LYE 580
+items INV MM_POTION_MAL_UNFINISHED 1
+
+# All three mixed: the alembic first.
+tick
+expect step = "Crystallise the mixalot at the alembic"
+expect object = alembic
+expect detail = "Then click again as the bellows open the fourth time"
+
+# A digweed grows in the south-west corner: pick it, and it goes on the mixalot.
+varbit MM_HERB_READY_3 1
+tick
+expect step = "Pick the digweed"
+expect object = herbSW
+varbit MM_HERB_READY_3 0
+items INV MM_LAB_SPECIAL_HERB 1
+tick
+expect step = "Use the digweed on the mixalot"
+items INV clear
+items INV MM_POTION_MMA_UNFINISHED 1
+items INV MM_POTION_AAL_UNFINISHED 1
+items INV MM_POTION_MAL_UNFINISHED 1
+tick
+expect step = "Crystallise the mixalot at the alembic"
+
+# In the alembic: wait for the bellows, click on the cue.
+items INV clear
+items INV MM_POTION_MMA_UNFINISHED 1
+items INV MM_POTION_AAL_UNFINISHED 1
+varbit MM_LAB_ALEMBIC_POTION 10
+tick
+expect step = "Crystallise the mixalot · wait for the bellows"
+expect waiting = true
+expect object = alembic
+mixology cue VFX_MACHINERY_ALCHEMY01_ALEMBIC01
+tick
+expect step = "Click the alembic now"
+tick
+expect step = "Crystallise the mixalot · wait for the bellows"
+varbit MM_LAB_ALEMBIC_POTION 0
+items INV MM_POTION_MAL_FINISHED 1
+tick
+expect lines = "Mystic mana amalgam NEXT, Aqualux amalgam TODO, Mixalot DONE"
+expect step = "Concentrate the mystic mana amalgam at the retort"
+expect object = retort
+
+# The retort: click every tick.
+items INV clear
+items INV MM_POTION_AAL_UNFINISHED 1
+items INV MM_POTION_MAL_FINISHED 1
+varbit MM_LAB_RETORT_POTION 2
+tick
+expect step = "Keep clicking the retort"
+varbit MM_LAB_RETORT_POTION 0
+items INV MM_POTION_MMA_FINISHED 1
+tick
+expect step = "Homogenise the aqualux amalgam at the agitator"
+expect object = agitator
+
+# The agitator: its cue's window is two ticks.
+items INV clear
+items INV MM_POTION_MAL_FINISHED 1
+items INV MM_POTION_MMA_FINISHED 1
+varbit MM_LAB_AGITATOR_POTION 6
+tick
+expect step = "Homogenise the aqualux amalgam · wait for the cue"
+mixology cue VFX_MACHINERY_ALCHEMY01_AGITATOR01
+tick
+expect step = "Click the agitator now"
+tick
+expect step = "Click the agitator now"
+tick
+expect step = "Homogenise the aqualux amalgam · wait for the cue"
+varbit MM_LAB_AGITATOR_POTION 0
+items INV MM_POTION_AAL_FINISHED 1
+tick
+expect step = "Deliver on the conveyor belt"
+expect object = conveyor
+expect detail = "All three orders at once: 40% more resin"
+expect lines = "Mystic mana amalgam DONE, Aqualux amalgam DONE, Mixalot DONE"
+
+# Delivered: the potions go, resin and experience arrive, three new orders.
+items INV clear
+varp MIXOLOGY_MOX_POINTS 1084
+varp MIXOLOGY_AGA_POINTS 1098
+varp MIXOLOGY_LYE_POINTS 1070
+xp HERBLORE 2200000
+varbit MM_LAB_ORDER_1_TYPE 1
+varbit MM_LAB_ORDER_1_MODIFIER 3
+varbit MM_LAB_ORDER_2_TYPE 8
+varbit MM_LAB_ORDER_2_MODIFIER 2
+varbit MM_LAB_ORDER_3_TYPE 5
+varbit MM_LAB_ORDER_3_MODIFIER 1
+widget MmOverlay.CONTENT child 2 text "Mammoth-might mix"
+widget MmOverlay.CONTENT child 4 text "Megalite liquid"
+widget MmOverlay.CONTENT child 6 text "Azure aura mix"
+tick
+expect stat.Deliveries = "1"
+expect saved.mixology.rounds ~ ",84,98,70,"
+expect saved.mixology.rounds ~ ",3"
+expect supply.headline ~ "Best round: 252 resin in "
+expect lines = "Mammoth-might mix NEXT, Megalite liquid TODO, Azure aura mix TODO"
+expect step = "Pull the mox lever"
+expect goal = "3252/24950"

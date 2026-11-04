@@ -20,6 +20,8 @@ import net.runelite.api.TileObject;
  * <p>Commands it adds: {@code setting NAME on|off} (motherlode, furnace, homes, upperHopper, rift, tickCoach),
  * {@code stormload N} (Tempoross's "Load what you hold at storm"; setting names tempoross and temporossCook too),
  * {@code foundry stages TOOL...} and {@code foundry bonus on|off} (the Giants' Foundry HUD's stage icons and sweet spot),
+ * {@code mixology plan ALL|PER_PASTE}, {@code mixology reward REWARD|none} and {@code mixology cue SPOTANIM} (a Mastering
+ * Mixology setting, or a spot animation appearing, by its {@code SpotanimID} name; setting names mixology and mixologyCues),
  * {@code fragments N} (fragments before the first Guardians of the Rift craft), {@code quest QUEST done|not}
  * (by RuneLite's {@code Quest} name), {@code hud elemental|catalytic ALTAR|none} (the rune icon the
  * Guardians of the Rift HUD shows for an open altar; the HUD component itself is a {@code widget}),
@@ -47,6 +49,9 @@ final class PilotRig implements Rig
 	/** The Giants' Foundry HUD as the script sets it. */
 	private com.codex.minigamepilot.core.FoundryCycle.Tool[] foundryStages = new com.codex.minigamepilot.core.FoundryCycle.Tool[0];
 	private boolean foundryBonus;
+	/** The Mastering Mixology settings as the script sets them. */
+	private com.codex.minigamepilot.core.MixCycle.Plan mixPlan = com.codex.minigamepilot.core.MixCycle.Plan.ALL;
+	private com.codex.minigamepilot.core.Mixology.Reward mixReward;
 	PilotRig(FakeGame game)
 	{
 		this.game = game;
@@ -59,8 +64,10 @@ final class PilotRig implements Rig
 		settings.put("tempoross", true);
 		settings.put("temporossCook", true);
 		settings.put("foundry", true);
+		settings.put("mixology", true);
+		settings.put("mixologyCues", true);
 		pilots = new Pilots(game.client(), null, c -> { }, new FieldNotes(() -> null, new Gson()),
-			bests::get, bests::put, id -> 0, store::get, store::put, () -> null);
+			bests::get, bests::put, game::price, store::get, store::put, () -> null);
 		pilots.profile("replay");
 		pilots.riftReaders(q -> quests.contains(q), c -> sprites.getOrDefault(c, -1));
 		pilots.foundryHud(new FoundryPilot.Hud()
@@ -95,6 +102,35 @@ final class PilotRig implements Rig
 				pilots.rift(settings.get("rift"));
 				pilots.tempoross(settings.get("tempoross"), settings.get("temporossCook"), stormLoad);
 				pilots.foundry(settings.get("foundry"));
+				mixology();
+				return true;
+			case "mixology":
+				// mixology plan PLAN | reward REWARD|none | cue SPOTANIM
+				if ("plan".equals(args.get(0)))
+				{
+					mixPlan = com.codex.minigamepilot.core.MixCycle.Plan.valueOf(args.get(1));
+				}
+				else if ("reward".equals(args.get(0)))
+				{
+					mixReward = "none".equals(args.get(1)) ? null : com.codex.minigamepilot.core.Mixology.Reward.valueOf(args.get(1));
+				}
+				else if ("cue".equals(args.get(0)))
+				{
+					try
+					{
+						pilots.spotanim(net.runelite.api.gameval.SpotanimID.class.getField(args.get(1)).getInt(null));
+					}
+					catch (ReflectiveOperationException e)
+					{
+						throw new IllegalArgumentException("No SpotanimID." + args.get(1));
+					}
+					return true;
+				}
+				else
+				{
+					throw new IllegalArgumentException("mixology plan PLAN | reward REWARD|none | cue SPOTANIM");
+				}
+				mixology();
 				return true;
 			case "foundry":
 			{
@@ -165,6 +201,11 @@ final class PilotRig implements Rig
 			default:
 				return false;
 		}
+	}
+
+	private void mixology()
+	{
+		pilots.mixology(settings.get("mixology"), mixPlan, mixReward, settings.get("mixologyCues"));
 	}
 
 	@Override

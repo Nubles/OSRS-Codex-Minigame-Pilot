@@ -1,6 +1,6 @@
 # Codex Minigame Pilot
 
-**One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes, Guardians of the Rift, Tempoross and the Giants' Foundry.** The Pilot watches the minigame you are in and always shows the single thing to do next: what to click, lit in gold in the world, the path there drawn on the ground and the minimap, and a line on why. You still do every click. It only reads the game and draws.
+**One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes, Guardians of the Rift, Tempoross, the Giants' Foundry and Mastering Mixology.** The Pilot watches the minigame you are in and always shows the single thing to do next: what to click, lit in gold in the world, the path there drawn on the ground and the minimap, and a line on why. You still do every click. It only reads the game and draws.
 
 It is part of the **Codex** suite of RuneLite plugins and shares their look: warm ink, aged gold and the game's own fonts.
 
@@ -57,6 +57,24 @@ It is part of the **Codex** suite of RuneLite plugins and shares their look: war
   <img src="docs/screenshots/foundry-plaque-lava.png" alt="Plaque at the waterfall">
 </p>
 
+### Mastering Mixology
+- **The orders your paste can fill.** Of the three open orders it makes every one the hopper has paste for, as the wiki's strategies advise (all three in one deposit pay 40% more resin, two 20% more). Short of a paste, it keeps the orders that pay the most resin and says why the others are left ("short of lye"). Or, under *Mixology orders to make*, the most resin per paste: mammoth-might mix, alco-augmentator and liplack liquor are skipped unless a mixalot is ordered.
+- **The levers, one pull at a time.** Each potion's paste in its recipe's order, counting what is already in the vessel, and when the vessel holds paste for another order that one is mixed first so no pull is wasted. Paste that fits no order means pulling all three again, which costs nothing.
+- **The right station, and its cue.** Potions are worked at the station their order names, the alembic first, then the retort, then the agitator, as the wiki's strategies go. At the retort it says to keep clicking; at the agitator and the alembic the step turns into "Click the agitator now" the moment its quick action is live, for the two ticks the agitator gives (*Mixology station cues*). Then the conveyor belt.
+- **Digweed where it pays.** A digweed in a corner is picked, then used on the mixalot (below 81 Herblore, on the ordered potion with the most experience), never on the three single-paste potions.
+- **What to put in the hopper.** The hopper's three pastes in orders' worth at your level (the wiki: at 75, mox, aga and lye are ordered about 39:35:31), the one that runs out first, and the herb that makes it cheapest at today's Grand Exchange prices. Short of paste, the step is the hopper (paste carried), the refiner (herbs carried) or the bank.
+- **Resin towards a reward.** Pick a reward under *Mixology reward*: your mox, aga and lye against its price, and how long it is at your own pace.
+- **Every delivery kept.** Each delivery's resin, the Herblore experience over the round and its time, per account. Across them, resin and experience an hour and your best round.
+
+<p align="center">
+  <img src="docs/screenshots/mixology-panel-levers.png" width="225" alt="Mastering Mixology: the levers for the next potion">
+  <img src="docs/screenshots/mixology-panel-cue.png" width="225" alt="Mastering Mixology: the agitator's cue">
+</p>
+<p align="center">
+  <img src="docs/screenshots/mixology-plaque-levers.png" alt="Plaque at the levers">
+  <img src="docs/screenshots/mixology-plaque-cue.png" alt="Plaque at the agitator's cue">
+</p>
+
 ### Tempoross
 - **One step through the storm.** Catch harpoonfish, cook them at the shrine, fill the ammunition crate, and harpoon the spirit pool while Tempoross is down. Each step is lit in the world, the fishing spot, the shrine, the crate or the pool, with its path and a line of why.
 - **The double spot first.** When a spot of jumping harpoonfish is up, that is where you fish, even with raw fish still to cook: it can give two a catch, and the wiki's strategies say to fish there wherever possible.
@@ -104,7 +122,7 @@ It is part of the **Codex** suite of RuneLite plugins and shares their look: war
 
 ## The panel
 
-The helm at the top holds the next action as one large gilt word and the full instruction under it, and flares when the step changes. Under it, the minigame's loop with your place in it, its gauges (the sack with pay-dirt in flight, the furnace's coal against what the next load needs, the planks the job still takes), the furniture checklist, and the session so far: pay-dirt, ore, bars, contracts, points and experience, with hourly pace. Away from the minigames it lists all six and what is waiting at each, such as an open contract, and what your last visit to the Motherlode Mine and the Blast Furnace came to: "Last visit 3 hours ago: 1h 12m for 1,134 pay-dirt, 972 ore, 68k Mining xp and ore worth 142k."
+The helm at the top holds the next action as one large gilt word and the full instruction under it, and flares when the step changes. Under it, the minigame's loop with your place in it, its gauges (the sack with pay-dirt in flight, the furnace's coal against what the next load needs, the planks the job still takes), the furniture checklist, and the session so far: pay-dirt, ore, bars, contracts, points and experience, with hourly pace. Away from the minigames it lists all seven and what is waiting at each, such as an open contract, and what your last visit to the Motherlode Mine and the Blast Furnace came to: "Last visit 3 hours ago: 1h 12m for 1,134 pay-dirt, 972 ore, 68k Mining xp and ore worth 142k."
 
 Each minigame's card also keeps your best visit, the most pay-dirt or bars an hour over at least fifteen minutes, with its experience an hour: "Best visit 5 days ago: 1,620 pay-dirt and 81k Mining xp an hour over 1h 24m." It is kept per account, and a session never carries over to another account.
 
@@ -122,7 +140,7 @@ Each round is also split into the stages of its loop (Mine, Hopper, Sack, Bank; 
 
 ## Tick coach
 
-The game runs on 0.6-second ticks, and the tick coach counts every loop in them: Motherlode's mine, hopper, sack and bank; the Blast Furnace's bank, belt and bars; a Mahogany Homes contract from the contractor through the furniture and back; a Guardians of the Rift altar trip from mining through essence and the altar to handing in; a Tempoross round from fishing through the shrine and the crate (and the spirit pool, when Tempoross goes down) back to fishing; a Giants' Foundry sword from the commission to the hand-in. After each loop the panel shows:
+The game runs on 0.6-second ticks, and the tick coach counts every loop in them: Motherlode's mine, hopper, sack and bank; the Blast Furnace's bank, belt and bars; a Mahogany Homes contract from the contractor through the furniture and back; a Guardians of the Rift altar trip from mining through essence and the altar to handing in; a Tempoross round from fishing through the shrine and the crate (and the spirit pool, when Tempoross goes down) back to fishing; a Giants' Foundry sword from the commission to the hand-in; a Mastering Mixology round from one delivery to the next. After each loop the panel shows:
 
 - **The loop in ticks against your best** of the same kind ("176 ticks, +26 on best"), or "new best".
 - **Its walking against a floor.** Every walk the Pilot sends you on is measured over the game's collision map, so its shortest way is known; at run pace (two tiles a tick) that walk has a floor nobody can beat. The card sets the ticks you spent on foot against it: "On foot 19 ticks against a floor of 17 at run pace, 2 over". Mining, smelting and building have no fixed duration the wiki states, so the coach never invents a floor for them: those parts are only compared with your own best.
@@ -178,7 +196,7 @@ Both are read only, never written, and everything works without them.
 
 ## Your data
 
-Your bank's goal items and supplies as last seen, your Mahogany Homes points, your Guardians of the Rift points, your last thirty Tempoross games, your last fifty Giants' Foundry swords and the moulds the jig has shown you own, the rewards you own, your round bests, your last and best visit to each minigame and what your contracts take are saved in your RuneLite profile, per account. A damaged or hand-edited value is read as far as it can be and the rest left out, so it never stops the Pilot.
+Your bank's goal items and supplies as last seen, your Mahogany Homes points, your Guardians of the Rift points, your last thirty Tempoross games, your last fifty Giants' Foundry swords and the moulds the jig has shown you own, your last hundred Mastering Mixology deliveries, the rewards you own, your round bests, your last and best visit to each minigame and what your contracts take are saved in your RuneLite profile, per account. A damaged or hand-edited value is read as far as it can be and the rest left out, so it never stops the Pilot.
 
 ## Field notes
 
@@ -190,9 +208,9 @@ Codex Minigame Pilot is guidance only. It reads what the game already shows you 
 
 ## Settings that matter
 
-- **Minigames:** turn each of the six off; *Cook before loading* and *Load what you hold at storm* (80%) for Tempoross; *Fragments before first craft* for Guardians of the Rift (120 by default); fix the *Blast Furnace bar* instead of letting the Pilot work it out; *Top up coffer below* (2,500 coins by default).
+- **Minigames:** turn each of the seven off; *Mixology orders to make* (every order, or the most resin per paste) and *Mixology station cues*; *Cook before loading* and *Load what you hold at storm* (80%) for Tempoross; *Fragments before first craft* for Guardians of the Rift (120 by default); fix the *Blast Furnace bar* instead of letting the Pilot work it out; *Top up coffer below* (2,500 coins by default).
 - **Guidance:** *Step plaque*, *Path on the ground*, *Path on minimap*, *Action labels*, *Mark what comes after*, *Hint arrow* and *World map marker* for Mahogany Homes, and *Visit summary in chat*. All on by default.
-- **Goals:** what Motherlode nuggets and Mahogany Homes points are saved for, the *Blast Furnace level* to work toward (0 for the next), *Show goals* and *Reward road*.
+- **Goals:** what Motherlode nuggets and Mahogany Homes points are saved for, the *Mixology reward* your resin is saved for, the *Blast Furnace level* to work toward (0 for the next), *Show goals* and *Reward road*.
 - **Tick coach:** *Tick coach*, on by default.
 - **Field notes:** *Keep field notes*, off by default.
 

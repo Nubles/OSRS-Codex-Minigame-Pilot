@@ -41,6 +41,7 @@ import net.runelite.api.events.GameObjectDespawned;
 import net.runelite.api.events.GameObjectSpawned;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
+import net.runelite.api.events.GraphicsObjectCreated;
 import net.runelite.api.events.GroundObjectDespawned;
 import net.runelite.api.events.GroundObjectSpawned;
 import net.runelite.api.events.ItemContainerChanged;
@@ -72,8 +73,8 @@ import net.runelite.client.util.Text;
 	name = "Codex Minigame Pilot",
 	internalName = "codex-minigame-pilot",
 	legacyDataDirectory = "codex-minigame-pilot",
-	description = "One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes, Guardians of the Rift, Tempoross and the Giants' Foundry: what to click, the path there, and why",
-	tags = {"motherlode", "mlm", "blast furnace", "mahogany homes", "construction", "mining", "smithing", "guardians of the rift", "gotr", "runecraft", "tempoross", "fishing", "giants foundry", "guide", "codex"}
+	description = "One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes, Guardians of the Rift, Tempoross, the Giants' Foundry and Mastering Mixology: what to click, the path there, and why",
+	tags = {"motherlode", "mlm", "blast furnace", "mahogany homes", "construction", "mining", "smithing", "guardians of the rift", "gotr", "runecraft", "tempoross", "fishing", "giants foundry", "mastering mixology", "mixology", "herblore", "guide", "codex"}
 )
 public class CodexMinigamePilotPlugin extends Plugin
 {
@@ -174,6 +175,7 @@ public class CodexMinigamePilotPlugin extends Plugin
 		pilots.riftFragments(config.riftFragments());
 		pilots.tempoross(config.tempoross(), config.temporossCook(), config.temporossStormLoad());
 		pilots.foundry(config.foundry());
+		pilots.mixology(config.mixology(), config.mixologyPlan(), config.mixologyReward().reward(), config.mixologyCues());
 		goals = new GoalWatch(key -> configManager.getRSProfileConfiguration(CodexMinigamePilotConfig.GROUP, key),
 			(key, value) -> configManager.setRSProfileConfiguration(CodexMinigamePilotConfig.GROUP, key, value),
 			this::navigatorBoard);
@@ -263,6 +265,11 @@ public class CodexMinigamePilotPlugin extends Plugin
 		if (CodexMinigamePilotConfig.GROUP.equals(event.getGroup()) && "foundry".equals(event.getKey()) && pilots != null)
 		{
 			pilots.foundry(config.foundry());
+			return;
+		}
+		if (CodexMinigamePilotConfig.GROUP.equals(event.getGroup()) && event.getKey() != null && event.getKey().startsWith("mixology") && pilots != null)
+		{
+			pilots.mixology(config.mixology(), config.mixologyPlan(), config.mixologyReward().reward(), config.mixologyCues());
 			return;
 		}
 		if (CodexMinigamePilotConfig.GROUP.equals(event.getGroup()) && "tickCoach".equals(event.getKey()) && pilots != null)
@@ -525,6 +532,15 @@ public class CodexMinigamePilotPlugin extends Plugin
 			{
 				goals.chat(Text.removeTags(event.getMessage()));
 			}
+		}
+	}
+
+	@Subscribe
+	public void onGraphicsObjectCreated(GraphicsObjectCreated event)
+	{
+		if (pilots != null)
+		{
+			pilots.spotanim(event.getGraphicsObject().getId());
 		}
 	}
 

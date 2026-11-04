@@ -1,0 +1,40 @@
+# A schematic Mastering Mixology lab for replays. Not the real map: just the things the Pilot points
+# at, laid out on one open floor near where the Mastering Mixology plugin by hex-agon places them.
+#
+# Facts:
+#  - names are RuneLite's (net.runelite.api.gameval): the levers MM_LAB_SWITCH_MOX, _AGA and _LYE;
+#    the mixing vessel MM_LAB_VESSEL; the stations MM_LAB_MACHINE_AGITATOR, _RETORT and _ALEMBIC;
+#    the conveyor belt MM_LAB_CONVEYOR; the hopper MM_LAB_HOPPER; the refiner MM_LAB_MILL; the
+#    four digweed patches MM_HERB_1 to _4
+#  - OSRS wiki, Mastering Mixology: the hopper is "next to the levers", the vessel "behind them",
+#    the conveyor belt "to the north", the refiner "next to the bank chest in the south-east",
+#    digweed grows "in one of the corners of the room"
+#
+#   y 9331  herbNW            conveyor            herbNE
+#   y 9329                    agitator
+#   y 9326                    vessel   (player 9327)
+#   y 9325  alembic                         retort
+#   y 9324              lye aga mox
+#   y 9322  herbSW            hopper              herbSE
+#   y 9320                                  refiner
+#   y 9318                                  bank
+#        x 1389                                    1399
+
+scene 1340 9270
+
+object MM_LAB_SWITCH_LYE 1393 9324 as lyeLever
+object MM_LAB_SWITCH_AGA 1394 9324 as agaLever
+object MM_LAB_SWITCH_MOX 1395 9324 as moxLever
+object MM_LAB_VESSEL 1394 9326 as vessel
+object MM_LAB_MACHINE_ALEMBIC 1391 9325 as alembic
+object MM_LAB_MACHINE_AGITATOR 1393 9329 as agitator
+object MM_LAB_MACHINE_RETORT 1397 9325 as retort
+object MM_LAB_CONVEYOR 1394 9331 as conveyor
+object MM_LAB_HOPPER 1394 9322 as hopper
+object MM_LAB_MILL 1398 9320 as refiner
+name 90000 "Bank chest"                  # a stand-in chest: the Pilot finds banks by name
+object 90000 1398 9318 as bank
+object MM_HERB_1 1399 9331 as herbNE
+object MM_HERB_2 1399 9322 as herbSE
+object MM_HERB_3 1389 9322 as herbSW
+object MM_HERB_4 1389 9331 as herbNW

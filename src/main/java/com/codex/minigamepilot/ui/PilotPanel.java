@@ -116,7 +116,7 @@ public class PilotPanel extends PluginPanel
 
 		if (!v.gauges.isEmpty())
 		{
-			body.add(new SectionHeader(v.activity == View.Activity.FURNACE ? "The furnace" : v.activity == View.Activity.HOMES ? "Materials" : v.activity == View.Activity.RIFT ? "The rift" : v.activity == View.Activity.TEMPOROSS ? "The storm" : v.activity == View.Activity.FOUNDRY ? "The forge" : "The sack"));
+			body.add(new SectionHeader(v.activity == View.Activity.FURNACE ? "The furnace" : v.activity == View.Activity.HOMES ? "Materials" : v.activity == View.Activity.RIFT ? "The rift" : v.activity == View.Activity.TEMPOROSS ? "The storm" : v.activity == View.Activity.FOUNDRY ? "The forge" : v.activity == View.Activity.MIXOLOGY ? "The hopper" : "The sack"));
 			Card card = new Card(new BorderLayout());
 			StackPanel gauges = new StackPanel(6, 0);
 			for (View.Gauge gauge : v.gauges)
@@ -184,7 +184,7 @@ public class PilotPanel extends PluginPanel
 
 		if (v.supply != null && !v.supply.lines.isEmpty())
 		{
-			body.add(new SectionHeader("In the bank", v.supply.trailing));
+			body.add(new SectionHeader(v.supply.title, v.supply.trailing));
 			Card card = new Card(new BorderLayout());
 			card.accent(v.supply.warn ? Theme.EMBER : Theme.TEAL);
 			StackPanel stack = new StackPanel(4, 0);

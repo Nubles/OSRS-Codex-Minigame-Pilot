@@ -35,6 +35,8 @@ public final class Pilots
 	private volatile boolean useStorm = true;
 	private final FoundryPilot foundry = new FoundryPilot();
 	private volatile boolean useFoundry = true;
+	private final MixologyPilot mixology = new MixologyPilot();
+	private volatile boolean useMixology = true;
 	private final Coach coach;
 	private final Recorder recorder;
 	private final IntUnaryOperator price;
@@ -70,10 +72,13 @@ public final class Pilots
 		rift.setStore(load, saveKey);
 		storm.setStore(load, saveKey);
 		foundry.setStore(load, saveKey);
+		mixology.setStore(load, saveKey);
+		mixology.setPrice(price);
 		this.coach = new Coach(loadBests, saveBests);
 		this.recorder = new Recorder(notes);
 		this.scene = new SceneIndex(client, id -> MotherlodePilot.isWatched(id) || FurnacePilot.isWatched(id) || HomesPilot.isWatched(id)
-			|| RiftPilot.isWatched(id) || StormPilot.isWatched(id) || FoundryPilot.isWatched(id));
+			|| RiftPilot.isWatched(id) || StormPilot.isWatched(id) || FoundryPilot.isWatched(id)
+			|| MixologyPilot.isWatched(id));
 		this.homes = new HomesPilot(saved, save, load, saveKey);
 	}
 
@@ -120,6 +125,20 @@ public final class Pilots
 		useFoundry = on;
 	}
 
+	/** The "Mastering Mixology" settings: on, which orders to make, the reward saved for (or null) and the station cues. */
+	public void mixology(boolean on, com.codex.minigamepilot.core.MixCycle.Plan plan, com.codex.minigamepilot.core.Mixology.Reward reward,
+		boolean cues)
+	{
+		useMixology = on;
+		mixology.settings(plan, reward, cues);
+	}
+
+	/** A spot animation appeared in the scene: Mastering Mixology's station cues. */
+	public void spotanim(int id)
+	{
+		mixology.spotanim(id, client.getTickCount());
+	}
+
 	/** How the Giants' Foundry reads its HUD's stage icons and sweet spot; by default it asks the game. Package-private: replays set them. */
 	void foundryHud(FoundryPilot.Hud hud)
 	{
@@ -162,6 +181,7 @@ public final class Pilots
 			rift.newAccount();
 			storm.newAccount();
 			foundry.newAccount();
+			mixology.newAccount();
 			said.clear();
 			unsaid.clear();
 		}
@@ -299,6 +319,14 @@ public final class Pilots
 			state = foundry.lastState;
 			units = foundry.units();
 		}
+		else if (useMixology && mixology.active(client, scene))
+		{
+			mixology.settle(client, now);
+			activity = View.Activity.MIXOLOGY;
+			flight = mixology.fly(client, scene, now);
+			state = mixology.lastState;
+			units = mixology.units();
+		}
 		else
 		{
 			activity = View.Activity.NONE;
@@ -327,6 +355,10 @@ public final class Pilots
 			else if (last == View.Activity.FOUNDRY)
 			{
 				foundry.left();
+			}
+			else if (last == View.Activity.MIXOLOGY)
+			{
+				mixology.left();
 			}
 			last = activity;
 		}
@@ -490,6 +522,7 @@ public final class Pilots
 		v.brief(rift.brief());
 		v.brief(storm.brief());
 		v.brief(foundry.brief());
+		v.brief(mixology.brief());
 		return v;
 	}
 }
