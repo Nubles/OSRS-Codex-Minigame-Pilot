@@ -38,6 +38,7 @@ final class PilotRig implements Rig
 		settings.put("furnace", true);
 		settings.put("homes", true);
 		settings.put("upperHopper", false);
+		settings.put("tickCoach", true);
 		pilots = new Pilots(game.client(), null, c -> { }, new FieldNotes(() -> null, new Gson()),
 			bests::get, bests::put, id -> 0, store::get, store::put, () -> null);
 		pilots.profile("replay");
@@ -55,6 +56,7 @@ final class PilotRig implements Rig
 				}
 				settings.put(args.get(0), "on".equals(args.get(1)));
 				pilots.upperHopper(settings.get("upperHopper"));
+				pilots.tickCoach(settings.get("tickCoach"));
 				return true;
 			case "saved":
 				store.put(args.get(0), args.get(1));
@@ -130,6 +132,16 @@ final class PilotRig implements Rig
 			r.put("object", game.nameOf(f.object));
 		}
 		r.put("route", String.valueOf(f.route.size()));
+		View.TickCard t = f.view.ticks();
+		if (t != null)
+		{
+			r.put("ticks.last", String.valueOf(t.getLastTicks()));
+			r.put("ticks.foot", String.valueOf(t.getFootTicks()));
+			r.put("ticks.floor", String.valueOf(t.getFloorTicks()));
+			r.put("ticks.leak", t.getLeak());
+			r.put("ticks.loops", String.valueOf(t.getLoops()));
+			r.put("ticks.perHour", String.valueOf(t.getPerHour()));
+		}
 		store.forEach((k, v) -> r.put("saved." + k, v));
 		return r;
 	}

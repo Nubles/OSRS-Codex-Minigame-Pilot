@@ -52,6 +52,18 @@ public final class Pace
 		private final transient int[] stageTicks;
 		/** Your best for each stage in this kind of round before this one, 0 where there was none. */
 		private final transient int[] stageBests;
+		/*
+		 * The tick coach's figures, transient for the same reason as the splits.
+		 */
+		/** Ticks spent moving on walks whose shortest way was known. */
+		private transient int footTicks;
+		/** Those walks at run pace along their shortest way: two tiles a tick (see {@link #RUN_TILES}). */
+		private transient int floorTicks;
+		/** The walk that lost the most ticks against its floor, or null, and the ticks it lost. */
+		private transient String walkPlace;
+		private transient int walkLoss;
+		/** Experience gained over the round in the minigame's skill, or -1 when it was not known throughout. */
+		private transient int xp = -1;
 
 		Round(String kind, int ticks, int units, int idle, String idlePlace, int idlePlaceTicks,
 			int extraTiles, String extraPlace, int extraPlaceTiles, int bestBefore, boolean hadBreak)
@@ -113,6 +125,54 @@ public final class Pace
 			return worst;
 		}
 
+		/** Ticks spent moving on walks whose shortest way was known. */
+		public int footTicks()
+		{
+			return footTicks;
+		}
+
+		/** The fewest ticks those walks could have taken: their shortest way at run pace. */
+		public int floorTicks()
+		{
+			return floorTicks;
+		}
+
+		/** Experience the round gave, or -1 when it is not known. */
+		public int xp()
+		{
+			return xp;
+		}
+
+		/**
+		 * The single biggest leak this round, in ticks: standing still with something to do, or a
+		 * walk slower than its shortest way at run pace (a detour, or walking instead of running),
+		 * whichever lost more. Only when neither lost {@link #LEAK_MIN} ticks does a stage over its
+		 * best stand in, since a slow stage is made of those two.
+		 */
+		public Leak leak()
+		{
+			if (hadBreak)
+			{
+				return Leak.NONE;
+			}
+			int idleTicks = idlePlace == null ? 0 : idlePlaceTicks;
+			int walkTicks = walkPlace == null ? 0 : walkLoss;
+			if (idleTicks >= LEAK_MIN && idleTicks >= walkTicks)
+			{
+				return new Leak(Leak.Kind.IDLE, idlePlace, idleTicks, -1);
+			}
+			if (walkTicks >= LEAK_MIN)
+			{
+				return new Leak(Leak.Kind.WALK, walkPlace, walkTicks, -1);
+			}
+			int slow = slowestStage();
+			if (slow >= 0)
+			{
+				return new Leak(Leak.Kind.STAGE, null, stageTicks[slow] - stageBests[slow], slow);
+			}
+			return Leak.NONE;
+		}
+
 		public boolean isBest()
 		{
 			return !hadBreak && (bestBefore == 0 || ticks < bestBefore);
@@ -150,6 +210,70 @@ public final class Pace
 		}
 	}
 
+	/**
+	 * Tiles a player covers in a tick running (oldschool.runescape.wiki/w/Energy: "move two tiles
+	 * per game tick while running"); walking covers one.
+	 */
+	public static final int RUN_TILES = 2;
+	/** A leak under this many ticks is noise: a click's delay, a tile around a player. */
+	public static final int LEAK_MIN = 2;
+
+	/** What lost a round the most time. */
+	public static final class Leak
+	{
+		public enum Kind
+		{
+			NONE,
+			IDLE,
+			WALK,
+			STAGE
+		}
+
+		static final Leak NONE = new Leak(Kind.NONE, null, 0, -1);
+
+		public final Kind kind;
+		/** Where, as "the sack", for IDLE and WALK; null otherwise. */
+		public final String place;
+		public final int ticks;
+		/** The stage, for STAGE; -1 otherwise. */
+		public final int stage;
+
+		Leak(Kind kind, String place, int ticks, int stage)
+		{
+			this.kind = kind;
+			this.place = place;
+			this.ticks = ticks;
+			this.stage = stage;
+		}
+
+		/**
+		 * "Idle 7 ticks at the sack", "6 ticks lost on foot to the bank", "Bank 5 ticks over your
+		 * best for it", or a clean round.
+		 *
+		 * @param stageNames the loop's stage names, for a STAGE leak, or null
+		 */
+		public String text(String[] stageNames)
+		{
+			switch (kind)
+			{
+				case IDLE:
+					return "Idle " + ticks(ticks) + " at " + place;
+				case WALK:
+					return ticks(ticks) + " lost on foot to " + place;
+				case STAGE:
+					String name = stageNames != null && stage < stageNames.length ? stageNames[stage] : "One stage";
+					return name + " " + ticks(ticks) + " over your best for it";
+				default:
+					return "No leak of " + LEAK_MIN + " ticks or more";
+			}
+		}
+
+		private static String ticks(int n)
+		{
+			return n == 1 ? "1 tick" : n + " ticks";
+		}
+	}
+
 	private final Map<String, Integer> bests = new HashMap<>();
 	private final Map<String, int[]> stageBests = new HashMap<>();
 	private final int[] stageTicks = new int[STAGES];
@@ -172,6 +296,13 @@ public final class Pace
 	private int legWalked;
 	private int idleTotal;
 	private String roundHint;
+	private int legFoot;
+	private int footTicks;
+	private int floorTicks;
+	private final Map<String, Integer> walkLossAt = new HashMap<>();
+	private int xpAtStart = -1;
+	private int xpNow = -1;
+	private boolean xpLost;
 
 	/**
 	 * One game tick.
@@ -191,7 +322,20 @@ public final class Pace
 	public Round tick(int stage, String leg, String place, boolean still, boolean waiting, int moved,
 		int routeLength, int unitCount, String kindHint)
 	{
+		return tick(stage, leg, place, still, waiting, moved, routeLength, unitCount, kindHint, -1);
+	}
+
+	/**
+	 * {@link #tick(int, String, String, boolean, boolean, int, int, int, String)} with the
+	 * experience in the minigame's skill now, or -1 when it is not known, for experience a round.
+	 */
+	public Round tick(int stage, String leg, String place, boolean still, boolean waiting, int moved,
+		int routeLength, int unitCount, String kindHint, int xp)
+	{
 		Round finished = null;
+		// A round ends on the tick the loop comes back to its start, so that tick's experience
+		// closes it; the next round starts from the same reading.
+		xpNow = xp;
 		if (!started)
 		{
 			if (stage != 0)
@@ -231,9 +375,18 @@ public final class Pace
 			legPlace = place;
 			legPlanned = routeLength;
 			legWalked = 0;
+			legFoot = 0;
 			stillRun = 0;
 		}
 		legWalked += Math.max(0, moved);
+		if (moved > 0 && legPlanned > 0)
+		{
+			legFoot++;
+		}
+		if (xp < 0)
+		{
+			xpLost = true;
+		}
 
 		if (still && !waiting)
 		{
@@ -394,6 +547,11 @@ public final class Pace
 		extraTotal = 0;
 		roundHint = null;
 		java.util.Arrays.fill(stageTicks, 0);
+		footTicks = 0;
+		floorTicks = 0;
+		walkLossAt.clear();
+		xpAtStart = xpNow;
+		xpLost = xpNow < 0;
 	}
 
 	private void endLeg()
@@ -406,8 +564,21 @@ public final class Pace
 				extraTotal += extra;
 				extraAt.merge(legPlace, extra, Integer::sum);
 			}
+			// The floor counts only the walk you made: a leg cut short by a new step is weighed
+			// up to where you got, at run pace over the shortest way.
+			if (legFoot > 0)
+			{
+				int floor = (Math.min(legPlanned, legWalked) + RUN_TILES - 1) / RUN_TILES;
+				footTicks += legFoot;
+				floorTicks += floor;
+				if (legFoot > floor)
+				{
+					walkLossAt.merge(legPlace, legFoot - floor, Integer::sum);
+				}
+			}
 		}
 		leg = null;
+		legFoot = 0;
 	}
 
 	private Round finish(String kindHint)
@@ -440,6 +611,12 @@ public final class Pace
 				}
 			}
 		}
+		r.footTicks = footTicks;
+		r.floorTicks = floorTicks;
+		Map.Entry<String, Integer> worstFoot = worst(walkLossAt);
+		r.walkPlace = worstFoot == null ? null : worstFoot.getKey();
+		r.walkLoss = worstFoot == null ? 0 : worstFoot.getValue();
+		r.xp = xpLost || xpAtStart < 0 || xpNow < xpAtStart ? -1 : xpNow - xpAtStart;
 		rounds.add(r);
 		if (rounds.size() > KEEP)
 		{

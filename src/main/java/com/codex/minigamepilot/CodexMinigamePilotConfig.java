@@ -109,7 +109,10 @@ public interface CodexMinigamePilotConfig extends Config
 	@ConfigSection(name = "Goals", description = "What each minigame is working toward: a reward from its shop or a level", position = 2)
 	String GOALS = "goals";
 
-	@ConfigSection(name = "Field notes", description = "A local record of what the Pilot saw, for checking its guidance", position = 3, closedByDefault = true)
+	@ConfigSection(name = "Tick coach", description = "Every loop measured in ticks against your best and the floor of its walks", position = 3)
+	String TICKS = "ticks";
+
+	@ConfigSection(name = "Field notes", description = "A local record of what the Pilot saw, for checking its guidance", position = 4, closedByDefault = true)
 	String NOTES = "notes";
 
 	@ConfigItem(keyName = "motherlode", name = "Motherlode Mine", description = "Guide the Motherlode Mine loop: mine pay-dirt, deposit it, hammer broken struts, search the sack and bank", section = MINIGAMES, position = 0)
@@ -272,6 +275,18 @@ public interface CodexMinigamePilotConfig extends Config
 		position = 4
 	)
 	default boolean rewardRoad()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "tickCoach",
+		name = "Tick coach",
+		description = "On the panel, measure each loop in ticks against your best and the floor of its walks at run pace, name its biggest leak, and chart your loops with loops and experience an hour",
+		section = TICKS,
+		position = 0
+	)
+	default boolean tickCoach()
 	{
 		return true;
 	}

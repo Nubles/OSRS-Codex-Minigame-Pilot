@@ -1,5 +1,7 @@
 package com.codex.minigamepilot.ui;
 
+import com.codex.minigamepilot.core.Figures;
+import com.codex.minigamepilot.core.Pace;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
@@ -229,6 +231,12 @@ public class PilotPanel extends PluginPanel
 			body.add(card);
 		}
 
+		if (v.ticks != null)
+		{
+			body.add(new SectionHeader("Tick coach", v.ticks.loops == 1 ? "1 loop" : Figures.count(v.ticks.loops) + " loops"));
+			body.add(tickCard(v.ticks));
+		}
+
 		if (!v.stats.isEmpty())
 		{
 			body.add(new SectionHeader("This session"));
@@ -306,5 +314,73 @@ public class PilotPanel extends PluginPanel
 		}
 		card.add(stack, BorderLayout.CENTER);
 		return card;
+	}
+
+	/**
+	 * The tick coach: the last loop in ticks with your best beside it, the walk against its floor,
+	 * the single biggest leak, loops and experience an hour, and every loop as a histogram.
+	 */
+	static Card tickCard(View.TickCard t)
+	{
+		Card card = new Card(new BorderLayout(0, 4));
+		boolean best = !t.first && t.bestTicks > 0 && t.lastTicks <= t.bestTicks;
+		card.accent(best ? Theme.GOLD_BRIGHT : t.leaking ? Theme.EMBER : Theme.GREEN);
+		StackPanel stack = new StackPanel(4, 0);
+
+		JPanel head = new JPanel(new BorderLayout(6, 0));
+		head.setOpaque(false);
+		head.add(Ui.label(ticks(t.lastTicks), Theme.title(), Theme.GOLD_BRIGHT), BorderLayout.WEST);
+		String chip;
+		java.awt.Color tone;
+		if (t.first)
+		{
+			chip = "first of its kind";
+			tone = Theme.TEAL;
+		}
+		else if (best)
+		{
+			chip = "new best";
+			tone = Theme.GOLD_BRIGHT;
+		}
+		else
+		{
+			int over = t.lastTicks - t.bestTicks;
+			chip = "+" + Figures.count(over) + " on best";
+			tone = over <= Pace.LEAK_MIN ? Theme.GOLD : Theme.EMBER;
+		}
+		head.add(Ui.label(chip, Theme.small(), tone), BorderLayout.EAST);
+		stack.add(head);
+		stack.add(Ui.wrapped(Pace.clock(t.lastTicks) + " last loop" + (best || t.first ? "" : ", best " + ticks(t.bestTicks)), Theme.small(), Theme.TEXT_MUTED, WIDTH - 30));
+		if (t.floorTicks > 0)
+		{
+			int lost = Math.max(0, t.footTicks - t.floorTicks);
+			stack.add(Ui.wrapped("On foot " + ticks(t.footTicks) + " against a floor of " + Figures.count(t.floorTicks)
+				+ " at run pace" + (lost > 0 ? ", " + Figures.count(lost) + " over" : ", right on it"),
+				Theme.small(), lost > Pace.LEAK_MIN ? Theme.mix(Theme.TEXT_MUTED, Theme.EMBER, 0.5) : Theme.TEAL, WIDTH - 30));
+		}
+		stack.add(Ui.wrapped((t.leaking ? "Biggest leak: " + lowerFirst(t.leak) : t.leak) + ".", Theme.small(),
+			t.leaking ? Theme.EMBER : Theme.GREEN, WIDTH - 30));
+		if (!t.bins.isEmpty())
+		{
+			stack.add(new LoopHistogram(t.bins));
+		}
+		JPanel tiles = new JPanel(new GridLayout(1, 2, 6, 0));
+		tiles.setOpaque(false);
+		tiles.add(new StatTile(Figures.count(t.perHour), "Loops", "an hour", Theme.GOLD));
+		tiles.add(new StatTile(t.xpPerHour < 0 ? "-" : Figures.count(t.xpPerHour), t.xpLabel, "an hour", Theme.GREEN));
+		stack.add(tiles);
+		card.add(stack, BorderLayout.CENTER);
+		return card;
+	}
+
+	private static String ticks(int n)
+	{
+		return n == 1 ? "1 tick" : Figures.count(n) + " ticks";
+	}
+
+	private static String lowerFirst(String s)
+	{
+		return s == null || s.isEmpty() || s.length() > 1 && Character.isUpperCase(s.charAt(1)) ? s
+			: Character.toLowerCase(s.charAt(0)) + s.substring(1);
 	}
 }
