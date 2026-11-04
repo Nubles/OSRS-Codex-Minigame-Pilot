@@ -74,8 +74,8 @@ import net.runelite.client.util.Text;
 	name = "Codex Minigame Pilot",
 	internalName = "codex-minigame-pilot",
 	legacyDataDirectory = "codex-minigame-pilot",
-	description = "One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes, Guardians of the Rift, Tempoross, the Giants' Foundry, Mastering Mixology, Vale Totems, the Tithe Farm, stealing artefacts, stealing valuables, the Rogues' Den, the Wintertodt and the Gnome Restaurant, with Barbarian Assault, Nightmare Zone, Volcanic Mine, Barracuda Trials and Trouble Brewing companions: what to click, the path there, and why",
-	tags = {"motherlode", "mlm", "blast furnace", "mahogany homes", "construction", "mining", "smithing", "guardians of the rift", "gotr", "runecraft", "tempoross", "fishing", "giants foundry", "mastering mixology", "mixology", "herblore", "vale totems", "fletching", "varlamore", "tithe farm", "farming", "stealing artefacts", "thieving", "piscarilius", "stealing valuables", "house thieving", "civitas illa fortis", "rogues den", "rogue equipment", "agility", "barbarian assault", "ba", "honour points", "fighter torso", "wintertodt", "firemaking", "pyromancer", "gnome restaurant", "gnome cooking", "cooking", "nightmare zone", "nmz", "imbue", "herb box", "volcanic mine", "vm", "fossil island", "prospector", "barracuda trials", "sailing", "tempor tantrum", "jubbly jive", "gwenith glide", "trouble brewing", "mos le'harmless", "pieces of eight", "rum", "guide", "codex"}
+	description = "One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes, Guardians of the Rift, Tempoross, the Giants' Foundry, Mastering Mixology, Vale Totems, the Tithe Farm, stealing artefacts, stealing valuables, the Rogues' Den, the Wintertodt and the Gnome Restaurant, with Barbarian Assault, Nightmare Zone, Volcanic Mine, Barracuda Trials, Trouble Brewing and Sorceress's Garden companions: what to click, the path there, and why",
+	tags = {"motherlode", "mlm", "blast furnace", "mahogany homes", "construction", "mining", "smithing", "guardians of the rift", "gotr", "runecraft", "tempoross", "fishing", "giants foundry", "mastering mixology", "mixology", "herblore", "vale totems", "fletching", "varlamore", "tithe farm", "farming", "stealing artefacts", "thieving", "piscarilius", "stealing valuables", "house thieving", "civitas illa fortis", "rogues den", "rogue equipment", "agility", "barbarian assault", "ba", "honour points", "fighter torso", "wintertodt", "firemaking", "pyromancer", "gnome restaurant", "gnome cooking", "cooking", "nightmare zone", "nmz", "imbue", "herb box", "volcanic mine", "vm", "fossil island", "prospector", "barracuda trials", "sailing", "tempor tantrum", "jubbly jive", "gwenith glide", "trouble brewing", "mos le'harmless", "pieces of eight", "rum", "sorceress's garden", "sorceress garden", "summer garden", "sq'irk", "sqirk", "osman", "guide", "codex"}
 )
 public class CodexMinigamePilotPlugin extends Plugin
 {
@@ -193,6 +193,7 @@ public class CodexMinigamePilotPlugin extends Plugin
 		pilots.volcanicMine(config.volcanicMine(), config.volcanicReward().reward());
 		pilots.barracudaTrials(config.barracudaTrials(), config.barracudaWaypoint());
 		pilots.troubleBrewing(config.troubleBrewing(), config.brewingReward().reward());
+		sorceressGarden();
 		goals = new GoalWatch(key -> configManager.getRSProfileConfiguration(CodexMinigamePilotConfig.GROUP, key),
 			(key, value) -> configManager.setRSProfileConfiguration(CodexMinigamePilotConfig.GROUP, key, value),
 			this::navigatorBoard);
@@ -355,6 +356,13 @@ public class CodexMinigamePilotPlugin extends Plugin
 			&& ("troubleBrewing".equals(event.getKey()) || "brewingReward".equals(event.getKey())))
 		{
 			pilots.troubleBrewing(config.troubleBrewing(), config.brewingReward().reward());
+			return;
+		}
+		if (CodexMinigamePilotConfig.GROUP.equals(event.getGroup()) && pilots != null
+			&& ("sorceressGarden".equals(event.getKey()) || "gardenSeason".equals(event.getKey())
+			|| "gardenGoal".equals(event.getKey()) || "gardenTarget".equals(event.getKey())))
+		{
+			sorceressGarden();
 			return;
 		}
 		if (CodexMinigamePilotConfig.GROUP.equals(event.getGroup()) && "tickCoach".equals(event.getKey()) && pilots != null)
@@ -895,5 +903,10 @@ public class CodexMinigamePilotPlugin extends Plugin
 		}
 		String value = contract.getHome().getName() + (contract.getTier() == null ? "" : ":" + contract.getTier().getName());
 		configManager.setRSProfileConfiguration(CodexMinigamePilotConfig.GROUP, CONTRACT_KEY, value);
+	}
+
+	private void sorceressGarden()
+	{
+		pilots.sorceressGarden(config.sorceressGarden(), config.gardenSeason().season(), config.gardenGoal().kind(), config.gardenTarget());
 	}
 }

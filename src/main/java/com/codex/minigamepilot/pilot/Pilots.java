@@ -61,6 +61,8 @@ public final class Pilots
 	private volatile boolean useBarracuda = true;
 	private final BrewingPilot brewing = new BrewingPilot();
 	private volatile boolean useBrewing = true;
+	private final GardenPilot garden = new GardenPilot();
+	private volatile boolean useGarden = true;
 	private final Coach coach;
 	private final Recorder recorder;
 	private final IntUnaryOperator price;
@@ -113,13 +115,15 @@ public final class Pilots
 		volcanic.setStore(load, saveKey);
 		barracuda.setStore(load, saveKey);
 		brewing.setStore(load, saveKey);
+		garden.setStore(load, saveKey);
 		this.coach = new Coach(loadBests, saveBests);
 		this.recorder = new Recorder(notes);
 		this.scene = new SceneIndex(client, id -> MotherlodePilot.isWatched(id) || FurnacePilot.isWatched(id) || HomesPilot.isWatched(id)
 			|| RiftPilot.isWatched(id) || StormPilot.isWatched(id) || FoundryPilot.isWatched(id)
 			|| MixologyPilot.isWatched(id) || TotemsPilot.isWatched(id) || TithePilot.isWatched(id)
 			|| ArtefactsPilot.isWatched(id) || HousesPilot.isWatched(id) || RoguesDenPilot.isWatched(id)
-			|| AssaultPilot.isWatched(id) || WintertodtPilot.isWatched(id) || NmzPilot.isWatched(id) || VolcanicPilot.isWatched(id));
+			|| AssaultPilot.isWatched(id) || WintertodtPilot.isWatched(id) || NmzPilot.isWatched(id) || VolcanicPilot.isWatched(id)
+			|| GardenPilot.isWatched(id));
 		this.homes = new HomesPilot(saved, save, load, saveKey);
 		homes.readers(null, stock);
 	}
@@ -199,6 +203,17 @@ public final class Pilots
 	{
 		useBrewing = on;
 		brewing.settings(reward);
+	}
+
+	/**
+	 * The "Sorceress's Garden" settings: on, the garden judged by (null for the one last run), and the
+	 * target (null for none) with its level or glasses (0 for the next level, or 22 glasses).
+	 */
+	public void sorceressGarden(boolean on, com.codex.minigamepilot.core.Garden.Season season,
+		com.codex.minigamepilot.core.GardenEta.Kind goal, int target)
+	{
+		useGarden = on;
+		garden.settings(season, goal, target);
 	}
 
 	/** The "Tempoross" settings: on, cook before loading, and the storm at which to load what you hold. */
@@ -333,6 +348,7 @@ public final class Pilots
 			volcanic.newAccount();
 			barracuda.newAccount();
 			brewing.newAccount();
+			garden.newAccount();
 			said.clear();
 			unsaid.clear();
 		}
@@ -474,6 +490,11 @@ public final class Pilots
 		{
 			brewing.watch(client, now);
 		}
+		// Sorceress's Garden runs are followed every tick too, and the juice you crush wherever you are.
+		if (useGarden)
+		{
+			garden.watch(client, npcs(), scene, now);
+		}
 		if (useMotherlode && MotherlodePilot.inMine(client))
 		{
 			activity = View.Activity.MOTHERLODE;
@@ -607,6 +628,13 @@ public final class Pilots
 			state = brewing.lastState;
 			units = brewing.units();
 		}
+		else if (useGarden && garden.active(client))
+		{
+			activity = View.Activity.SORCERESS_GARDEN;
+			flight = garden.fly(client, now);
+			state = garden.lastState;
+			units = garden.units();
+		}
 		else if (useAssault && assault.active(client, scene, npcs()))
 		{
 			activity = View.Activity.BARBARIAN_ASSAULT;
@@ -694,6 +722,10 @@ public final class Pilots
 			else if (last == View.Activity.TROUBLE_BREWING)
 			{
 				brewing.left();
+			}
+			else if (last == View.Activity.SORCERESS_GARDEN)
+			{
+				garden.left();
 			}
 			last = activity;
 		}
@@ -797,6 +829,8 @@ public final class Pilots
 		barracuda.relogged(client, now, client.getTickCount());
 		// A Trouble Brewing game ends on logging out.
 		brewing.relogged(client, now, client.getTickCount());
+		// A trip to the garden's fountain already made is kept on logging out.
+		garden.relogged(client, now, client.getTickCount());
 		motherlode.relogged();
 		furnace.relogged();
 		coach.left();
@@ -925,6 +959,7 @@ public final class Pilots
 		v.brief(volcanic.brief());
 		v.brief(barracuda.brief(client.getRealSkillLevel(net.runelite.api.Skill.SAILING)));
 		v.brief(brewing.brief());
+		v.brief(garden.brief());
 		return v;
 	}
 }

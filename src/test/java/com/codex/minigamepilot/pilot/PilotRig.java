@@ -33,6 +33,8 @@ import net.runelite.api.TileObject;
  * setting names barracudaTrials and barracudaWaypoint (the Barracuda Trials),
  * {@code brewing reward REWARD|none} (Trouble Brewing, by {@code Brewing.Reward} name; setting name troubleBrewing;
  * Cabin Fever by {@code quest CABIN_FEVER done}),
+ * {@code garden season SEASON|last} and {@code garden goal KIND|none [TARGET]} (the Sorceress's Garden, by
+ * {@code Garden.Season} and {@code GardenEta.Kind} names; setting name sorceressGarden),
  * {@code mixology plan ALL|PER_PASTE}, {@code mixology reward REWARD|none} and {@code mixology cue SPOTANIM} (a Mastering
  * Mixology setting, or a spot animation appearing, by its {@code SpotanimID} name; setting names mixology and mixologyCues),
  * {@code bank ITEM COUNT} (the bank as last seen), {@code teleport "Name" "Source" X Y SECONDS carried|banked},
@@ -118,6 +120,7 @@ final class PilotRig implements Rig
 		settings.put("barracudaTrials", true);
 		settings.put("barracudaWaypoint", true);
 		settings.put("troubleBrewing", true);
+		settings.put("sorceressGarden", true);
 		pilots = new Pilots(game.client(), null, c -> { }, new FieldNotes(() -> null, new Gson()),
 			bests::get, bests::put, game::price, store::get, store::put, () -> bank);
 		pilots.atlas(() -> teleports == null ? null : com.codex.minigamepilot.core.WayfinderAtlas.of(walkPace, teleports));
@@ -168,6 +171,24 @@ final class PilotRig implements Rig
 				volcanic();
 				pilots.barracudaTrials(settings.get("barracudaTrials"), settings.get("barracudaWaypoint"));
 				brewing();
+				garden();
+				return true;
+			case "garden":
+				// garden season SEASON|last, garden goal KIND|none [TARGET]
+				if ("season".equals(args.get(0)))
+				{
+					gardenSeason = "last".equals(args.get(1)) ? null : com.codex.minigamepilot.core.Garden.Season.valueOf(args.get(1));
+				}
+				else if ("goal".equals(args.get(0)))
+				{
+					gardenGoal = "none".equals(args.get(1)) ? null : com.codex.minigamepilot.core.GardenEta.Kind.valueOf(args.get(1));
+					gardenTarget = args.size() > 2 ? Integer.parseInt(args.get(2)) : 0;
+				}
+				else
+				{
+					throw new IllegalArgumentException("garden season SEASON|last, garden goal KIND|none [TARGET]");
+				}
+				garden();
 				return true;
 			case "brewing":
 				// brewing reward REWARD|none
@@ -428,6 +449,15 @@ final class PilotRig implements Rig
 	private com.codex.minigamepilot.core.Volcanic.Reward volcanicReward = com.codex.minigamepilot.core.Volcanic.Reward.PROSPECTOR_KIT;
 
 	private com.codex.minigamepilot.core.Brewing.Reward brewingReward = com.codex.minigamepilot.core.Brewing.Reward.NAVAL_BLUE;
+
+	private com.codex.minigamepilot.core.Garden.Season gardenSeason = com.codex.minigamepilot.core.Garden.Season.SUMMER;
+	private com.codex.minigamepilot.core.GardenEta.Kind gardenGoal = com.codex.minigamepilot.core.GardenEta.Kind.THIEVING_LEVEL;
+	private int gardenTarget;
+
+	private void garden()
+	{
+		pilots.sorceressGarden(settings.get("sorceressGarden"), gardenSeason, gardenGoal, gardenTarget);
+	}
 
 	private void brewing()
 	{
