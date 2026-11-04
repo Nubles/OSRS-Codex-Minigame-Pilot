@@ -589,6 +589,31 @@ public class SavedKeysFuzzTest
 	}
 
 	@Test
+	public void golemKept()
+	{
+		survive("golem.kept", "1;1767000000000,0,0,s,0,d;1767000060000,100,2710,e,1,d;1767000120000,90,2700,-,1,-;1767000180000,95,2690,r,0,m", s ->
+		{
+			GolemLog g = GolemLog.decode(s);
+			GolemLog.Pace p = g.pace();
+			for (double h : new double[]{p.golemsPerHour(), p.xpPerHour(), p.xpPerGolem(), p.gap()})
+			{
+				assertTrue(!Double.isNaN(h) && !Double.isInfinite(h));
+			}
+			for (GolemLog.Golem x : g.all())
+			{
+				assertTrue(x.ticks >= 0 && x.ticks <= GolemLog.LONGEST && x.xp >= 0 && x.xp <= GolemLog.XP_MAX
+					&& (x.gem != null || x.chisel) && x.gem != GolemCrafting.Gift.CHISEL);
+			}
+			for (GolemLog.Sitting x : g.sittings())
+			{
+				assertTrue(x.golems > 0 && x.timed <= x.golems && x.ticks >= 0);
+			}
+			assertTrue(g.sinceChisel() <= g.count() && g.xp() >= 0);
+			GolemLog.decode(g.encode());
+		});
+	}
+
+	@Test
 	public void soulWarsKept()
 	{
 		survive("soulwars.kept", "1;1767000000000,1500,b,w,58,3,1,4,2,300,27,6,f;1767000700000,1400,r,l,36,0,2,-1,-1,-1,-1,-1,f;1767001400000,90,-,u,0,-1,-1,-1,-1,-1,-1,-1,l", s ->

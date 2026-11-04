@@ -1,0 +1,58 @@
+# Golem crafting: the Crafting level it needs, a chisel and a hammer (an Imcando hammer worn in the off hand will
+# do), golems powered from a fur pouch (the fur not seen, so not guessed), and the Jeweller's chisel as a target.
+#
+# Facts (OSRS wiki):
+#  - Golem crafting: "the activity itself requires level 60 Crafting to do."; "This requires a chisel, a hammer,
+#    and four sunstones per golem."; recommended equipment "Imcando hammer (off-hand)".
+#  - Imcando hammer: "it can be used as a hammer, both while equipped and unequipped".
+#  - Jeweller's chisel: "It is obtained as a rare drop after inserting a sunstone core into an unpowered golem
+#    whilst golem crafting", 1/300.
+# RuneLite gameval: ObjectID.GOLEM_STATION_1, ItemID.IMCANDO_HAMMER_OFFHAND, JEWELLERS_CHISEL (34024).
+# The scene is schematic: one golem station.
+scene 2560 2200
+at 2600 2240
+object GOLEM_STATION_1 2602 2242 as station
+skill CRAFTING 59
+items INV set CHISEL 1 SUNSTONE 4 SUNSTONE_CORE 1
+never quiet = false
+never target != NONE
+tick
+expect activity = GOLEM_CRAFTING
+expect step = "Golem crafting needs 60 Crafting"
+expect detail = "Your Crafting is 59; boosts do not count for it"
+
+skill CRAFTING 60
+tick
+expect step = "Bring a hammer"
+items WORN IMCANDO_HAMMER_OFFHAND 1
+tick
+expect step = "Golem crafting, at your own pace"
+expect stat.In_your_pack = "1"
+
+# The chisel as the target: 40 golems kept, none with a chisel, 260 to the average 300.
+saved golem.kept "1;1767000000000,0,0,s,0,-;1767000060000,100,2700,s,0,-;1767000120000,100,2700,e,0,-;1767000180000,100,2700,s,0,-;1767000240000,100,2700,s,0,-;1767000300000,100,2700,s,0,-;1767000360000,100,2700,s,0,-;1767000420000,100,2700,s,0,-;1767000480000,100,2700,s,0,-;1767000540000,100,2700,s,0,-;1767000600000,100,2700,s,0,-;1767000660000,100,2700,s,0,-;1767000720000,100,2700,s,0,-;1767000780000,100,2700,s,0,-;1767000840000,100,2700,s,0,-;1767000900000,100,2700,s,0,-;1767000960000,100,2700,s,0,-;1767001020000,100,2700,s,0,-;1767001080000,100,2700,s,0,-;1767001140000,100,2700,s,0,-;1767001200000,100,2700,r,0,-;1767001260000,100,2700,s,0,-;1767001320000,100,2700,s,0,-;1767001380000,100,2700,s,0,-;1767001440000,100,2700,s,0,-;1767001500000,100,2700,s,0,-;1767001560000,100,2700,s,0,-;1767001620000,100,2700,s,0,-;1767001680000,100,2700,s,0,-;1767001740000,100,2700,s,0,-;1767001800000,100,2700,s,0,-;1767001860000,100,2700,s,0,-;1767001920000,100,2700,s,0,-;1767001980000,100,2700,s,0,-;1767002040000,100,2700,s,0,-;1767002100000,100,2700,s,0,-;1767002160000,100,2700,d,0,-;1767002220000,100,2700,s,0,-;1767002280000,100,2700,s,0,-;1767002340000,100,2700,s,0,-"
+profile other
+profile replay
+golem goal JEWELLERS_CHISEL
+tick
+expect goal = "40/300"
+# 39 timed golems at a minute each: 60 an hour, so 260 golems is 4h 20m.
+expect stat.Golems_an_hour = "60"
+expect goal.note = "13% chance of it by now; the average 300 is 260 golems (1,295 sunstone to mine), 4h 20m at your pace. Even odds at 208 golems."
+expect lines ~ "Jeweller's chisel · 0 TODO"
+expect supply.headline = "Best session: 60 golems an hour over 40"
+
+# A golem from a fur pouch: a core goes but no fur leaves the pack, so its fur is not known.
+items INV set CHISEL 1 SUNSTONE 0 SUNSTONE_CORE 0
+xp CRAFTING 275000
+chat GAMEMESSAGE "As you complete the golem it leaves a gift on the ground for you: 1 x Uncut sapphire."
+tick
+expect saved.golem.kept ~ ",s,0,-"
+expect goal = "41/300"
+
+# The chisel comes: the target is reached.
+tick 99
+chat GAMEMESSAGE "As you complete the golem it leaves a gift on the ground for you: 1 x Jeweller's chisel."
+tick
+expect saved.golem.kept ~ ",-,1,-"
+expect goal.note = "Yours: set another under Golem target."

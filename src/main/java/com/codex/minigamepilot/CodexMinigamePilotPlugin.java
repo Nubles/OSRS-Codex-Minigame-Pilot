@@ -74,8 +74,8 @@ import net.runelite.client.util.Text;
 	name = "Codex Minigame Pilot",
 	internalName = "codex-minigame-pilot",
 	legacyDataDirectory = "codex-minigame-pilot",
-	description = "One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes, Guardians of the Rift, Tempoross, the Giants' Foundry, Mastering Mixology, Vale Totems, the Tithe Farm, stealing artefacts, stealing valuables, the Rogues' Den, the Wintertodt and the Gnome Restaurant, with Barbarian Assault, Nightmare Zone, Volcanic Mine, Barracuda Trials, Trouble Brewing, Sorceress's Garden and Soul Wars companions: what to click, the path there, and why",
-	tags = {"motherlode", "mlm", "blast furnace", "mahogany homes", "construction", "mining", "smithing", "guardians of the rift", "gotr", "runecraft", "tempoross", "fishing", "giants foundry", "mastering mixology", "mixology", "herblore", "vale totems", "fletching", "varlamore", "tithe farm", "farming", "stealing artefacts", "thieving", "piscarilius", "stealing valuables", "house thieving", "civitas illa fortis", "rogues den", "rogue equipment", "agility", "barbarian assault", "ba", "honour points", "fighter torso", "wintertodt", "firemaking", "pyromancer", "gnome restaurant", "gnome cooking", "cooking", "nightmare zone", "nmz", "imbue", "herb box", "volcanic mine", "vm", "fossil island", "prospector", "barracuda trials", "sailing", "tempor tantrum", "jubbly jive", "gwenith glide", "trouble brewing", "mos le'harmless", "pieces of eight", "rum", "sorceress's garden", "sorceress garden", "summer garden", "sq'irk", "sqirk", "osman", "soul wars", "zeal", "lil creator", "spoils of war", "isle of souls", "guide", "codex"}
+	description = "One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes, Guardians of the Rift, Tempoross, the Giants' Foundry, Mastering Mixology, Vale Totems, the Tithe Farm, stealing artefacts, stealing valuables, the Rogues' Den, the Wintertodt and the Gnome Restaurant, with Barbarian Assault, Nightmare Zone, Volcanic Mine, Barracuda Trials, Trouble Brewing, Sorceress's Garden, Soul Wars and golem crafting companions: what to click, the path there, and why",
+	tags = {"motherlode", "mlm", "blast furnace", "mahogany homes", "construction", "mining", "smithing", "guardians of the rift", "gotr", "runecraft", "tempoross", "fishing", "giants foundry", "mastering mixology", "mixology", "herblore", "vale totems", "fletching", "varlamore", "tithe farm", "farming", "stealing artefacts", "thieving", "piscarilius", "stealing valuables", "house thieving", "civitas illa fortis", "rogues den", "rogue equipment", "agility", "barbarian assault", "ba", "honour points", "fighter torso", "wintertodt", "firemaking", "pyromancer", "gnome restaurant", "gnome cooking", "cooking", "nightmare zone", "nmz", "imbue", "herb box", "volcanic mine", "vm", "fossil island", "prospector", "barracuda trials", "sailing", "tempor tantrum", "jubbly jive", "gwenith glide", "trouble brewing", "mos le'harmless", "pieces of eight", "rum", "sorceress's garden", "sorceress garden", "summer garden", "sq'irk", "sqirk", "osman", "soul wars", "zeal", "lil creator", "spoils of war", "isle of souls", "golem crafting", "golem", "wyrmscraig", "sunstone", "crafting", "guide", "codex"}
 )
 public class CodexMinigamePilotPlugin extends Plugin
 {
@@ -195,6 +195,7 @@ public class CodexMinigamePilotPlugin extends Plugin
 		pilots.troubleBrewing(config.troubleBrewing(), config.brewingReward().reward());
 		sorceressGarden();
 		soulWars();
+		golemCrafting();
 		goals = new GoalWatch(key -> configManager.getRSProfileConfiguration(CodexMinigamePilotConfig.GROUP, key),
 			(key, value) -> configManager.setRSProfileConfiguration(CodexMinigamePilotConfig.GROUP, key, value),
 			this::navigatorBoard);
@@ -369,6 +370,11 @@ public class CodexMinigamePilotPlugin extends Plugin
 		if (CodexMinigamePilotConfig.GROUP.equals(event.getGroup()) && pilots != null && event.getKey().startsWith("soulWars"))
 		{
 			soulWars();
+			return;
+		}
+		if (CodexMinigamePilotConfig.GROUP.equals(event.getGroup()) && pilots != null && event.getKey().startsWith("golem"))
+		{
+			golemCrafting();
 			return;
 		}
 		if (CodexMinigamePilotConfig.GROUP.equals(event.getGroup()) && "tickCoach".equals(event.getKey()) && pilots != null)
@@ -909,6 +915,11 @@ public class CodexMinigamePilotPlugin extends Plugin
 		}
 		String value = contract.getHome().getName() + (contract.getTier() == null ? "" : ":" + contract.getTier().getName());
 		configManager.setRSProfileConfiguration(CodexMinigamePilotConfig.GROUP, CONTRACT_KEY, value);
+	}
+
+	private void golemCrafting()
+	{
+		pilots.golemCrafting(config.golemCrafting(), config.golemGoal().kind(), config.golemTarget(), config.golemFur().fur());
 	}
 
 	private void soulWars()

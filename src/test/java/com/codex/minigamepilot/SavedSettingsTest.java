@@ -66,6 +66,8 @@ public class SavedSettingsTest
 			"sorceressGarden", "gardenSeason", "gardenGoal", "gardenTarget",
 			// Soul Wars.
 			"soulWars", "soulWarsReward", "soulWarsSkill", "soulWarsLevel", "soulWarsSpend", "soulWarsHalfImbue",
+			// Golem crafting.
+			"golemCrafting", "golemGoal", "golemTarget", "golemFur",
 			"fieldNotes")), keys);
 		assertEquals("codexminigamepilot", CodexMinigamePilotConfig.GROUP);
 	}

@@ -34,7 +34,8 @@ public final class View
 		BARRACUDA_TRIALS("Barracuda Trials"),
 		TROUBLE_BREWING("Trouble Brewing"),
 		SORCERESS_GARDEN("Sorceress's Garden"),
-		SOUL_WARS("Soul Wars");
+		SOUL_WARS("Soul Wars"),
+		GOLEM_CRAFTING("Golem Crafting");
 
 		private final String title;
 
@@ -678,6 +679,8 @@ public final class View
 			"Every garden run kept, caught or not, your success rate and sq'irks an hour at your own pace, the juice you crush and Osman's Thieving xp for it, and the time to your level. No start cue: you run when you choose."));
 		v.brief(new Brief(Activity.SOUL_WARS, null,
 			"Every game kept, won, lost or drawn, with the zeal it earned and your part in it, zeal an hour at your own pace, the time to your reward from Nomad, and the experience your zeal buys. No fight cues."));
+		v.brief(new Brief(Activity.GOLEM_CRAFTING, null,
+			"Every golem kept with its gift, fur and Crafting experience, golems and experience an hour at your own pace, your gifts against the wiki's rates, your best session, and the time to your level or the Jeweller's chisel. No click cues."));
 		return v;
 	}
 
