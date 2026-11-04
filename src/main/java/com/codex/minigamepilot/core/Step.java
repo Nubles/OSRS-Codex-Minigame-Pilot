@@ -165,7 +165,10 @@ public final class Step
 		VOLCANO_BANK,
 		// Barracuda Trials
 		/** The trial's master (Rum-dashed Ralph, Gurtob or Gwyna), who starts a run. */
-		TRIAL_MASTER
+		TRIAL_MASTER,
+		// Trouble Brewing
+		/** Honest Jimmy, who signs you to the smaller team and keeps the reward shop. */
+		HONEST_JIMMY
 	}
 
 	private final String verb;

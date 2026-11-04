@@ -534,6 +534,28 @@ public class SavedKeysFuzzTest
 	}
 
 	@Test
+	public void brewingKept()
+	{
+		survive("brewing.kept", "1;1767000000000,2000,b,12,10,200,3000,f;1767001380000,1500,r,-1,-1,0,0,l;1767002000000,40,-,3,0,0,0,o", s ->
+		{
+			BrewingLog g = BrewingLog.decode(s);
+			for (double h : new double[]{g.piecesPerHour(), g.xpPerHour(), g.piecesPerHourSitting(), g.xpPerHourSitting(), g.averageRum()})
+			{
+				assertTrue(!Double.isNaN(h) && !Double.isInfinite(h));
+				sane(String.valueOf(h < 0 ? 0 : Math.round(h)));
+			}
+			for (BrewingLog.Game x : g.all())
+			{
+				assertTrue(x.ticks >= 0 && x.ticks <= BrewingLog.LONGEST && x.pieces >= 0 && x.pieces <= BrewingLog.PIECES_MAX);
+				assertTrue(x.xp >= 0 && x.xp <= BrewingLog.XP_MAX && x.rum >= -1 && x.rum <= BrewingLog.RUM_MAX && x.end != null);
+				sane(x.result());
+			}
+			assertTrue(g.averagePieces() >= 0 && g.won() <= g.scored());
+			BrewingLog.decode(g.encode());
+		});
+	}
+
+	@Test
 	public void barracudaKept()
 	{
 		survive("barracuda.kept", "1;1767000000000,t,s,190,776,f,60.2970.2960/120.2990.2980/190.2960.2950;1767000100000,j,-,30,0,o,;1767000200000,g,m,600,9000,a,100.0.0", s ->

@@ -31,7 +31,8 @@ public final class View
 		GNOME_RESTAURANT("Gnome Restaurant"),
 		NIGHTMARE_ZONE("Nightmare Zone"),
 		VOLCANIC_MINE("Volcanic Mine"),
-		BARRACUDA_TRIALS("Barracuda Trials");
+		BARRACUDA_TRIALS("Barracuda Trials"),
+		TROUBLE_BREWING("Trouble Brewing");
 
 		private final String title;
 
@@ -669,6 +670,8 @@ public final class View
 			"Every game kept with its points, Mining experience, length and how it ended, points and experience an hour at your pace, and the time to your prospector kit or tome."));
 		v.brief(new Brief(Activity.BARRACUDA_TRIALS, null,
 			"Every Sailing trial run kept with its splits, a ghost of your best run of each course, Sailing experience an hour by trial, and the next rank's time to beat."));
+		v.brief(new Brief(Activity.TROUBLE_BREWING, null,
+			"Every game kept with its team, rum, pieces of eight and Cooking experience, pieces of eight an hour at your pace, and the time to your naval set or flags."));
 		return v;
 	}
 

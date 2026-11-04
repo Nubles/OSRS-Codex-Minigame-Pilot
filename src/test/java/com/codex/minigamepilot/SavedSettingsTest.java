@@ -60,6 +60,8 @@ public class SavedSettingsTest
 			"volcanicMine", "volcanicReward",
 			// Barracuda Trials.
 			"barracudaTrials", "barracudaWaypoint",
+			// Trouble Brewing.
+			"troubleBrewing", "brewingReward",
 			"fieldNotes")), keys);
 		assertEquals("codexminigamepilot", CodexMinigamePilotConfig.GROUP);
 	}

@@ -1,0 +1,167 @@
+# Trouble Brewing: the lobby's one next step, a game's ingredient chain one plain line at a time,
+# and the game kept with its rum, pieces of eight and Cooking experience.
+#
+# Facts (OSRS wiki, Trouble Brewing; Honest Jimmy's House of Stuff; Pirate bandana (Trouble Brewing)):
+#  - "you must have completed the Cabin Fever quest and have at least 40 Cooking."
+#  - "you cannot have any followers, items in your inventory, or anything equipped in the head slot."
+#  - "Honest Jimmy will sign you to whichever team currently has fewest members."
+#  - Blue naval shirt 1,000, Blue tricorn hat 500, Blue navy slacks 1,000.
+#  - The bandana is "automatically equipped when joining her team" (San Fan's: "San Fan will sign you to the blue team").
+#  - "There must be at least three logs in each boiler to make rum"; "Each bottle of rum requires 3 bowls of
+#    coloured water."; "Each bottle of rum requires 5 buckets of normal water."
+#  - "Dye the monkey with the water to mark it as being on your team, then use it on the Bitternut tree."
+#  - "Each bottle of rum is worth one point."
+# RuneLite: the game is region 15150 (Discord plugin); the lobby at 3811, 3021 (world map); pieces of
+# eight held are the player variable brew_pieces (VarPlayerID.BREW_PIECES), the game's shop currency.
+# The interface texts are schematic: the pilot reads the number in each.
+scene 3760 2960
+at 3811 3021
+npc HONEST_JIMMY "Honest Jimmy" 3814 3023 as jimmy
+item LOGS "Logs"
+skill COOKING 35
+tick
+expect activity = TROUBLE_BREWING
+expect step = "Finish Cabin Fever"
+expect detail = "Trouble Brewing opens after Cabin Fever and 40 Cooking"
+
+quest CABIN_FEVER done
+tick
+expect step = "Train Cooking to 40"
+expect detail = "Trouble Brewing lets you in at 40 Cooking; you have 35"
+
+# 60 Cooking, but carrying logs: teams take you with an empty inventory.
+skill COOKING 60 273742
+items INV LOGS 3
+varp BREW_PIECES 400
+tick
+expect step = "Bank your items"
+expect stat.Pieces_of_eight = "400"
+expect goal = "400/2500"
+expect goal.pieces = "Blue naval shirt TODO, Blue tricorn hat TODO, Blue navy slacks TODO"
+expect goal.note ~ "2,100 pieces of eight to go. Play a game"
+
+# The hat is affordable: the lobby says buy it first.
+varp BREW_PIECES 1600
+items INV clear
+tick
+expect step = "Buy the blue tricorn hat"
+expect target = HONEST_JIMMY
+expect npc = "Honest Jimmy"
+expect detail = "500 of your 1,600 pieces of eight"
+
+# Bought: now it is yours, and the next step is a team.
+varp BREW_PIECES 900
+items BANK BREW_TRICORN_BLUE 1
+tick
+expect saved.brewing.owned = "1;b"
+expect goal = "900/2000"
+expect goal.pieces = "Blue naval shirt TODO, Blue tricorn hat DONE, Blue navy slacks TODO"
+expect step = "Join a team"
+expect target = HONEST_JIMMY
+expect detail = "Honest Jimmy signs you to the smaller team"
+
+# Signed to blue: the bandana on, in the waiting room.
+items WORN BREW_BLUE_PIRATE_HAT 1
+widget BrewWaitingRoomOverlay.CONTENTS text ""
+widget BrewWaitingRoomOverlay.RED_COUNT text "3"
+widget BrewWaitingRoomOverlay.BLUE_COUNT text "2"
+widget BrewWaitingRoomOverlay.TIME_TEXT text "Next game: 2 mins"
+tick
+expect step = "Wait for the game"
+expect waiting = true
+expect detail = "Next game: 2 mins"
+expect lines = "Blue team IDLE, Red team IDLE"
+
+# The game: the overlay up, a boiler under three logs.
+close BrewWaitingRoomOverlay.CONTENTS
+close BrewWaitingRoomOverlay.RED_COUNT
+close BrewWaitingRoomOverlay.BLUE_COUNT
+close BrewWaitingRoomOverlay.TIME_TEXT
+at 3800 2990
+widget BrewOverlay.CONTENT_TOP text ""
+widget BrewOverlay.BREW_TIME_DISPLAY text "20 mins"
+widget BrewOverlay.BITTERNUT_COUNT text "0"
+widget BrewOverlay.SWEETGRUB_COUNT text "2"
+widget BrewOverlay.BUCKET_COUNT text "10"
+widget BrewOverlay.COLOURWATER_COUNT text "6"
+widget BrewOverlay.BARK_COUNT text "1"
+widget BrewOverlay.BOILER1_COUNT text "5"
+widget BrewOverlay.BOILER2_COUNT text "4"
+widget BrewOverlay.BOILER3_COUNT text "2"
+widget BrewOverlay.RED_SCORE text "0"
+widget BrewOverlay.BLUE_SCORE text "0"
+tick
+always quiet = false
+expect place = "Trouble Brewing · blue team"
+expect step = "Put logs in boiler 3"
+expect detail = "It has 2; each boiler needs 3 logs, lit, to make rum"
+expect stat.Time_left = "20 mins"
+expect lines ~ "Bitternut TODO, Sweetgrubs DONE"
+expect lines ~ "Boiler 3 TODO"
+
+# Boilers fed: the hopper is shortest of bitternuts.
+widget BrewOverlay.BOILER3_COUNT text "6"
+tick
+expect step = "Catch a monkey for a bitternut"
+expect detail = "Bitternuts are shortest: 0 in the hopper, 1 a bottle"
+
+# The chain: a monkey, coloured water, dyed, the tree, a bitternut, the hopper.
+items INV BREW_MONKEY 1
+tick
+expect step = "Fetch coloured water for the monkey"
+items INV BREW_BOWL_BLUE 1
+tick
+expect step = "Dye the monkey"
+items INV set BREW_BLUE_MONKEY 1
+tick
+expect step = "Use the monkey on the Bitternut tree"
+items INV clear
+items INV BREW_BITTERNUT 1
+tick
+expect step = "Put the bitternut in the hopper"
+expect detail = "On the top floor are the hoppers; a bottle takes one"
+items INV clear
+items INV BREW_RED_FLOWER 2
+tick
+expect step = "Put the flowers in your kettle"
+items INV clear
+items INV BREW_SCRAPEY_LOGS 1
+tick
+expect step = "Fletch the scrapey logs"
+
+# Rum made: the overlay's scores rise; Cooking experience from the hopper.
+items INV clear
+widget BrewOverlay.BLUE_SCORE text "11"
+widget BrewOverlay.RED_SCORE text "7"
+widget BrewOverlay.BREW_TIME_DISPLAY text "3 mins"
+xp COOKING 276742
+tick 1500
+expect stat.Rum = "11"
+expect gauge.Blue_team_(yours) = "11/11"
+expect gauge.Red_team = "7/11"
+expect stat.Cooking_xp = "3,000"
+
+# The end: the game-over scroll, the pieces of eight paid, the end-of-game experience.
+close BrewOverlay.CONTENT_TOP
+close BrewOverlay.BREW_TIME_DISPLAY
+at 3811 3021
+widget BrewGameOver.BREW_SCORE text "Your team won!"
+widget BrewGameOver.BREW_SAN_FINAL_SCORE text "14"
+widget BrewGameOver.BREW_DAN_FINAL_SCORE text "9"
+widget BrewGameOver.BREW_PIECES_OF_EIGHT text "Pieces of eight: 235"
+varp BREW_PIECES 1135
+xp COOKING 276992
+items WORN clear
+tick
+forget
+close BrewGameOver.BREW_SCORE
+tick 10
+expect saved.brewing.kept ~ ",b,14,9,235,3250,f"
+expect stat.Games_today = "1"
+expect stat.Pieces_of_eight = "1,135"
+expect supply.headline = "Best game: 235 pieces of eight, 14 rum"
+expect goal = "1135/2000"
+expect goal.note ~ "865 pieces of eight to go"
+expect goal.note ~ "at your pace in the game (about 4 games)."
+# The shirt is affordable now.
+expect step = "Buy the blue naval shirt"

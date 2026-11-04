@@ -1,6 +1,6 @@
 # Codex Minigame Pilot
 
-**One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes, Guardians of the Rift, Tempoross, the Giants' Foundry, Mastering Mixology, Vale Totems, the Tithe Farm, stealing artefacts, stealing valuables, the Rogues' Den maze, the Wintertodt and Gnome Restaurant deliveries, with Barbarian Assault, Nightmare Zone, Volcanic Mine and Barracuda Trials companions.** The Pilot watches the minigame you are in and always shows the single thing to do next: what to click, lit in gold in the world, the path there drawn on the ground and the minimap, and a line on why. You still do every click. It only reads the game and draws.
+**One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes, Guardians of the Rift, Tempoross, the Giants' Foundry, Mastering Mixology, Vale Totems, the Tithe Farm, stealing artefacts, stealing valuables, the Rogues' Den maze, the Wintertodt and Gnome Restaurant deliveries, with Barbarian Assault, Nightmare Zone, Volcanic Mine, Barracuda Trials and Trouble Brewing companions.** The Pilot watches the minigame you are in and always shows the single thing to do next: what to click, lit in gold in the world, the path there drawn on the ground and the minimap, and a line on why. You still do every click. It only reads the game and draws.
 
 It is part of the **Codex** suite of RuneLite plugins and shares their look: warm ink, aged gold and the game's own fonts.
 
@@ -262,6 +262,24 @@ Barracuda Trials Pathfinder, one of the Plugin Hub's most installed plugins, pai
   <img src="docs/screenshots/barracuda-plaque-lobby.png" alt="Plaque: beat 2:51 for Shark">
 </p>
 
+### Trouble Brewing (Mos Le'Harmless rum-making)
+Trouble Brewing, with some 45,000 installs on the Plugin Hub, shows the game's timer, the rum and the pieces of eight a game will pay. The Pilot keeps what your games come to and how long your reward is at your own pace.
+- **Every game kept.** Per account: the team you played for (from the bandana or hat the game puts on you), the rum your team made against the other team's (the game's own scores, one point a bottle), the pieces of eight it paid (the game's own count of them on your account, else the game-over scroll), the Cooking experience it gave (the end-of-game reward included), its length, and whether you played it out, left or logged out.
+- **Your pace.** Pieces of eight and Cooking experience an hour in the game, and with the three-minute waits counted once you play a few in a sitting; by team too, from your own games only.
+- **The reward you are after.** A naval set in any of its seven colours, every flag, every flag and naval piece, medium clues, rum or the stuff, at Honest Jimmy's prices. Pieces you own are seen in your bank, pack or worn and left out; the pieces of eight left and the time to it at your pace.
+- **In the lobby, one step.** Cabin Fever and 40 Cooking if you lack them; the next piece once you hold its pieces of eight; leave your follower, bank your items and hat; else join a team (Honest Jimmy signs you to the smaller one). In the waiting room, the players signed to each side.
+- **In a game, one plain line.** The next link of the chain you are on, from what you carry: sweetgrubs, bitternuts, bark, coloured water or water to the hopper; fletch scrapey logs; dye a monkey and send it up the Bitternut tree; flowers to your kettle. Carrying nothing, a boiler under three logs, else the ingredient the hopper is shortest of by the overlay's own counts. Nothing is clicked for you.
+
+<p align="center">
+  <img src="docs/screenshots/brewing-panel-game.png" width="225" alt="Trouble Brewing: in a game">
+  <img src="docs/screenshots/brewing-panel-lobby.png" width="225" alt="Trouble Brewing: the lobby, your reward, your games">
+  <img src="docs/screenshots/brewing-panel-flags.png" width="225" alt="Trouble Brewing: waiting, saving for every flag">
+</p>
+<p align="center">
+  <img src="docs/screenshots/brewing-plaque-game.png" alt="Plaque: fletch the scrapey logs">
+  <img src="docs/screenshots/brewing-plaque-lobby.png" alt="Plaque: buy the blue naval shirt">
+</p>
+
 ### Barbarian Assault (a companion, outside the fight)
 The calls, the eggs and the healers are left to RuneLite's own Barbarian Assault plugin. The Pilot keeps the rest: what your games come to, and what to play next.
 - **Every game kept.** Each game, per account: its waves, the role you played in each (read from the role's horn), each wave's time from its "---- Wave: N ----" line to its end, lost waves and retries, and the honour points the game gave every role, read from the game's own point counters as they rise. The panel shows the game under way wave by wave, your last games, the quickest full game and queen wave, and honour points an hour.
@@ -400,7 +418,7 @@ All are read only, never written, and everything works without them.
 
 ## Your data
 
-Your bank's goal items and supplies as last seen, your Mahogany Homes points, your Guardians of the Rift points, your last thirty Tempoross games, your last fifty Giants' Foundry swords and the moulds the jig has shown you own, your last hundred Mastering Mixology deliveries, your last hundred Vale totems with where each totem site stands and the order you visit them, your last hundred Tithe Farm sacks and the order you plant your round in, your last two hundred artefact trips with where each house's drawers and Captain Khaled were seen, your last two hundred house hauls with where each house's door and Oriana were seen and what Oriana pays you a valuable, your last fifty Mahogany Homes contracts, your last hundred and fifty Barracuda Trial runs (every course's best always kept) and the ranks seen as yours, the rewards you own, your round bests, your last and best visit to each minigame and what your contracts take are saved in your RuneLite profile, per account. A damaged or hand-edited value is read as far as it can be and the rest left out, so it never stops the Pilot.
+Your bank's goal items and supplies as last seen, your Mahogany Homes points, your Guardians of the Rift points, your last thirty Tempoross games, your last fifty Giants' Foundry swords and the moulds the jig has shown you own, your last hundred Mastering Mixology deliveries, your last hundred Vale totems with where each totem site stands and the order you visit them, your last hundred Tithe Farm sacks and the order you plant your round in, your last two hundred artefact trips with where each house's drawers and Captain Khaled were seen, your last two hundred house hauls with where each house's door and Oriana were seen and what Oriana pays you a valuable, your last fifty Mahogany Homes contracts, your last two hundred Trouble Brewing games, your last hundred and fifty Barracuda Trial runs (every course's best always kept) and the ranks seen as yours, the rewards you own, your round bests, your last and best visit to each minigame and what your contracts take are saved in your RuneLite profile, per account. A damaged or hand-edited value is read as far as it can be and the rest left out, so it never stops the Pilot.
 
 ## Field notes
 
@@ -412,9 +430,9 @@ Codex Minigame Pilot is guidance only. It reads what the game already shows you 
 
 ## Settings that matter
 
-- **Minigames:** turn each one off; *Mark patrols* for stealing artefacts; *Mark homeowners* for stealing valuables; *Tithe plants a round* for the Tithe Farm; *Vale totem wood* and *Claim offerings as you pass* for Vale Totems; *Mixology orders to make* (every order, or the most resin per paste) and *Mixology station cues*; *Cook before loading* and *Load what you hold at storm* (80%) for Tempoross; *Fragments before first craft* for Guardians of the Rift (120 by default); fix the *Blast Furnace bar* instead of letting the Pilot work it out; *Top up coffer below* (2,500 coins by default); *Barbarian Assault* for the companion; *Wintertodt*, *Fletch kindling* and *Warm up at* (40%) for the Wintertodt; *Gnome Restaurant*; *Barracuda Trials*.
+- **Minigames:** turn each one off; *Mark patrols* for stealing artefacts; *Mark homeowners* for stealing valuables; *Tithe plants a round* for the Tithe Farm; *Vale totem wood* and *Claim offerings as you pass* for Vale Totems; *Mixology orders to make* (every order, or the most resin per paste) and *Mixology station cues*; *Cook before loading* and *Load what you hold at storm* (80%) for Tempoross; *Fragments before first craft* for Guardians of the Rift (120 by default); fix the *Blast Furnace bar* instead of letting the Pilot work it out; *Top up coffer below* (2,500 coins by default); *Barbarian Assault* for the companion; *Wintertodt*, *Fletch kindling* and *Warm up at* (40%) for the Wintertodt; *Gnome Restaurant*; *Barracuda Trials*; *Trouble Brewing*.
 - **Guidance:** *Step plaque*, *Path on the ground*, *Path on minimap*, *Action labels*, *Mark what comes after*, *Hint arrow*, *World map marker* and *Low planks in chat* for Mahogany Homes, *Barracuda next waypoint*, and *Visit summary in chat*. All on by default.
-- **Goals:** what Motherlode nuggets and Mahogany Homes points are saved for, the *Mixology reward* your resin is saved for, the *Vale Totems reward* your research points are saved for, the *Tithe Farm reward* your points are saved for, the *Barbarian Assault reward* your honour points are saved for (the fighter torso by default, or every role to level 5), the *Wintertodt reward* (the pyromancer outfit by default), the *Stealing artefacts level* and *Stealing valuables level* (0 for the next), the *Blast Furnace level* to work toward (0 for the next), *Show goals* and *Reward road*.
+- **Goals:** what Motherlode nuggets and Mahogany Homes points are saved for, the *Mixology reward* your resin is saved for, the *Vale Totems reward* your research points are saved for, the *Tithe Farm reward* your points are saved for, the *Barbarian Assault reward* your honour points are saved for (the fighter torso by default, or every role to level 5), the *Wintertodt reward* (the pyromancer outfit by default), the *Trouble Brewing reward* (the blue naval set by default), the *Stealing artefacts level* and *Stealing valuables level* (0 for the next), the *Blast Furnace level* to work toward (0 for the next), *Show goals* and *Reward road*.
 - **Tick coach:** *Tick coach*, on by default.
 - **Field notes:** *Keep field notes*, off by default.
 

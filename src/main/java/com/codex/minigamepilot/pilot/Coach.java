@@ -422,6 +422,8 @@ final class Coach
 				return "the bank chest";
 			case TRIAL_MASTER:
 				return "the trial master";
+			case HONEST_JIMMY:
+				return "Honest Jimmy";
 			default:
 				return null;
 		}
