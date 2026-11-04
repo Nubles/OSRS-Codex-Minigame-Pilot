@@ -1,6 +1,6 @@
 # Codex Minigame Pilot
 
-**One clear next step for Motherlode Mine, Blast Furnace and Mahogany Homes.** The Pilot watches the minigame you are in and always shows the single thing to do next: what to click, lit in gold in the world, the path there drawn on the ground and the minimap, and a line on why. You still do every click. It only reads the game and draws.
+**One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes and Guardians of the Rift.** The Pilot watches the minigame you are in and always shows the single thing to do next: what to click, lit in gold in the world, the path there drawn on the ground and the minimap, and a line on why. You still do every click. It only reads the game and draws.
 
 It is part of the **Codex** suite of RuneLite plugins and shares their look: warm ink, aged gold and the game's own fonts.
 
@@ -34,6 +34,22 @@ It is part of the **Codex** suite of RuneLite plugins and shares their look: war
 - **What a contract costs you.** Each contract you finish is measured: the Construction experience it gave (any outfit bonus included), the planks and steel the job took, and the whole loop's time. Priced at today's Grand Exchange prices, the tiers you have done are ranked by coins per experience point, with experience an hour, so you can see whether expert contracts are worth their mahogany. Nothing is guessed: a tier is ranked once you have finished one, and a job first seen half done is not measured.
 - **Planks in the bank.** Your tier's planks and steel bars in the bank, carried and in the plank sack, counted in contracts at what your own contracts take, and in time: "Mahogany planks for about 24 contracts, 1h 48m". Away from the minigames the Mahogany Homes card says the same.
 
+### Guardians of the Rift
+- **One step through the whole game.** Take uncharged cells, wait for the rift, mine fragments, craft essence at the workbench, fill your pouches, enter the altar, craft, empty the pouches and craft again, take the portal back, power up the Great Guardian with your stones, place the charged cell, deposit the runes, and round again. Each one is lit in the world with its path and a line of why.
+- **Fragments sized to the trip.** At the start of a game it mines to 120 fragments before the first craft, as the wiki's general strategy does (a setting). After that it mines only what one trip needs: the free slots in your pack and the room in your pouches, read from the pouches themselves.
+- **The right altar for you, not just the open one.** Of the two open altars it never picks one your Runecraft level or your quests shut you out of (cosmic needs Lost City, law Troll Stronghold, death Mourning's End Part II, blood Sins of the Father), and it says so: "The death altar is not yours yet". Of those you can use it follows the wiki's rule for even points: blood and death first, then fire and earth, otherwise the type you have fewer points of.
+- **Your points, kept even.** It reads your elemental and catalytic points when you check the Rewards Guardian and from the totals at the end of each game, takes one of each off for every search, and adds what this game's energy is worth so far. The panel shows both, the searches they pay for, and which one lags. Until it has seen your points it says so rather than guessing, and picks the stronger cell instead.
+- **The rift's clock.** How long the rift has been open, the guardian's power, and when the next portal to the huge guardian remains is about due (the first about 160 seconds in, then every 140, as the wiki has it). When that portal is open and your trip still needs essence, the step is to take it.
+
+<p align="center">
+  <img src="docs/screenshots/rift-panel.png" width="225" alt="Guardians of the Rift: picking the altar">
+  <img src="docs/screenshots/rift-panel-altar.png" width="225" alt="Guardians of the Rift: inside the fire altar">
+</p>
+<p align="center">
+  <img src="docs/screenshots/rift-plaque.png" alt="Plaque at Guardians of the Rift">
+  <img src="docs/screenshots/rift-plaque-altar.png" alt="Plaque inside an altar">
+</p>
+
 <p align="center">
   <img src="docs/screenshots/motherlode-sack.png" width="225" alt="Emptying the sack">
   <img src="docs/screenshots/furnace-wait.png" width="225" alt="Waiting for bars">
@@ -55,7 +71,7 @@ It is part of the **Codex** suite of RuneLite plugins and shares their look: war
 
 ## The panel
 
-The helm at the top holds the next action as one large gilt word and the full instruction under it, and flares when the step changes. Under it, the minigame's loop with your place in it, its gauges (the sack with pay-dirt in flight, the furnace's coal against what the next load needs, the planks the job still takes), the furniture checklist, and the session so far: pay-dirt, ore, bars, contracts, points and experience, with hourly pace. Away from the minigames it lists all three and what is waiting at each, such as an open contract, and what your last visit to the Motherlode Mine and the Blast Furnace came to: "Last visit 3 hours ago: 1h 12m for 1,134 pay-dirt, 972 ore, 68k Mining xp and ore worth 142k."
+The helm at the top holds the next action as one large gilt word and the full instruction under it, and flares when the step changes. Under it, the minigame's loop with your place in it, its gauges (the sack with pay-dirt in flight, the furnace's coal against what the next load needs, the planks the job still takes), the furniture checklist, and the session so far: pay-dirt, ore, bars, contracts, points and experience, with hourly pace. Away from the minigames it lists all four and what is waiting at each, such as an open contract, and what your last visit to the Motherlode Mine and the Blast Furnace came to: "Last visit 3 hours ago: 1h 12m for 1,134 pay-dirt, 972 ore, 68k Mining xp and ore worth 142k."
 
 Each minigame's card also keeps your best visit, the most pay-dirt or bars an hour over at least fifteen minutes, with its experience an hour: "Best visit 5 days ago: 1,620 pay-dirt and 81k Mining xp an hour over 1h 24m." It is kept per account, and a session never carries over to another account.
 
@@ -73,7 +89,7 @@ Each round is also split into the stages of its loop (Mine, Hopper, Sack, Bank; 
 
 ## Tick coach
 
-The game runs on 0.6-second ticks, and the tick coach counts every loop in them: Motherlode's mine, hopper, sack and bank; the Blast Furnace's bank, belt and bars; a Mahogany Homes contract from the contractor through the furniture and back. After each loop the panel shows:
+The game runs on 0.6-second ticks, and the tick coach counts every loop in them: Motherlode's mine, hopper, sack and bank; the Blast Furnace's bank, belt and bars; a Mahogany Homes contract from the contractor through the furniture and back; a Guardians of the Rift altar trip from mining through essence and the altar to handing in. After each loop the panel shows:
 
 - **The loop in ticks against your best** of the same kind ("176 ticks, +26 on best"), or "new best".
 - **Its walking against a floor.** Every walk the Pilot sends you on is measured over the game's collision map, so its shortest way is known; at run pace (two tiles a tick) that walk has a floor nobody can beat. The card sets the ticks you spent on foot against it: "On foot 19 ticks against a floor of 17 at run pace, 2 over". Mining, smelting and building have no fixed duration the wiki states, so the coach never invents a floor for them: those parts are only compared with your own best.
@@ -129,7 +145,7 @@ Both are read only, never written, and everything works without them.
 
 ## Your data
 
-Your bank's goal items and supplies as last seen, your Mahogany Homes points, the rewards you own, your round bests, your last and best visit to each minigame and what your contracts take are saved in your RuneLite profile, per account. A damaged or hand-edited value is read as far as it can be and the rest left out, so it never stops the Pilot.
+Your bank's goal items and supplies as last seen, your Mahogany Homes points, your Guardians of the Rift points, the rewards you own, your round bests, your last and best visit to each minigame and what your contracts take are saved in your RuneLite profile, per account. A damaged or hand-edited value is read as far as it can be and the rest left out, so it never stops the Pilot.
 
 ## Field notes
 
@@ -141,7 +157,7 @@ Codex Minigame Pilot is guidance only. It reads what the game already shows you 
 
 ## Settings that matter
 
-- **Minigames:** turn each of the three off; fix the *Blast Furnace bar* instead of letting the Pilot work it out; *Top up coffer below* (2,500 coins by default).
+- **Minigames:** turn each of the four off; *Fragments before first craft* for Guardians of the Rift (120 by default); fix the *Blast Furnace bar* instead of letting the Pilot work it out; *Top up coffer below* (2,500 coins by default).
 - **Guidance:** *Step plaque*, *Path on the ground*, *Path on minimap*, *Action labels*, *Mark what comes after*, *Hint arrow* and *World map marker* for Mahogany Homes, and *Visit summary in chat*. All on by default.
 - **Goals:** what Motherlode nuggets and Mahogany Homes points are saved for, the *Blast Furnace level* to work toward (0 for the next), *Show goals* and *Reward road*.
 - **Tick coach:** *Tick coach*, on by default.

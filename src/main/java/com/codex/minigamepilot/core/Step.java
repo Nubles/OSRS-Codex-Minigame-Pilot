@@ -30,7 +30,25 @@ public final class Step
 		CONTRACTOR,
 		CLIENT,
 		HOTSPOT,
-		HOME
+		HOME,
+		// Guardians of the Rift
+		/** Guardian parts or remains, to mine fragments from. */
+		REMAINS,
+		WORKBENCH,
+		/** The uncharged cells table. */
+		CELLS,
+		/** A portal guardian: the way into its altar. */
+		GUARDIAN,
+		/** The runic altar itself, once inside. */
+		ALTAR,
+		/** The altar's portal back to the temple. */
+		EXIT,
+		GREAT_GUARDIAN,
+		CELL_TILE,
+		DEPOSIT_POOL,
+		/** The portal to the huge guardian remains, or back from them. */
+		RIFT_PORTAL,
+		HUGE_REMAINS
 	}
 
 	private final String verb;

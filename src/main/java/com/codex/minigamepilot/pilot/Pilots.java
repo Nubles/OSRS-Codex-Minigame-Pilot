@@ -29,6 +29,8 @@ public final class Pilots
 	private final MotherlodePilot motherlode = new MotherlodePilot();
 	private final FurnacePilot furnace = new FurnacePilot();
 	private final HomesPilot homes;
+	private final RiftPilot rift = new RiftPilot();
+	private volatile boolean useRift = true;
 	private final Coach coach;
 	private final Recorder recorder;
 	private final IntUnaryOperator price;
@@ -61,9 +63,11 @@ public final class Pilots
 		this.stock = stock;
 		motherlode.setPrice(price);
 		motherlode.setStore(load, saveKey);
+		rift.setStore(load, saveKey);
 		this.coach = new Coach(loadBests, saveBests);
 		this.recorder = new Recorder(notes);
-		this.scene = new SceneIndex(client, id -> MotherlodePilot.isWatched(id) || FurnacePilot.isWatched(id) || HomesPilot.isWatched(id));
+		this.scene = new SceneIndex(client, id -> MotherlodePilot.isWatched(id) || FurnacePilot.isWatched(id) || HomesPilot.isWatched(id)
+			|| RiftPilot.isWatched(id));
 		this.homes = new HomesPilot(saved, save, load, saveKey);
 	}
 
@@ -73,6 +77,27 @@ public final class Pilots
 	public void tickCoach(boolean on)
 	{
 		tickCoach = on;
+	}
+
+	/** The "Guardians of the Rift" setting. */
+	public void rift(boolean on)
+	{
+		useRift = on;
+	}
+
+	/** The "Fragments before the first craft" setting for Guardians of the Rift. */
+	public void riftFragments(int fragments)
+	{
+		rift.setFirstTarget(fragments);
+	}
+
+	/**
+	 * How Guardians of the Rift reads quests and its HUD's rune icons; by default it asks the game.
+	 * Package-private: replays set them from the script.
+	 */
+	void riftReaders(java.util.function.Predicate<net.runelite.api.Quest> quest, IntUnaryOperator sprite)
+	{
+		rift.readers(quest, sprite);
 	}
 
 	/** The "Upper hopper unlocked" setting for the Motherlode Mine. */
@@ -108,6 +133,7 @@ public final class Pilots
 			motherlode.newAccount();
 			furnace.newAccount();
 			homes.newAccount();
+			rift.newAccount();
 			said.clear();
 			unsaid.clear();
 		}
@@ -135,6 +161,7 @@ public final class Pilots
 		recorder.chat(type, message);
 		furnace.coalBag.chat(message);
 		homes.chat(message);
+		rift.chat(message);
 	}
 
 	/** @param bankCoal coal in the open bank, or -1 when the bank is closed */
@@ -180,6 +207,7 @@ public final class Pilots
 					}
 					scene.add(tile.getWallObject());
 					scene.add(tile.getDecorativeObject());
+					scene.add(tile.getGroundObject());
 				}
 			}
 		}
@@ -220,6 +248,13 @@ public final class Pilots
 			units = homes.units();
 			kind = homes.kindHint();
 		}
+		else if (useRift && rift.active(client, scene))
+		{
+			activity = View.Activity.RIFT;
+			flight = rift.fly(client, scene, now);
+			state = rift.lastState;
+			units = rift.units();
+		}
 		else
 		{
 			activity = View.Activity.NONE;
@@ -236,6 +271,10 @@ public final class Pilots
 			{
 				keep(last, furnace.visit(now), furnace.pace(now), true);
 				furnace.left();
+			}
+			else if (last == View.Activity.RIFT)
+			{
+				rift.left();
 			}
 			last = activity;
 		}
@@ -394,6 +433,7 @@ public final class Pilots
 		long now = System.currentTimeMillis();
 		v.brief(motherlode.brief(lastVisit(View.Activity.MOTHERLODE), best(View.Activity.MOTHERLODE), now));
 		v.brief(furnace.brief(lastVisit(View.Activity.FURNACE), best(View.Activity.FURNACE), now));
+		v.brief(rift.brief());
 		return v;
 	}
 }
