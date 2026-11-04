@@ -46,6 +46,8 @@ public class SavedSettingsTest
 			"stealingArtefacts", "artefactsPatrols", "artefactsLevel",
 			// Stealing valuables.
 			"stealingValuables", "valuablesOwners", "valuablesLevel",
+			// Rogues' Den.
+			"roguesDen", "roguesDenTraps",
 			"fieldNotes")), keys);
 		assertEquals("codexminigamepilot", CodexMinigamePilotConfig.GROUP);
 	}

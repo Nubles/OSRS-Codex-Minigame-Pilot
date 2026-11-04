@@ -69,6 +69,20 @@ final class Pack
 		return out;
 	}
 
+	/** Items worn, one for each filled slot. */
+	int wornCount()
+	{
+		int n = 0;
+		if (worn != null)
+		{
+			for (Item i : worn)
+			{
+				n += i.getId() > 0 && i.getQuantity() > 0 ? 1 : 0;
+			}
+		}
+		return n;
+	}
+
 	/** Empty inventory slots. */
 	int free()
 	{

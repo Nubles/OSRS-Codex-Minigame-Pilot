@@ -1,6 +1,6 @@
 # Codex Minigame Pilot
 
-**One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes, Guardians of the Rift, Tempoross, the Giants' Foundry, Mastering Mixology, Vale Totems, the Tithe Farm, stealing artefacts and stealing valuables.** The Pilot watches the minigame you are in and always shows the single thing to do next: what to click, lit in gold in the world, the path there drawn on the ground and the minimap, and a line on why. You still do every click. It only reads the game and draws.
+**One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes, Guardians of the Rift, Tempoross, the Giants' Foundry, Mastering Mixology, Vale Totems, the Tithe Farm, stealing artefacts, stealing valuables and the Rogues' Den maze.** The Pilot watches the minigame you are in and always shows the single thing to do next: what to click, lit in gold in the world, the path there drawn on the ground and the minimap, and a line on why. You still do every click. It only reads the game and draws.
 
 It is part of the **Codex** suite of RuneLite plugins and shares their look: warm ink, aged gold and the game's own fonts.
 
@@ -152,6 +152,24 @@ It is part of the **Codex** suite of RuneLite plugins and shares their look: war
 <p align="center">
   <img src="docs/screenshots/valuables-plaque-distracted.png" alt="Plaque at a distracted citizen">
   <img src="docs/screenshots/valuables-plaque-window.png" alt="Plaque when the owner is coming back">
+</p>
+
+### Rogues' Den
+- **One leg of the maze at a time.** The wiki's way through, row by row: the contortion bars and pendulum, the stairs to the north-west gate, the trap line, either of the two ledges, a blade to left-click (or you walk round it), the pendulums and the ledge, the trap room; then, under 80 Thieving, the long route (passageways, "Search wall" on the first of four walls, the tile, the mosaic door, the grills, the three walls, the pendulum), or with 80 the locked doors' shortcut; then the spinning blades, the flash powder for the guard, the last two pendulums and a wall safe. The leg's obstacle is lit in gold as it comes into view.
+- **Where you are, read from the maze.** No tile of the maze is written in. The Pilot follows each run from what the game reports: the mystic jewel arriving as you enter and leaving with you, each drain of Agility at an obstacle (bars 5, pendulums 3, ledges 4, blades 3, as the wiki has them) or of Thieving at a searched trap, the tile and the flash powder in your pack, and the obstacles that stand in one room only (the mosaic door, the grills, the guard, the safes) coming near.
+- **The right choice where the maze has one.** Only the item called Tile opens the mosaic door: carrying one of the three called Tiles, the step is to drop it and take the south-eastern one. The flash powder before the guard, the guard lit while you hold it. Below 6 Agility before the last two pendulums it warns you; at the safe it says the crack rolls on your drained Thieving.
+- **Traps marked.** Floor traps, wall traps and spinning blades near you are washed in ember (*Mark maze traps*); the wall you are to search is the only trap lit in gold.
+- **The lobby.** 50 Agility and 50 Thieving (boosts do not count), nothing carried or worn (Emerald Benedict runs the bank), no follower, then the doorway, with Brian O'Richard the first time.
+- **Every run kept.** Each run, per account: its time, whether it reached the safe, what the safe gave (a crate, a rogue kit, or nothing when the crack fails), and where the maze sent you back. The panel shows where you are sent back most, your quickest run, runs to the safe and Agility experience an hour at your pace beside the wiki's 22k.
+- **The rogue set, at your pace.** Pieces you own, from your bank, pack and worn items, crates you hold as pieces still to choose, and the rest in runs to the safe at the wiki's crate chance for your Thieving level and in time at your own pace. A crate in your pack names the piece you lack.
+
+<p align="center">
+  <img src="docs/screenshots/roguesden-panel-walls.png" width="225" alt="Rogues' Den: the four walls on the long route">
+  <img src="docs/screenshots/roguesden-panel-lobby.png" width="225" alt="Rogues' Den: the lobby with the rogue set">
+</p>
+<p align="center">
+  <img src="docs/screenshots/roguesden-plaque-walls.png" alt="Plaque at the four walls">
+  <img src="docs/screenshots/roguesden-plaque-tile.png" alt="Plaque with the wrong tile">
 </p>
 
 ### Tempoross

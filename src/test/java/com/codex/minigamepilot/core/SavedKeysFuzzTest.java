@@ -404,6 +404,41 @@ public class SavedKeysFuzzTest
 	}
 
 	@Test
+	public void roguesDenKept()
+	{
+		survive("roguesden.kept", "1;1760000000000,210,1,SAFE,C,1000,50;1760000100000,90,0,GRILLS,-,300,10;1760000200000,0,0,-,-,0,0", s ->
+		{
+			MazeLog g = MazeLog.decode(s);
+			sane(String.valueOf(g.perHour() < 0 ? 0 : Math.round(g.perHour())));
+			sane(String.valueOf(g.agilityXpPerHour() < 0 ? 0 : Math.round(g.agilityXpPerHour())));
+			double h = g.hoursFor(12);
+			sane(String.valueOf(h < 0 ? 0 : Math.round(h)));
+			sane(String.valueOf(Math.max(0, g.typical())));
+			for (MazeLog.Run r : g.all())
+			{
+				assertTrue(r.ticks >= 0 && r.ticks <= MazeLog.LONGEST && r.agilityXp >= 0 && r.thievingXp >= 0);
+				assertTrue(r.finished || r.reward == MazeLog.Reward.NONE);
+			}
+			for (int n : g.sentBack().values())
+			{
+				assertTrue(n > 0);
+			}
+			MazeLog.decode(g.encode());
+		});
+	}
+
+	@Test
+	public void roguesDenOwned()
+	{
+		survive("roguesden.owned", "MASK,TOP,BOOTS", s ->
+		{
+			java.util.Set<Maze.Piece> p = Maze.decodePieces(s);
+			assertTrue(p.size() <= 5);
+			assertTrue(Maze.decodePieces(Maze.encodePieces(p)).equals(p));
+		});
+	}
+
+	@Test
 	public void valuablesKept()
 	{
 		survive("valuables.kept", "1;1760000000000,LAVINIA,250,400,120,120,5400,6300,900;1760000100000,-,0,0,100,10,4500,4500,0", s ->

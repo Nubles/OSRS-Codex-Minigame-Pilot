@@ -24,7 +24,7 @@ import net.runelite.api.TileObject;
  * {@code tithe plants PLAN} and {@code tithe reward REWARD|none} (the Tithe Farm, by {@code Tithe.Plan} and {@code Tithe.Reward}
  * names; setting name titheFarm), {@code artefacts level N} (the Thieving level to work toward when stealing artefacts;
  * setting names stealingArtefacts and artefactsPatrols), {@code valuables level N} (the same for stealing valuables;
- * setting names stealingValuables and valuablesOwners),
+ * setting names stealingValuables and valuablesOwners), setting names roguesDen and roguesDenTraps (the Rogues' Den),
  * {@code mixology plan ALL|PER_PASTE}, {@code mixology reward REWARD|none} and {@code mixology cue SPOTANIM} (a Mastering
  * Mixology setting, or a spot animation appearing, by its {@code SpotanimID} name; setting names mixology and mixologyCues),
  * {@code bank ITEM COUNT} (the bank as last seen), {@code teleport "Name" "Source" X Y SECONDS carried|banked},
@@ -98,6 +98,8 @@ final class PilotRig implements Rig
 		settings.put("artefactsPatrols", true);
 		settings.put("stealingValuables", true);
 		settings.put("valuablesOwners", true);
+		settings.put("roguesDen", true);
+		settings.put("roguesDenTraps", true);
 		pilots = new Pilots(game.client(), null, c -> { }, new FieldNotes(() -> null, new Gson()),
 			bests::get, bests::put, game::price, store::get, store::put, () -> bank);
 		pilots.atlas(() -> teleports == null ? null : com.codex.minigamepilot.core.WayfinderAtlas.of(walkPace, teleports));
@@ -140,6 +142,7 @@ final class PilotRig implements Rig
 				tithe();
 				artefacts();
 				valuables();
+				den();
 				return true;
 			case "valuables":
 				// valuables level N
@@ -338,6 +341,11 @@ final class PilotRig implements Rig
 		}
 	}
 
+	private void den()
+	{
+		pilots.roguesDen(settings.get("roguesDen"), settings.get("roguesDenTraps"));
+	}
+
 	private void valuables()
 	{
 		pilots.valuables(settings.get("stealingValuables"), settings.get("valuablesOwners"), valuablesLevel);
@@ -447,6 +455,10 @@ final class PilotRig implements Rig
 		if (!f.wary.isEmpty())
 		{
 			r.put("wary", String.valueOf(f.wary.size()));
+		}
+		if (!f.hazards.isEmpty())
+		{
+			r.put("hazards", String.valueOf(f.hazards.size()));
 		}
 		if (f.step != null)
 		{
