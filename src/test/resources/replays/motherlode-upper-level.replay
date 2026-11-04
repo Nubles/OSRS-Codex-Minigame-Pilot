@@ -1,0 +1,25 @@
+# Issue #5: mining on the upper level, the next vein was one downstairs, and the Pilot kept
+# sending the player down the ladder with the upper hopper unlocked.
+include /replays/scenes/motherlode.scene
+skill MINING 70
+saved motherlode.upper 1
+setting upperHopper on
+at 3726 5698
+never target = LADDER
+never object = lowVein1
+never object = lowVein2
+
+# Up here, the next vein is up here, and so is the one after.
+tick
+expect place = "Upper level"
+expect step = "Mine pay-dirt"
+expect object = upVein2
+remove upVein2
+tick
+expect object = upVein1
+
+# A full load goes in the upper hopper, not down the ladder.
+items INV PAYDIRT 27
+tick
+expect step = "Deposit your pay-dirt in the hopper"
+expect object = upperHopper

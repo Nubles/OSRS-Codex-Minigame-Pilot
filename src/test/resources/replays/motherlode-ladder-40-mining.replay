@@ -1,0 +1,26 @@
+# Issue #7: a 40 Mining account, with no upper level, was sent up the ladder.
+# The upper level needs 57 Mining (not boostable) and 100 nuggets (oldschool.runescape.wiki/w/Motherlode_Mine).
+include /replays/scenes/motherlode.scene
+at 3740 5650
+never target = LADDER
+never step = "Climb the ladder"
+
+# Veins below to mine: mine the nearest.
+tick
+expect activity = MOTHERLODE
+expect place = "Lower level"
+expect step = "Mine pay-dirt"
+expect object = lowVein2
+
+# Every vein below is mined out; only the ones up the ladder are left. Wait, do not climb.
+remove lowVein1
+remove lowVein2
+tick 5
+expect step = "Wait for a vein"
+expect waiting = true
+
+# The veins grow back.
+wall MOTHERLODE_ORE_SINGLE 3724 5640 as lowVein3
+tick
+expect step = "Mine pay-dirt"
+expect object = lowVein3

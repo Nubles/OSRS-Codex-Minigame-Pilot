@@ -1,0 +1,15 @@
+# The upper level asks for 57 Mining unboosted (oldschool.runescape.wiki/w/Motherlode_Mine).
+# A boost to 57 must not teach the Pilot that the level is open, even standing up there.
+include /replays/scenes/motherlode.scene
+skill MINING 55
+boost MINING 58
+never saved.motherlode.upper = 1
+at 3730 5698
+tick 10
+expect place = "Upper level"
+remove lowVein1
+remove lowVein2
+at 3740 5650
+never step = "Climb the ladder"
+tick 5
+expect step = "Wait for a vein"

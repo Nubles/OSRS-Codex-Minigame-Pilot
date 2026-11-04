@@ -1,0 +1,25 @@
+# Issue #2, the other half: emptying the sack between trips, the Pilot told the player to climb
+# the ladder instead of going on emptying the sack.
+include /replays/scenes/motherlode.scene
+skill MINING 70
+saved motherlode.upper 1
+setting upperHopper on
+at 3758 5644
+varbit MOTHERLODE_SACK_TRANSMIT 81
+never target = LADDER
+tick
+
+# The sack is searched: 27 ore come out, 54 pay-dirt are left in it.
+varbit MOTHERLODE_SACK_TRANSMIT 54
+items INV COAL 27
+tick
+expect step = "Bank your ore and gems"
+expect object = bank
+
+# Banked; back to the sack, not up the ladder.
+items INV clear
+items INV RUNE_PICKAXE 1
+at 3768 5641
+tick
+expect step = "Search the sack"
+expect object = sack
