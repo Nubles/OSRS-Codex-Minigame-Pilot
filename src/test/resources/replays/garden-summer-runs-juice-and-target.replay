@@ -1,0 +1,100 @@
+# Sorceress's Garden, the summer garden: arriving, a run that pays a sq'irk, one caught by an elemental, another
+# sq'irk, the two crushed into a glass, the time to the next Thieving level at your own pace, and a logout mid-lap
+# that keeps nothing it has not seen. Information only: never a plaque, a target or a route.
+#
+# Facts (OSRS wiki):
+#  - Sorceress's Garden: Summer needs 65 Thieving; "You can only enter a seasonal garden if your current Thieving
+#    level matches or exceeds the garden's required level."
+#  - Summer sq'irk (10845): "Doing so gives 60 Farming experience and teleports the player to the fountain in the
+#    inner garden."
+#  - Summer sq'irkjuice (10849): "Made from 2 summer sq'irks."; "for 3,000 Thieving experience".
+#  - Summer Elemental: NPC ids 1801-1806; "The elementals can only 'see' and teleport the player when there are two
+#    or fewer squares between them and the player."
+# RuneLite gameval: ObjectID._100_OSMAN_POMY_TREE_SUMMER (12943, the wiki's Sq'irk tree), _100_OSMAN_FOUNTAIN.
+# The scene is schematic: a fountain, the summer tree north of it, and the autumn tree to the west.
+scene 2860 5440
+at 2910 5480
+object _100_OSMAN_FOUNTAIN 2910 5482 as fountain
+object _100_OSMAN_POMY_TREE_SUMMER 2915 5505 as summerTree
+object _100_OSMAN_POMY_TREE_AUTUMN 2885 5482 as autumnTree
+skill THIEVING 70
+skill FARMING 50 101333
+items INV PESTLE_AND_MORTAR 1
+items INV BEER_GLASS 3
+never quiet = false
+never target != NONE
+always route = 0
+tick
+expect activity = SORCERESS_GARDEN
+expect place = "Sorceress's Garden · the summer garden"
+expect step = "The summer garden, at your own pace"
+expect detail = "Every run is kept, caught or not, and your pace follows from them"
+expect stat.Runs = "0"
+expect stat.Success = "-"
+expect goal = "737627/814445"
+expect goal.note ~ "52 summer sq'irks to go (26 glasses). Run the summer garden and the time to it follows from your own pace."
+
+# Run one: off into the maze, a sq'irk, back at the fountain 60 ticks after arriving.
+tick 51
+at 2914 5503
+tick 8
+items INV OSMAN_SQUIRK_SUMMER 1
+xp FARMING 101393
+at 2910 5480
+tick
+tick 3
+expect saved.garden.kept ~ ",60,u,q"
+expect stat.Runs = "1"
+expect stat.Success = "100%"
+expect stat.Last_lap = "0:36"
+expect supply.headline = "Best summer lap: 0:36"
+
+# Run two: an elemental two squares off sends you back with nothing.
+at 2913 5498
+npc _100_OSMAN_SUMMER_ELEMENTAL_3 "Summer Elemental" 2913 5500 as elemental
+tick 40
+remove elemental
+at 2910 5481
+tick
+tick 3
+expect saved.garden.kept ~ ",u,c"
+expect stat.Runs = "2"
+expect stat.Success = "50%"
+expect gauge.Summer_runs_that_paid = "1/2"
+
+# Run three: another sq'irk.
+at 2914 5503
+tick 50
+items INV OSMAN_SQUIRK_SUMMER 1
+xp FARMING 101453
+at 2910 5480
+tick
+tick 3
+expect saved.garden.kept ~ ",u,q"
+expect stat.Success = "67%"
+expect lines ~ "Summer sq'irks · 2 NEXT"
+expect step = "Crush your summer sq'irks"
+expect detail = "2 fill a beer glass: 3,000 Thieving xp from Osman"
+
+# Crushed into a glass: two sq'irks and a glass become one glass of juice.
+items INV set PESTLE_AND_MORTAR 1 BEER_GLASS 2 OSMAN_SQUIRK_J_SUMMER 1
+tick
+expect saved.garden.juice = "1;0,0,0,1"
+expect lines ~ "Summer sq'irkjuice · 1 DONE"
+expect step = "The summer garden, at your own pace"
+expect detail = "67% of your last 3 runs paid a sq'irk"
+# 76,818 Thieving xp to 71, 3,000 of it held as juice: 25 glasses, 50 sq'irks, at two in three runs 75 runs.
+expect goal = "740627/814445"
+expect goal.note ~ "50 summer sq'irks to go (25 glasses): about 75 runs"
+expect goal.note ~ "Your juice is 3,000 of it."
+
+# Logged out a few ticks into a lap: nothing more is kept.
+at 2913 5490
+tick 5
+state LOGIN_SCREEN
+tick
+state LOGGED_IN
+at 2910 5480
+tick 3
+expect stat.Runs = "3"
+expect saved.garden.kept !~ ",o"

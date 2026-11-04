@@ -62,6 +62,8 @@ public class SavedSettingsTest
 			"barracudaTrials", "barracudaWaypoint",
 			// Trouble Brewing.
 			"troubleBrewing", "brewingReward",
+			// Sorceress's Garden.
+			"sorceressGarden", "gardenSeason", "gardenGoal", "gardenTarget",
 			"fieldNotes")), keys);
 		assertEquals("codexminigamepilot", CodexMinigamePilotConfig.GROUP);
 	}

@@ -1,0 +1,87 @@
+# Sorceress's Garden below 65 Thieving: the summer garden is named with its level, not sent to; set to judge by the
+# garden last run, an autumn run that pays herbs, an autumn sq'irk (the same 50 Farming xp, told apart by the fruit),
+# a run caught by an autumn elemental, the Farming level target, a glasses-of-juice target, and no pestle and mortar.
+#
+# Facts (OSRS wiki):
+#  - Sorceress's Garden: Autumn 45 Thieving, Summer 65; herbs: "picking them will always yield 50 Farming experience".
+#  - Autumn sq'irk (10846): "Doing so gives 50 Farming experience and teleports the player to the fountain in the
+#    inner garden."; Autumn sq'irkjuice (10850): "Made from 3 autumn sq'irks."; "for 2,350 Thieving experience".
+#  - Autumn Elemental: NPC ids 5802-5807.
+#  - "Beer glasses needed for this minigame can be obtained for free by searching the shelves in the Sorceress's house."
+# RuneLite gameval: ObjectID._100_OSMAN_POMY_TREE_AUTUMN (13406), _100_OSMAN_FOUNTAIN.
+# The scene is schematic: a fountain, the autumn tree to the west and the summer tree to the north.
+scene 2860 5440
+at 2910 5480
+object _100_OSMAN_FOUNTAIN 2910 5482
+object _100_OSMAN_POMY_TREE_SUMMER 2915 5505
+object _100_OSMAN_POMY_TREE_AUTUMN 2885 5482
+skill THIEVING 60
+skill FARMING 40
+items INV PESTLE_AND_MORTAR 1
+items INV BEER_GLASS 2
+never quiet = false
+never target != NONE
+tick
+expect step = "The summer garden needs 65 Thieving"
+expect detail = "Your Thieving is 60; the autumn garden is open to you"
+
+# A juice boost counts: the wiki's "current Thieving level".
+boost THIEVING 65
+tick
+expect step = "The summer garden, at your own pace"
+boost THIEVING 60
+garden season last
+garden goal FARMING_LEVEL 0
+tick
+# Nothing run yet: the best garden open to you.
+expect place = "Sorceress's Garden · the autumn garden"
+
+# Herbs in the autumn garden: 50 Farming xp and no sq'irk.
+at 2888 5484
+tick 40
+xp FARMING 37274
+at 2910 5480
+tick
+tick 3
+expect saved.garden.kept ~ ",a,h"
+expect supply.headline = "null"
+expect stat.Success = "100%"
+expect stat.Sq'irks_an_hour = "0"
+
+# An autumn sq'irk: the same 50 Farming xp, but the fruit says it is no herb.
+at 2886 5483
+tick 40
+items INV OSMAN_SQUIRK_AUTUMN 1
+xp FARMING 37324
+at 2910 5480
+tick
+tick 3
+expect saved.garden.kept ~ ",a,h;"
+expect saved.garden.kept ~ ",a,q"
+expect supply.headline = "Best autumn lap: 0:26"
+
+# Caught by an autumn elemental.
+at 2887 5483
+npc _100_OSMAN_AUTUMN_ELEMENTAL_2 "Autumn Elemental" 2886 5482 as elemental
+tick 30
+remove elemental
+at 2910 5480
+tick
+tick 3
+expect saved.garden.kept ~ ",a,c"
+expect stat.Success = "67%"
+# 41 Farming (41,171 xp) from 37,324: 3,847 to go at 50 xp in two runs of three, 33.3 a run: 116 runs.
+expect goal = "37324/41171"
+expect goal.note ~ "3,847 Farming xp to go: about 116 runs"
+
+# Glasses of autumn juice: 2 glasses wanted, one sq'irk of three held.
+garden goal JUICE 2
+tick
+expect goal = "0/2"
+expect goal.note ~ "5 autumn sq'irks to go (2 glasses)"
+
+# Without the pestle and mortar the line says so.
+items INV set BEER_GLASS 2 OSMAN_SQUIRK_AUTUMN 1
+tick
+expect step = "Bring a pestle and mortar"
+expect detail = "Beer glasses are free from the shelves in the Sorceress's house"

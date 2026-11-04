@@ -556,6 +556,39 @@ public class SavedKeysFuzzTest
 	}
 
 	@Test
+	public void gardenKept()
+	{
+		survive("garden.kept", "1;1767000000000,90,u,q;1767000060000,100,u,c;1767000120000,0,a,h", s ->
+		{
+			GardenLog g = GardenLog.decode(s, "1;0,0,0,46");
+			for (Garden.Season x : Garden.Season.values())
+			{
+				GardenLog.Pace p = g.pace(x);
+				for (double h : new double[]{p.successRate(), p.sqirksPerRun(), p.sqirksPerHour(), p.thievingXpPerHour(), p.farmingXpPerHour(), p.lap()})
+				{
+					assertTrue(!Double.isNaN(h) && !Double.isInfinite(h));
+				}
+				assertTrue(p.sqirks + p.herbs + p.caught == p.runs && p.timedRuns <= p.runs);
+			}
+			for (GardenLog.Run r : g.all())
+			{
+				assertTrue(r.ticks >= 0 && r.ticks <= GardenLog.LONGEST && r.season != null && r.outcome != null);
+			}
+			assertTrue(g.farmingXp() >= 0 && g.juiceXp() >= 0);
+			GardenLog.decode(g.encode(), g.encodeJuice());
+		});
+		survive("garden.juice", "1;0,0,0,46", s ->
+		{
+			GardenLog g = GardenLog.decode(null, s);
+			for (Garden.Season x : Garden.Season.values())
+			{
+				assertTrue(g.juice(x) >= 0 && g.juice(x) <= GardenLog.JUICE_MAX);
+			}
+			assertTrue(g.juiceXp() >= 0);
+		});
+	}
+
+	@Test
 	public void barracudaKept()
 	{
 		survive("barracuda.kept", "1;1767000000000,t,s,190,776,f,60.2970.2960/120.2990.2980/190.2960.2950;1767000100000,j,-,30,0,o,;1767000200000,g,m,600,9000,a,100.0.0", s ->

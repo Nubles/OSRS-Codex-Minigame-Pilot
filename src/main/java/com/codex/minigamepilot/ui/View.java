@@ -32,7 +32,8 @@ public final class View
 		NIGHTMARE_ZONE("Nightmare Zone"),
 		VOLCANIC_MINE("Volcanic Mine"),
 		BARRACUDA_TRIALS("Barracuda Trials"),
-		TROUBLE_BREWING("Trouble Brewing");
+		TROUBLE_BREWING("Trouble Brewing"),
+		SORCERESS_GARDEN("Sorceress's Garden");
 
 		private final String title;
 
@@ -672,6 +673,8 @@ public final class View
 			"Every Sailing trial run kept with its splits, a ghost of your best run of each course, Sailing experience an hour by trial, and the next rank's time to beat."));
 		v.brief(new Brief(Activity.TROUBLE_BREWING, null,
 			"Every game kept with its team, rum, pieces of eight and Cooking experience, pieces of eight an hour at your pace, and the time to your naval set or flags."));
+		v.brief(new Brief(Activity.SORCERESS_GARDEN, null,
+			"Every garden run kept, caught or not, your success rate and sq'irks an hour at your own pace, the juice you crush and Osman's Thieving xp for it, and the time to your level. No start cue: you run when you choose."));
 		return v;
 	}
 

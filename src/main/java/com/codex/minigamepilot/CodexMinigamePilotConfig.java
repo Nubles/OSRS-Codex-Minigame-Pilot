@@ -3,6 +3,8 @@ package com.codex.minigamepilot;
 import com.codex.minigamepilot.core.Assault;
 import com.codex.minigamepilot.core.Nmz;
 import com.codex.minigamepilot.core.Brewing;
+import com.codex.minigamepilot.core.Garden;
+import com.codex.minigamepilot.core.GardenEta;
 import com.codex.minigamepilot.core.Volcanic;
 import com.codex.minigamepilot.core.Wintertodt;
 import com.codex.minigamepilot.core.Goals;
@@ -304,6 +306,65 @@ public interface CodexMinigamePilotConfig extends Config
 		public String toString()
 		{
 			return reward == null ? "None" : reward.getTitle();
+		}
+	}
+
+	/** The Sorceress's Garden whose runs the panel judges by. */
+	enum GardenSeason
+	{
+		SUMMER(Garden.Season.SUMMER),
+		AUTUMN(Garden.Season.AUTUMN),
+		SPRING(Garden.Season.SPRING),
+		WINTER(Garden.Season.WINTER),
+		LAST_RUN(null);
+
+		private final Garden.Season season;
+
+		GardenSeason(Garden.Season season)
+		{
+			this.season = season;
+		}
+
+		/** The season, or null for the garden you last ran. */
+		public Garden.Season season()
+		{
+			return season;
+		}
+
+		@Override
+		public String toString()
+		{
+			return season == null ? "The one you last ran" : season.getTitle();
+		}
+	}
+
+	/** What the Sorceress's Garden is worked towards. */
+	enum GardenGoal
+	{
+		NONE(null, "None"),
+		THIEVING_LEVEL(GardenEta.Kind.THIEVING_LEVEL, "Thieving level"),
+		FARMING_LEVEL(GardenEta.Kind.FARMING_LEVEL, "Farming level"),
+		JUICE(GardenEta.Kind.JUICE, "Glasses of juice");
+
+		private final GardenEta.Kind kind;
+		private final String title;
+
+		GardenGoal(GardenEta.Kind kind, String title)
+		{
+			this.kind = kind;
+			this.title = title;
+		}
+
+		/** The kind, or null for none. */
+		public GardenEta.Kind kind()
+		{
+			return kind;
+		}
+
+		@Override
+		public String toString()
+		{
+			return title;
 		}
 	}
 
@@ -868,6 +929,18 @@ public interface CodexMinigamePilotConfig extends Config
 		return true;
 	}
 
+	@ConfigItem(
+		keyName = "sorceressGarden",
+		name = "Sorceress's Garden",
+		description = "Keep every Sorceress's Garden run (its garden, and a sq'irk, herbs or caught), your success rate and sq'irks an hour at your own pace, the juice you crush and Osman's Thieving xp for it. Information only: no start cue, nothing timed or lit",
+		section = MINIGAMES,
+		position = 35
+	)
+	default boolean sorceressGarden()
+	{
+		return true;
+	}
+
 	@ConfigItem(keyName = "plaque", name = "Step plaque", description = "Show the next step on a small plaque in the game view", section = GUIDANCE, position = 0)
 	default boolean plaque()
 	{
@@ -1103,6 +1176,43 @@ public interface CodexMinigamePilotConfig extends Config
 	default BrewingReward brewingReward()
 	{
 		return BrewingReward.NAVAL_BLUE;
+	}
+
+	@ConfigItem(
+		keyName = "gardenSeason",
+		name = "Garden judged by",
+		description = "The Sorceress's Garden whose runs give the success rate, the pace and the time to your target",
+		section = GOALS,
+		position = 16
+	)
+	default GardenSeason gardenSeason()
+	{
+		return GardenSeason.SUMMER;
+	}
+
+	@ConfigItem(
+		keyName = "gardenGoal",
+		name = "Garden target",
+		description = "What the Sorceress's Garden is for: a Thieving level (the juice handed to Osman), a Farming level, or glasses of juice, with the sq'irks, runs and time to it at your own pace",
+		section = GOALS,
+		position = 17
+	)
+	default GardenGoal gardenGoal()
+	{
+		return GardenGoal.THIEVING_LEVEL;
+	}
+
+	@Range(min = 0, max = 10_000)
+	@ConfigItem(
+		keyName = "gardenTarget",
+		name = "Garden target amount",
+		description = "The level or glasses of juice for Garden target. 0: the next level, or a banked inventory of 22 glasses",
+		section = GOALS,
+		position = 18
+	)
+	default int gardenTarget()
+	{
+		return 0;
 	}
 
 	@ConfigItem(
