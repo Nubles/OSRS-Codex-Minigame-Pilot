@@ -55,6 +55,8 @@ public final class Pilots
 	private volatile boolean useGnome = true;
 	private final NmzPilot nmz = new NmzPilot();
 	private volatile boolean useNmz = true;
+	private final VolcanicPilot volcanic = new VolcanicPilot();
+	private volatile boolean useVolcanic = true;
 	private final Coach coach;
 	private final Recorder recorder;
 	private final IntUnaryOperator price;
@@ -104,13 +106,14 @@ public final class Pilots
 		gnome.setPrice(price);
 		nmz.setStore(load, saveKey);
 		nmz.setPrice(price);
+		volcanic.setStore(load, saveKey);
 		this.coach = new Coach(loadBests, saveBests);
 		this.recorder = new Recorder(notes);
 		this.scene = new SceneIndex(client, id -> MotherlodePilot.isWatched(id) || FurnacePilot.isWatched(id) || HomesPilot.isWatched(id)
 			|| RiftPilot.isWatched(id) || StormPilot.isWatched(id) || FoundryPilot.isWatched(id)
 			|| MixologyPilot.isWatched(id) || TotemsPilot.isWatched(id) || TithePilot.isWatched(id)
 			|| ArtefactsPilot.isWatched(id) || HousesPilot.isWatched(id) || RoguesDenPilot.isWatched(id)
-			|| AssaultPilot.isWatched(id) || WintertodtPilot.isWatched(id) || NmzPilot.isWatched(id));
+			|| AssaultPilot.isWatched(id) || WintertodtPilot.isWatched(id) || NmzPilot.isWatched(id) || VolcanicPilot.isWatched(id));
 		this.homes = new HomesPilot(saved, save, load, saveKey);
 		homes.readers(null, stock);
 	}
@@ -141,6 +144,13 @@ public final class Pilots
 	{
 		useNmz = on;
 		nmz.settings(reward, halved);
+	}
+
+	/** The "Volcanic Mine" settings: on, and the reward saved for (or null). */
+	public void volcanicMine(boolean on, com.codex.minigamepilot.core.Volcanic.Reward reward)
+	{
+		useVolcanic = on;
+		volcanic.settings(reward);
 	}
 
 	/** After a Mahogany Homes hand-in, a line when the planks left run low, once, or null. */
@@ -299,6 +309,7 @@ public final class Pilots
 			wintertodt.newAccount();
 			gnome.newAccount();
 			nmz.newAccount();
+			volcanic.newAccount();
 			said.clear();
 			unsaid.clear();
 		}
@@ -332,6 +343,7 @@ public final class Pilots
 		valuables.chat(message);
 		assault.chat(message, client.getTickCount());
 		wintertodt.chat(message);
+		volcanic.chat(message);
 		gnome.chat(message, client.getTickCount());
 	}
 
@@ -422,6 +434,11 @@ public final class Pilots
 		if (useNmz)
 		{
 			nmz.watch(client, now);
+		}
+		// A Volcanic Mine game is followed every tick too, so coming out or logging out ends it.
+		if (useVolcanic)
+		{
+			volcanic.watch(client, now);
 		}
 		if (useMotherlode && MotherlodePilot.inMine(client))
 		{
@@ -535,6 +552,13 @@ public final class Pilots
 			state = nmz.lastState;
 			units = nmz.units();
 		}
+		else if (useVolcanic && volcanic.active(client))
+		{
+			activity = View.Activity.VOLCANIC_MINE;
+			flight = volcanic.fly(client, npcs(), scene, now);
+			state = volcanic.lastState;
+			units = volcanic.units();
+		}
 		else if (useAssault && assault.active(client, scene, npcs()))
 		{
 			activity = View.Activity.BARBARIAN_ASSAULT;
@@ -610,6 +634,10 @@ public final class Pilots
 			else if (last == View.Activity.NIGHTMARE_ZONE)
 			{
 				nmz.left();
+			}
+			else if (last == View.Activity.VOLCANIC_MINE)
+			{
+				volcanic.left();
 			}
 			last = activity;
 		}
@@ -707,6 +735,8 @@ public final class Pilots
 		gnome.relogged();
 		// A Nightmare Zone dream ends on logging out.
 		nmz.relogged(now, client.getTickCount());
+		// A Volcanic Mine game ends on logging out.
+		volcanic.relogged(client, now, client.getTickCount());
 		motherlode.relogged();
 		furnace.relogged();
 		coach.left();
@@ -832,6 +862,7 @@ public final class Pilots
 		v.brief(wintertodt.brief());
 		v.brief(gnome.brief());
 		v.brief(nmz.brief());
+		v.brief(volcanic.brief());
 		return v;
 	}
 }

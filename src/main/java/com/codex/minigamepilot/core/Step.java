@@ -157,7 +157,12 @@ public final class Step
 		/** The Rewards chest, Dom Onion's Reward Shop. */
 		REWARDS_CHEST,
 		/** Dominic's coffer, which pays for dreams. */
-		DREAM_COFFER
+		DREAM_COFFER,
+		// Volcanic Mine
+		/** Petrified Pete, who lets you into the Volcanic Mine and keeps its reward shop. */
+		PETRIFIED_PETE,
+		/** The bank chest by the Volcanic Mine's entrance. */
+		VOLCANO_BANK
 	}
 
 	private final String verb;

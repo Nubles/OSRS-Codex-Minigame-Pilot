@@ -1,0 +1,72 @@
+# Volcanic Mine: ore packs as the reward, access learnt as paid for good, a game ended by the
+# eruption and one by logging out, each kept with how it ended.
+#
+# Facts (OSRS wiki, Volcanic Mine; Ore pack (Volcanic Mine); Death):
+#  - "Ore packs are an item purchased from the Volcanic Mine reward shop for 4,000 points."
+#  - "A one-time fee of 3,000 numulite can also be paid for permanent access."
+#  - "After 10 minutes have elapsed, the volcano will erupt and anyone still in the volcano will die."
+#  - "Oh dear, you are dead!" (Death)
+# RuneLite: the mine is regions 15263 and 15262 (Discord plugin); the entrance at 3812, 3810
+# (world map). The scene is schematic.
+volcanic reward ORE_PACK
+scene 3760 3760
+at 3812 3808
+npc FOSSIL_MINEGUARD "Petrified Pete" 3815 3812 as pete
+skill MINING 80
+widget FossilVolcanicShop.POINTS text "Points: 9,000"
+tick
+expect stat.Points = "9,000"
+expect goal = "1000/4000"
+expect goal.note ~ "2 packs affordable now. 3,000 points to the next pack."
+# Ore packs are bought again and again: the card says how many, the step stays on the game.
+expect step = "Bring 30 numulite"
+close FossilVolcanicShop.POINTS
+# No numulite carried, yet in: access paid for good.
+tick
+scene 3760 10140
+at 3800 10190
+varbit FOSSIL_MINE_PROGRESS_STATUS 2
+varbit FOSSIL_MINE_TEMP_PTS 0
+varbit FOSSIL_MINE_NUMBERPLAYERS 1
+varbit FOSSIL_MINE_CURRENT_STABILITY 60
+tick
+expect saved.volcanic.owned ~ "A"
+varbit FOSSIL_MINE_TEMP_PTS 1500
+widget FossilVolcanicMine.TIME text "0:01"
+tick 300
+widget FossilVolcanicMine.TIME text "0:00"
+tick
+chat GAMEMESSAGE "Oh dear, you are dead!"
+tick
+# Back at the entrance, dead: the eruption.
+close FossilVolcanicMine.TIME
+scene 3760 3760
+at 3812 3808
+npc FOSSIL_MINEGUARD "Petrified Pete" 3815 3812 as pete
+varbit FOSSIL_MINE_PROGRESS_STATUS 0
+tick 4
+expect saved.volcanic.kept ~ ",1500,0,1,e"
+expect stat.Points = "10,500"
+expect goal.note ~ "2 packs affordable now. 1,500 points to the next pack"
+
+# Spending at the shop: the balance read again.
+widget FossilVolcanicShop.POINTS text "Points: 2,500"
+tick
+close FossilVolcanicShop.POINTS
+tick
+expect stat.Points = "2,500"
+# Access paid for good: straight in.
+expect step = "Enter the Volcanic Mine"
+expect detail = "Your access is paid for good"
+
+# A game ended by logging out.
+scene 3760 10140
+at 3800 10190
+varbit FOSSIL_MINE_PROGRESS_STATUS 2
+varbit FOSSIL_MINE_TEMP_PTS 0
+tick
+varbit FOSSIL_MINE_TEMP_PTS 406
+tick 180
+state LOGIN_SCREEN
+tick
+expect saved.volcanic.kept ~ ",406,0,1,o"

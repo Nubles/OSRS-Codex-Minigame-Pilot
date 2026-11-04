@@ -2,6 +2,7 @@ package com.codex.minigamepilot;
 
 import com.codex.minigamepilot.core.Assault;
 import com.codex.minigamepilot.core.Nmz;
+import com.codex.minigamepilot.core.Volcanic;
 import com.codex.minigamepilot.core.Wintertodt;
 import com.codex.minigamepilot.core.Goals;
 import com.codex.minigamepilot.core.MixCycle;
@@ -257,6 +258,39 @@ public interface CodexMinigamePilotConfig extends Config
 
 		/** The reward, or null for none. */
 		public Wintertodt.Reward reward()
+		{
+			return reward;
+		}
+
+		@Override
+		public String toString()
+		{
+			return reward == null ? "None" : reward.getTitle();
+		}
+	}
+
+	/** What Volcanic Mine points are saved for. */
+	enum VolcanicReward
+	{
+		NONE(null),
+		PROSPECTOR_KIT(Volcanic.Reward.PROSPECTOR_KIT),
+		PROSPECTOR_HELMET(Volcanic.Reward.PROSPECTOR_HELMET),
+		PROSPECTOR_JACKET(Volcanic.Reward.PROSPECTOR_JACKET),
+		PROSPECTOR_LEGS(Volcanic.Reward.PROSPECTOR_LEGS),
+		PROSPECTOR_BOOTS(Volcanic.Reward.PROSPECTOR_BOOTS),
+		ASH_COVERED_TOME(Volcanic.Reward.ASH_COVERED_TOME),
+		LARGE_WATER_CONTAINER(Volcanic.Reward.LARGE_WATER_CONTAINER),
+		ORE_PACK(Volcanic.Reward.ORE_PACK);
+
+		private final Volcanic.Reward reward;
+
+		VolcanicReward(Volcanic.Reward reward)
+		{
+			this.reward = reward;
+		}
+
+		/** The reward, or null for none. */
+		public Volcanic.Reward reward()
 		{
 			return reward;
 		}
@@ -760,6 +794,18 @@ public interface CodexMinigamePilotConfig extends Config
 		return true;
 	}
 
+	@ConfigItem(
+		keyName = "volcanicMine",
+		name = "Volcanic Mine",
+		description = "Keep every Volcanic Mine game (points, Mining experience, length, how it ended), your points and experience an hour, and the next step at the entrance. Inside the mine only the game's own figures are shown, with no cues or warnings",
+		section = MINIGAMES,
+		position = 32
+	)
+	default boolean volcanicMine()
+	{
+		return true;
+	}
+
 	@ConfigItem(keyName = "plaque", name = "Step plaque", description = "Show the next step on a small plaque in the game view", section = GUIDANCE, position = 0)
 	default boolean plaque()
 	{
@@ -959,6 +1005,18 @@ public interface CodexMinigamePilotConfig extends Config
 	default boolean nmzHalfImbues()
 	{
 		return false;
+	}
+
+	@ConfigItem(
+		keyName = "volcanicReward",
+		name = "Volcanic Mine reward",
+		description = "What your Volcanic Mine points are for: the prospector kit or a piece of it, the ash covered tome, the large water container or ore packs, with the time to it at your pace",
+		section = GOALS,
+		position = 14
+	)
+	default VolcanicReward volcanicReward()
+	{
+		return VolcanicReward.PROSPECTOR_KIT;
 	}
 
 	@ConfigItem(

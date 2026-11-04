@@ -56,6 +56,8 @@ public class SavedSettingsTest
 			"gnomeRestaurant",
 			// Nightmare Zone.
 			"nightmareZone", "nmzReward", "nmzHalfImbues",
+			// Volcanic Mine.
+			"volcanicMine", "volcanicReward",
 			"fieldNotes")), keys);
 		assertEquals("codexminigamepilot", CodexMinigamePilotConfig.GROUP);
 	}

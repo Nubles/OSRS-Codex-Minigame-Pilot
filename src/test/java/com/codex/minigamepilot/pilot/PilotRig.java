@@ -29,6 +29,7 @@ import net.runelite.api.TileObject;
  * {@code wintertodt reward REWARD|none} and {@code wintertodt warmth N} (the Wintertodt, by {@code Wintertodt.Reward} name;
  * setting names wintertodt and wintertodtFletch), setting name gnomeRestaurant (the Gnome Restaurant),
  * {@code nmz reward REWARD|none} (the Nightmare Zone, by {@code Nmz.Reward} name; setting names nightmareZone and nmzHalfImbues),
+ * {@code volcanic reward REWARD|none} (the Volcanic Mine, by {@code Volcanic.Reward} name; setting name volcanicMine),
  * {@code mixology plan ALL|PER_PASTE}, {@code mixology reward REWARD|none} and {@code mixology cue SPOTANIM} (a Mastering
  * Mixology setting, or a spot animation appearing, by its {@code SpotanimID} name; setting names mixology and mixologyCues),
  * {@code bank ITEM COUNT} (the bank as last seen), {@code teleport "Name" "Source" X Y SECONDS carried|banked},
@@ -110,6 +111,7 @@ final class PilotRig implements Rig
 		settings.put("gnomeRestaurant", true);
 		settings.put("nightmareZone", true);
 		settings.put("nmzHalfImbues", false);
+		settings.put("volcanicMine", true);
 		pilots = new Pilots(game.client(), null, c -> { }, new FieldNotes(() -> null, new Gson()),
 			bests::get, bests::put, game::price, store::get, store::put, () -> bank);
 		pilots.atlas(() -> teleports == null ? null : com.codex.minigamepilot.core.WayfinderAtlas.of(walkPace, teleports));
@@ -157,6 +159,16 @@ final class PilotRig implements Rig
 				wintertodt();
 				pilots.gnomeRestaurant(settings.get("gnomeRestaurant"));
 				nmz();
+				volcanic();
+				return true;
+			case "volcanic":
+				// volcanic reward REWARD|none
+				if (!"reward".equals(args.get(0)))
+				{
+					throw new IllegalArgumentException("volcanic reward REWARD|none");
+				}
+				volcanicReward = "none".equals(args.get(1)) ? null : com.codex.minigamepilot.core.Volcanic.Reward.valueOf(args.get(1));
+				volcanic();
 				return true;
 			case "nmz":
 				// nmz reward REWARD|none
@@ -395,6 +407,13 @@ final class PilotRig implements Rig
 	private int wintertodtWarmth = 40;
 
 	private com.codex.minigamepilot.core.Nmz.Reward nmzReward = com.codex.minigamepilot.core.Nmz.Reward.HERB_BOX;
+
+	private com.codex.minigamepilot.core.Volcanic.Reward volcanicReward = com.codex.minigamepilot.core.Volcanic.Reward.PROSPECTOR_KIT;
+
+	private void volcanic()
+	{
+		pilots.volcanicMine(settings.get("volcanicMine"), volcanicReward);
+	}
 
 	private void nmz()
 	{

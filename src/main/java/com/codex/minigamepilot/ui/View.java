@@ -29,7 +29,8 @@ public final class View
 		BARBARIAN_ASSAULT("Barbarian Assault"),
 		WINTERTODT("Wintertodt"),
 		GNOME_RESTAURANT("Gnome Restaurant"),
-		NIGHTMARE_ZONE("Nightmare Zone");
+		NIGHTMARE_ZONE("Nightmare Zone"),
+		VOLCANIC_MINE("Volcanic Mine");
 
 		private final String title;
 
@@ -643,6 +644,8 @@ public final class View
 			"Each order's recipe one step at a time with what you lack, then the customer marked with the time left, every delivery kept with its tip, and every gnome dish as a checklist."));
 		v.brief(new Brief(Activity.NIGHTMARE_ZONE, null,
 			"Every dream kept with its bosses, points, time and potions, your points an hour by the bosses you dream, and the time to your imbue or herb boxes."));
+		v.brief(new Brief(Activity.VOLCANIC_MINE, null,
+			"Every game kept with its points, Mining experience, length and how it ended, points and experience an hour at your pace, and the time to your prospector kit or tome."));
 		return v;
 	}
 

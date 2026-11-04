@@ -1,6 +1,6 @@
 # Codex Minigame Pilot
 
-**One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes, Guardians of the Rift, Tempoross, the Giants' Foundry, Mastering Mixology, Vale Totems, the Tithe Farm, stealing artefacts, stealing valuables, the Rogues' Den maze, the Wintertodt and Gnome Restaurant deliveries, with Barbarian Assault and Nightmare Zone companions.** The Pilot watches the minigame you are in and always shows the single thing to do next: what to click, lit in gold in the world, the path there drawn on the ground and the minimap, and a line on why. You still do every click. It only reads the game and draws.
+**One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes, Guardians of the Rift, Tempoross, the Giants' Foundry, Mastering Mixology, Vale Totems, the Tithe Farm, stealing artefacts, stealing valuables, the Rogues' Den maze, the Wintertodt and Gnome Restaurant deliveries, with Barbarian Assault, Nightmare Zone and Volcanic Mine companions.** The Pilot watches the minigame you are in and always shows the single thing to do next: what to click, lit in gold in the world, the path there drawn on the ground and the minimap, and a line on why. You still do every click. It only reads the game and draws.
 
 It is part of the **Codex** suite of RuneLite plugins and shares their look: warm ink, aged gold and the game's own fonts.
 
@@ -227,6 +227,23 @@ NMZ Optimal Points and NMZ Utilities, two of the Plugin Hub's most installed plu
 </p>
 <p align="center">
   <img src="docs/screenshots/nmz-plaque-lobby.png" alt="Plaque: take your potions">
+</p>
+
+### Volcanic Mine (a companion, information only inside)
+Volcanic Mine and Ultimate Volcanic Mine, two of the Plugin Hub's most installed plugins, warn players of the vents, the eruption and the end of the game. The Pilot keeps what those games come to instead, and inside the mine it only shows what the game itself shows: no cue to act and no warning timed to the vents or the eruption.
+- **Every game kept.** Per account: its points from the game's own count, the Mining experience it gave (counted until a few ticks after you come out), its length, the players in it, and how it ended: left by the exit, died, caught by the eruption, or logged out.
+- **Your pace.** Points and Mining experience an hour in the mine, and with the waits between games counted once you play a few in a sitting; by team size too, from your own games only.
+- **The reward you are after.** The prospector kit (only the pieces you do not own yet, whether bought here or at the Motherlode Mine), one piece of it, the ash covered tome, the large water container or ore packs, at Petrified Pete's prices. Points are read from his shop's balance and your games since; the points left and the time to it at your pace.
+- **At the entrance, one step.** Mining to 50 if you lack it; the reward once you hold its points; 30 numulite for the fee unless you have been seen to go in without paying; else pay Petrified Pete and go in.
+- **In the mine, figures only.** Time left from the game's own clock, stability, each chamber's pressure once checked, the players, this game's points and experience. No plaque in the game view.
+
+<p align="center">
+  <img src="docs/screenshots/volcanic-panel-entrance.png" width="225" alt="Volcanic Mine: the entrance, the kit, your games">
+  <img src="docs/screenshots/volcanic-panel-mine.png" width="225" alt="Volcanic Mine: in the mine, figures only">
+  <img src="docs/screenshots/volcanic-panel-ore-packs.png" width="225" alt="Volcanic Mine: ore packs">
+</p>
+<p align="center">
+  <img src="docs/screenshots/volcanic-plaque-buy.png" alt="Plaque: buy the prospector helmet">
 </p>
 
 ### Barbarian Assault (a companion, outside the fight)
