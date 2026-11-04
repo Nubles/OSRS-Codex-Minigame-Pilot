@@ -116,7 +116,18 @@ public final class Step
 		/** Oriana, who trades valuables in for coins. */
 		ORIANA,
 		/** A street urchin who tells you which house is vacant. */
-		URCHIN
+		URCHIN,
+		// Rogues' Den
+		/** The maze's doorway, the way in from the lobby. */
+		DOORWAY,
+		/** Emerald Benedict, the den's banker. */
+		BANKER,
+		/** The obstacle of the maze leg you are on. */
+		OBSTACLE,
+		/** A rogue guard, to blind with the flash powder. */
+		GUARD,
+		/** A wall safe at the end of the maze. */
+		WALL_SAFE
 	}
 
 	private final String verb;

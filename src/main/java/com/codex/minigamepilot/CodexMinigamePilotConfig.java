@@ -551,6 +551,30 @@ public interface CodexMinigamePilotConfig extends Config
 		return true;
 	}
 
+	@ConfigItem(
+		keyName = "roguesDen",
+		name = "Rogues' Den",
+		description = "Guide the Rogues' Den maze in Burthorpe: in the lobby the levels, the crate to search, the bank and the doorway; in the maze the next leg of the wiki's way through and its obstacle, the right tile and the shortcut at 80 Thieving; every run kept with its time and where you were sent back, and the rogue set's time at your pace",
+		section = MINIGAMES,
+		position = 24
+	)
+	default boolean roguesDen()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "roguesDenTraps",
+		name = "Mark maze traps",
+		description = "In the Rogues' Den maze, wash the floor traps, wall traps and spinning blades near you in ember",
+		section = MINIGAMES,
+		position = 25
+	)
+	default boolean roguesDenTraps()
+	{
+		return true;
+	}
+
 	@ConfigItem(keyName = "plaque", name = "Step plaque", description = "Show the next step on a small plaque in the game view", section = GUIDANCE, position = 0)
 	default boolean plaque()
 	{

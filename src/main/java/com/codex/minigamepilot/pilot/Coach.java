@@ -141,6 +141,8 @@ final class Coach
 			case ARTEFACTS:
 			case HOUSES:
 				return Skill.THIEVING;
+			case ROGUES_DEN:
+				return Skill.AGILITY;
 			default:
 				return null;
 		}
@@ -378,6 +380,16 @@ final class Coach
 				return "Oriana";
 			case URCHIN:
 				return "the urchin";
+			case DOORWAY:
+				return "the doorway";
+			case BANKER:
+				return "Emerald Benedict";
+			case OBSTACLE:
+				return "the obstacle";
+			case GUARD:
+				return "the guard";
+			case WALL_SAFE:
+				return "the wall safe";
 			default:
 				return null;
 		}

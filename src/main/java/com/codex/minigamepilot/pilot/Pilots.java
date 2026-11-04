@@ -45,6 +45,8 @@ public final class Pilots
 	private volatile boolean useArtefacts = true;
 	private final HousesPilot valuables = new HousesPilot();
 	private volatile boolean useValuables = true;
+	private final RoguesDenPilot den = new RoguesDenPilot();
+	private volatile boolean useDen = true;
 	private final Coach coach;
 	private final Recorder recorder;
 	private final IntUnaryOperator price;
@@ -87,12 +89,13 @@ public final class Pilots
 		artefacts.setStore(load, saveKey);
 		valuables.setStore(load, saveKey);
 		valuables.setPrice(price);
+		den.setStore(load, saveKey);
 		this.coach = new Coach(loadBests, saveBests);
 		this.recorder = new Recorder(notes);
 		this.scene = new SceneIndex(client, id -> MotherlodePilot.isWatched(id) || FurnacePilot.isWatched(id) || HomesPilot.isWatched(id)
 			|| RiftPilot.isWatched(id) || StormPilot.isWatched(id) || FoundryPilot.isWatched(id)
 			|| MixologyPilot.isWatched(id) || TotemsPilot.isWatched(id) || TithePilot.isWatched(id)
-			|| ArtefactsPilot.isWatched(id) || HousesPilot.isWatched(id));
+			|| ArtefactsPilot.isWatched(id) || HousesPilot.isWatched(id) || RoguesDenPilot.isWatched(id));
 		this.homes = new HomesPilot(saved, save, load, saveKey);
 		homes.readers(null, stock);
 	}
@@ -188,6 +191,13 @@ public final class Pilots
 		valuables.settings(owners, level);
 	}
 
+	/** The "Rogues' Den" settings: on, and mark the maze's traps. */
+	public void roguesDen(boolean on, boolean traps)
+	{
+		useDen = on;
+		den.settings(traps);
+	}
+
 	/** A spot animation appeared in the scene: Mastering Mixology's station cues. */
 	public void spotanim(int id)
 	{
@@ -241,6 +251,7 @@ public final class Pilots
 			tithe.newAccount();
 			artefacts.newAccount();
 			valuables.newAccount();
+			den.newAccount();
 			said.clear();
 			unsaid.clear();
 		}
@@ -426,6 +437,13 @@ public final class Pilots
 			state = valuables.lastState;
 			units = valuables.units();
 		}
+		else if (useDen && den.active(client, scene, npcs()))
+		{
+			activity = View.Activity.ROGUES_DEN;
+			flight = den.fly(client, scene, npcs(), now);
+			state = den.lastState;
+			units = den.units();
+		}
 		else
 		{
 			activity = View.Activity.NONE;
@@ -474,6 +492,10 @@ public final class Pilots
 			else if (last == View.Activity.HOUSES)
 			{
 				valuables.left(now);
+			}
+			else if (last == View.Activity.ROGUES_DEN)
+			{
+				den.left(now);
 			}
 			last = activity;
 		}
@@ -557,6 +579,11 @@ public final class Pilots
 		{
 			// Logging out and in leaves a house with what you hold.
 			valuables.relogged(now);
+		}
+		else if (last == View.Activity.ROGUES_DEN)
+		{
+			// A run under way ends where it stood.
+			den.relogged(now);
 		}
 		motherlode.relogged();
 		furnace.relogged();
@@ -678,6 +705,7 @@ public final class Pilots
 		v.brief(tithe.brief());
 		v.brief(artefacts.brief());
 		v.brief(valuables.brief());
+		v.brief(den.brief());
 		return v;
 	}
 }

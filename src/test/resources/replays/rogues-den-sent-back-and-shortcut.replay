@@ -1,0 +1,156 @@
+# Rogues' Den at 82 Thieving: the shortcut, a run sent back in the trap room, a run whose safe
+# crack fails, a rogue kit, and a logout in the maze. The rogue set is counted from the bank, a
+# banked crate as a piece still to choose, with the time to the rest at the pace of the runs kept.
+#
+# Facts (OSRS wiki, Rogues' Den; Rogue equipment; Rogue's equipment crate):
+#  - "If you have at least 80 Thieving, unlock the doors and proceed to go right, left, left, and
+#    skip to post-shortcut."
+#  - "You immediately leave the maze if you trigger a trap or touch a dangerous obstacle."
+#  - "Note: There is a chance to fail the lockpicking and end up without reward."
+#  - the crate chance at 80 Thieving is 43.9% (the wiki's table); a crate lets you choose the piece
+#  - each piece worn: 15% double loot
+include /replays/scenes/rogues-den.scene
+skill HITPOINTS 10
+skill AGILITY 70
+skill THIEVING 82
+# One run kept already: to the safe in 200 ticks (two minutes) with a crate.
+saved roguesden.kept "1;1767225000000,200,1,SAFE,C,800,30"
+items BANK set ROGUESDEN_HELM 1 ROGUESDEN_BODY 1 ROGUESDEN_CRATE 1
+items INV clear
+tick
+expect step = "Enter the maze through the doorway"
+expect detail = "Your 80 Thieving opens the shortcut"
+expect lines ~ "Shortcut, 80 Thieving DONE"
+expect saved.roguesden.owned = "MASK,TOP"
+# Two owned, the banked crate a third.
+expect goal = "3/5"
+expect goal.pieces ~ "Rogue gloves NEXT"
+expect goal.note ~ "2 crates more: about 5 runs to the safe at 43.9% (the wiki, at 80 Thieving), about "
+
+# Run one: in, through the start, and sent back in the trap room.
+at 3017 5017
+items INV set ROGUESDEN_GEM 1
+tick
+expect lines.note = "Leg 1 of 15 · shortcut"
+at 3021 5020
+boost AGILITY 65
+tick
+at 3025 5021
+boost AGILITY 62
+tick
+at 3030 5025
+boost AGILITY 58
+tick
+at 3036 5031
+boost AGILITY 55
+tick
+at 3039 5033
+boost AGILITY 52
+tick
+at 3042 5036
+boost AGILITY 48
+tick
+expect step = "Between the two trap tiles, then the bend"
+expect detail = "Then unlock the doors: right, left, left, with your 80 Thieving"
+expect lines ~ "The trap room NEXT, The locked doors TODO, The final floor traps TODO"
+never lines ~ "passageway"
+
+# A trap: out to the lobby, the levels restored, a little experience.
+at 3010 5008
+items INV clear
+boost AGILITY 70
+xp AGILITY 737827
+tick 3
+expect saved.roguesden.kept ~ ",0,TRAP_ROOM,-,200,0"
+expect stat.Runs = "1"
+expect stat.To_the_safe = "0"
+expect pick = "1 of 2"
+expect supply.headline ~ "Quickest to the safe: 2:00"
+expect step = "Enter the maze through the doorway"
+
+# Run two: the shortcut to the finish, and the safe's crack fails.
+forget
+at 3017 5017
+items INV set ROGUESDEN_GEM 1
+tick
+at 3021 5020
+boost AGILITY 65
+tick
+at 3025 5021
+boost AGILITY 62
+tick
+at 3030 5025
+boost AGILITY 58
+tick
+at 3036 5031
+boost AGILITY 55
+tick
+at 3039 5033
+boost AGILITY 52
+tick
+at 3042 5036
+boost AGILITY 48
+tick
+# Past the doors: the finish's spinning blades.
+at 3081 5074
+tick
+expect step = "Past the spinning blades: stop, then run past the floor traps"
+at 3085 5079
+items INV set ROGUESDEN_GEM 1 ROGUESDEN_FLASH_POWDER 1
+tick
+expect step = "Use the flash powder on the guard, then run past"
+items INV set ROGUESDEN_GEM 1
+tick
+at 3091 5086
+boost AGILITY 45
+tick
+at 3093 5088
+boost AGILITY 42
+tick
+expect step = "Crack any wall safe"
+expect detail = "It teleports you out; the crack can fail"
+at 3010 5008
+items INV clear
+boost AGILITY 70
+xp AGILITY 738371
+tick 3
+expect saved.roguesden.kept ~ ",1,SAFE,-,544,0"
+expect stat.To_the_safe = "1"
+expect pick = "1 of 3"
+
+# Run three: straight to the safe's room, a rogue kit.
+at 3017 5017
+items INV set ROGUESDEN_GEM 1
+tick
+at 3095 5090
+tick
+expect step = "Crack any wall safe"
+at 3010 5008
+items INV set ROGUESDEN_KIT 1
+tick
+expect saved.roguesden.kept ~ ",1,SAFE,K,0,0"
+expect step = "Bank everything you carry"
+
+# Run four: a logout in the maze ends it where it stood, not timed.
+items INV clear
+at 3017 5017
+items INV set ROGUESDEN_GEM 1
+tick
+at 3021 5020
+boost AGILITY 65
+tick
+expect step = "Past the pendulum"
+state LOGIN_SCREEN
+items INV clear
+boost AGILITY 70
+state LOGGED_IN
+tick
+expect saved.roguesden.kept ~ ";1767225000000,200,1,SAFE,C,800,30;"
+expect saved.roguesden.kept ~ ",0,0,FIRST_PENDULUM,-,0,0"
+expect activity = ROGUES_DEN
+expect step = "Enter the maze through the doorway"
+
+# Wearing two pieces: the double loot they give.
+items WORN set ROGUESDEN_HELM 1 ROGUESDEN_BODY 1
+tick
+expect step = "Bank everything you wear"

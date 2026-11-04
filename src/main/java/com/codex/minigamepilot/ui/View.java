@@ -24,7 +24,8 @@ public final class View
 		TOTEMS("Vale Totems"),
 		TITHE("Tithe Farm"),
 		ARTEFACTS("Stealing Artefacts"),
-		HOUSES("Stealing Valuables");
+		HOUSES("Stealing Valuables"),
+		ROGUES_DEN("Rogues' Den");
 
 		private final String title;
 
@@ -628,6 +629,8 @@ public final class View
 			"The house Captain Khaled names, its ladder and drawers lit, the patrols marked on the way back, and every artefact kept with experience and coins an hour."));
 		v.brief(new Brief(Activity.HOUSES, null,
 			"The citizen an urchin has distracted, the vacant house once its owner has gone and how long you have, the open window out, and every haul kept with coins and experience an hour."));
+		v.brief(new Brief(Activity.ROGUES_DEN, null,
+			"The maze one leg at a time with its traps marked, the right tile and the shortcut at 80 Thieving, every run kept, and the rogue set's time at your pace."));
 		return v;
 	}
 

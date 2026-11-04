@@ -1,0 +1,207 @@
+# Rogues' Den: a whole run by the long route. In the lobby the bank comes first (nothing may be
+# carried or worn), then the doorway; in the maze each leg of the wiki's walkthrough in turn, moved
+# on by the Agility and Thieving the obstacles drain, the tile and the flash powder, and the rooms'
+# own obstacles coming near; out by the safe with a crate, and the run kept.
+#
+# Facts (OSRS wiki, Rogues' Den; Mystic jewel; Tiles (Rogues' Den); Rogue's equipment crate):
+#  - "Entering the maze requires level 50[not boostable] in both Thieving and Agility, and no items
+#    can be brought or worn inside."; "Emerald Benedict runs the bank."
+#  - "Players must talk to Brian O'Richard to enter the maze before playing the first time"
+#  - the mystic jewel is "automatically given when entering the Rogues' Den maze"
+#  - drains: contortion bars 5, pendulums 3, ledges 4, floor blades 3 Agility; a searched trap 1 Thieving
+#  - the walkthrough's order: bars and pendulum, stairs, the trap line, either ledge, a blade, the
+#    pendulums, the ledge, the trap room; (under 80 Thieving) the passageway and blade, the running
+#    passageway, the spinning blades and ledge, "Search wall" on the first of four walls, "Grab the
+#    south-eastern tile", the mosaic door, the grills, the three walls, the pendulum, the floor
+#    traps; then the spinning blades, the flash powder, the guard, "the last two pendulums", a safe
+#  - "Only the item named Tile rather than Tiles is the correct item for the maze."
+#  - a crate gives "the choice to either receive one piece of rogue equipment or a rogue kit"
+#  - the crate chance at 60 Thieving is 40.8% (the wiki's table)
+include /replays/scenes/rogues-den.scene
+skill HITPOINTS 10
+skill AGILITY 60
+skill THIEVING 60
+items INV set COINS 100
+items WORN set ROGUESDEN_BOOTS 1
+tick
+expect activity = ROGUES_DEN
+expect step = "Bank everything you carry and wear"
+expect npc = "Emerald Benedict"
+expect place = "Rogues' Den · lobby"
+expect lines ~ "Nothing carried or worn TODO"
+expect lines.note = "First time: see Brian O'Richard"
+# Rogue boots worn: owned from now on.
+expect saved.roguesden.owned = "BOOTS"
+expect goal = "1/5"
+expect goal.pieces ~ "Rogue boots DONE"
+expect hazards = -
+
+items INV clear
+items WORN clear
+tick
+expect step = "Enter the maze through the doorway"
+expect object = doorway
+expect detail = "The first time, talk to Brian O'Richard before you enter"
+
+# Through the doorway: the mystic jewel is given.
+at 3017 5017
+items INV set ROGUESDEN_GEM 1
+tick
+expect step = "West through the contortion bars"
+expect object = bars
+expect place = "Rogues' Den · start"
+expect lines.note = "Leg 1 of 24 · long route"
+expect hazards = 1
+never target = DOORWAY
+
+at 3021 5020
+boost AGILITY 55
+tick
+expect step = "Past the pendulum"
+expect object = firstPendulum
+
+at 3025 5021
+boost AGILITY 52
+tick
+expect step = "Stay on the stairs to the north-west gate"
+expect target = NONE
+
+# Either ledge: its drain passes the stairs and the trap line, which report nothing.
+at 3030 5025
+boost AGILITY 48
+tick
+expect step = "Left-click a blade to cross it"
+expect object = blade
+
+at 3036 5031
+boost AGILITY 45
+tick
+expect step = "Past the pendulums"
+expect object = pendulum2
+
+at 3039 5033
+boost AGILITY 42
+tick
+expect step = "Walk over the ledge to the next room"
+expect object = ledge
+# The room's second pendulum changes nothing.
+boost AGILITY 39
+tick
+expect step = "Walk over the ledge to the next room"
+
+at 3042 5036
+boost AGILITY 35
+tick
+expect step = "Between the two trap tiles, then the bend"
+expect hazards = 2
+expect lines ~ "The ledge DONE, The trap room NEXT, The first passageway TODO"
+
+# The long route: over the blade by the passageway.
+at 3052 5045
+boost AGILITY 32
+tick
+expect step = "East: stop before the traps, then run to the passageway"
+expect object = passage
+
+at 3056 5048
+boost AGILITY 28
+tick
+expect step = "Search the first wall, then run past the other three"
+expect verb = "Search"
+expect object = wall1
+# The other three walls are run past: marked as traps, not lit.
+expect hazards = 5
+
+boost THIEVING 59
+tick
+expect step = "Take the south-eastern tile"
+
+# One of the three called Tiles: the wrong one.
+at 3064 5054
+items INV set ROGUESDEN_GEM 1 ROGUESDEN_PUZZLE_MOSAIC_TILE3 1
+tick
+expect step = "Drop the Tiles: take the one called Tile"
+expect target = ITEM
+
+items INV set ROGUESDEN_GEM 1 ROGUESDEN_PUZZLE_MOSAIC_TILE1 1
+tick
+expect step = "Open the door and click the tile in the puzzle"
+expect object = mosaic
+
+items INV set ROGUESDEN_GEM 1
+tick
+expect step = "Through the grills by the one correct path"
+expect object = grillA
+expect others = grillB
+
+at 3074 5066
+boost THIEVING 58
+tick
+expect step = "Run past the traps, then the pendulum"
+
+at 3076 5069
+boost AGILITY 25
+tick
+expect step = "Left: stop before the first floor trap, run past them all"
+
+# The finish's spinning blades come near.
+at 3081 5074
+tick
+expect step = "Past the spinning blades: stop, then run past the floor traps"
+expect place = "Rogues' Den · finish"
+
+# The guard's room.
+at 3085 5079
+tick
+expect step = "Pick up the flash powder"
+
+items INV set ROGUESDEN_GEM 1 ROGUESDEN_FLASH_POWDER 1
+tick
+expect step = "Use the flash powder on the guard, then run past"
+expect npc = "Rogue Guard"
+expect target = GUARD
+
+items INV set ROGUESDEN_GEM 1
+tick
+expect step = "Past the last two pendulums"
+
+at 3091 5086
+boost AGILITY 22
+tick
+expect step = "Past the last two pendulums"
+at 3093 5088
+boost AGILITY 19
+tick
+expect step = "Crack any wall safe"
+expect object = safeA
+expect place = "Rogues' Den · the safes"
+expect detail = "The crack rolls on your Thieving now, 58; it can fail"
+
+# The safe: out to the lobby with a crate, the levels restored and the run's experience.
+forget
+at 3010 5008
+items INV set ROGUESDEN_CRATE 1
+boost AGILITY 60
+boost THIEVING 60
+xp AGILITY 274270
+xp THIEVING 273766
+tick
+expect saved.roguesden.kept ~ ",1,SAFE,C,528,24"
+expect step = "Search the crate: choose the rogue mask"
+expect target = ITEM
+expect stat.Runs = "1"
+expect stat.To_the_safe = "1"
+expect stat.Crates = "1"
+expect goal = "2/5"
+expect goal.pieces ~ "Rogue mask NEXT"
+expect supply.headline ~ "Quickest to the safe: "
+expect hazards = -
+
+# The mask chosen.
+items INV set ROGUESDEN_HELM 1
+tick
+expect saved.roguesden.owned = "MASK,BOOTS"
+expect step = "Bank everything you carry"
+expect goal = "2/5"
+expect goal.note ~ "3 crates more: about 7 runs to the safe at 40.8% (the wiki, at 60 Thieving), about "
+expect goal.note ~ " at your pace"

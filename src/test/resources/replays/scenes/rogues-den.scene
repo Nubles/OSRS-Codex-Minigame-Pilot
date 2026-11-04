@@ -1,0 +1,58 @@
+# A schematic Rogues' Den for replays. Not the real map: the wiki gives the way through the maze
+# as rooms and obstacles in order, not tiles, so every tile here is made up. The obstacles stand
+# in the wiki's order along a diagonal, each room well apart from the next, the lobby in the
+# south-west corner.
+#
+# Facts:
+#  - names are RuneLite's (net.runelite.api.gameval): Brian O'Richard ROGUESDEN_MAZEMASTER (the
+#    wiki's NPC ID 3189), Emerald Benedict ROGUESDEN_BANKER ("Emerald Benedict runs the bank"),
+#    the Doorway ROGUESDEN_MAZEENTRANCE, Contortion Bars ROGUESDEN_OBSTACLE_CONTORTION_BARS,
+#    Pendulum ROGUESDEN_TRAP_FLOOR_PENDULUM, Ledge ROGUESDEN_OBSTACLE_FLOOR_BALANCING_LEDGE and
+#    _WALL_HANGING_LEDGE, Blade ROGUESDEN_TRAP_FLOOR_TIMEDBLADE, Passageway ROGUESDEN_PASSAGE_ACROSS,
+#    the traps ("Floor" ROGUESDEN_TRAP_FLOOR_SPIKES and _PITFALL, "Wall" ROGUESDEN_TRAP_WALL_SPIKES
+#    and _SAW, "Spinning blades" ROGUESDEN_TRAP_FLOOR_SCYTHEBLADE), the mosaic Door
+#    ROGUESDEN_PUZZLE_DOOR_MOSAIC, the Grills ROGUESDEN_OBSTACLE_BLOCKING_DOOR_*, a Rogue Guard
+#    ROGUESDEN_GUARD1 and the maze's Wall safe ROGUESDEN_WALLDECOR_MAZESAFE
+#  - the order is the wiki's walkthrough (Rogues' Den: "Pre-shortcut", "Long route", "Post-shortcut")
+#
+#   lobby (3005-3014, 5005-5014)   start (3020-3048)   long route (3050-3078)   finish (3080-3098)
+
+scene 3000 5000
+
+at 3010 5008
+npc ROGUESDEN_MAZEMASTER "Brian O'Richard" 3008 5010 as brian
+npc ROGUESDEN_BANKER "Emerald Benedict" 3006 5006 as banker
+object ROGUESDEN_MAZEENTRANCE 3012 5014 as doorway
+
+# The start: floor traps, the contortion bars and a pendulum; two ledges; a blade, pendulums and a ledge; the trap room.
+object ROGUESDEN_TRAP_FLOOR_SPIKES 3018 5018 as startTrap
+object ROGUESDEN_OBSTACLE_CONTORTION_BARS 3020 5020 as bars
+object ROGUESDEN_TRAP_FLOOR_PENDULUM 3024 5021 as firstPendulum
+object ROGUESDEN_OBSTACLE_FLOOR_BALANCING_LEDGE 3030 5024 as ledgeA
+object ROGUESDEN_OBSTACLE_WALL_HANGING_LEDGE 3030 5027 as ledgeB
+object ROGUESDEN_TRAP_FLOOR_TIMEDBLADE 3036 5030 as blade
+object ROGUESDEN_TRAP_FLOOR_PENDULUM 3039 5032 as pendulum2
+object ROGUESDEN_OBSTACLE_FLOOR_BALANCING_LEDGE 3042 5035 as ledge
+object ROGUESDEN_TRAP_FLOOR_PITFALL 3046 5038 as roomTrap
+object ROGUESDEN_TRAP_WALL_SPIKES 3047 5040 as roomWall
+
+# The long route: a passageway and a blade; the four walls; the tile room's mosaic door; the grills; a pendulum.
+object ROGUESDEN_PASSAGE_ACROSS 3050 5042 as passage
+object ROGUESDEN_TRAP_FLOOR_TIMEDBLADE 3052 5044 as longBlade
+object ROGUESDEN_TRAP_WALL_SPIKES 3058 5050 as wall1
+object ROGUESDEN_TRAP_WALL_SAW 3059 5050 as wall2
+object ROGUESDEN_TRAP_WALL_SPIKES 3060 5050 as wall3
+object ROGUESDEN_TRAP_WALL_SAW 3061 5050 as wall4
+object ROGUESDEN_PUZZLE_DOOR_MOSAIC 3066 5056 as mosaic
+object ROGUESDEN_OBSTACLE_BLOCKING_DOOR_NOENTRY 3070 5062 as grillA
+object ROGUESDEN_OBSTACLE_BLOCKING_DOOR_ENTER 3071 5062 as grillB
+object ROGUESDEN_TRAP_FLOOR_PENDULUM 3076 5068 as longPendulum
+
+# The finish: spinning blades and floor traps, a guard, the last two pendulums, the safes.
+object ROGUESDEN_TRAP_FLOOR_SCYTHEBLADE 3082 5075 as spin
+object ROGUESDEN_TRAP_FLOOR_SPIKES 3084 5077 as finalTrap
+npc ROGUESDEN_GUARD1 "Rogue Guard" 3090 5082 as guard
+object ROGUESDEN_TRAP_FLOOR_PENDULUM 3091 5085 as lastPendulumA
+object ROGUESDEN_TRAP_FLOOR_PENDULUM 3093 5087 as lastPendulumB
+object ROGUESDEN_WALLDECOR_MAZESAFE 3097 5092 as safeA
+object ROGUESDEN_WALLDECOR_MAZESAFE 3099 5092 as safeB

@@ -94,6 +94,10 @@ public class SceneGuide extends Overlay
 				}
 			}
 		}
+		for (TileObject o : f.hazards)
+		{
+			drawHazard(g, o);
+		}
 		for (NPC n : f.wary)
 		{
 			drawWary(g, n);
@@ -197,6 +201,21 @@ public class SceneGuide extends Overlay
 				plate(g, f.step.getVerb(), at.getX(), at.getY(), Theme.GOLD);
 			}
 		}
+	}
+
+	/** A trap to keep clear of: its tile washed and rimmed in ember, under everything else. */
+	private static void drawHazard(Graphics2D g, TileObject o)
+	{
+		Shape tile = o.getCanvasTilePoly();
+		if (tile == null)
+		{
+			return;
+		}
+		g.setColor(Ink.WARY_FILL);
+		g.fill(tile);
+		g.setStroke(Ink.THIN);
+		g.setColor(Ink.WARY_RIM);
+		g.draw(tile);
 	}
 
 	/**
