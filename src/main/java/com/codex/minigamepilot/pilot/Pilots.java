@@ -63,6 +63,8 @@ public final class Pilots
 	private volatile boolean useBrewing = true;
 	private final GardenPilot garden = new GardenPilot();
 	private volatile boolean useGarden = true;
+	private final SoulWarsPilot soulWars = new SoulWarsPilot();
+	private volatile boolean useSoulWars = true;
 	private final Coach coach;
 	private final Recorder recorder;
 	private final IntUnaryOperator price;
@@ -116,6 +118,7 @@ public final class Pilots
 		barracuda.setStore(load, saveKey);
 		brewing.setStore(load, saveKey);
 		garden.setStore(load, saveKey);
+		soulWars.setStore(load, saveKey);
 		this.coach = new Coach(loadBests, saveBests);
 		this.recorder = new Recorder(notes);
 		this.scene = new SceneIndex(client, id -> MotherlodePilot.isWatched(id) || FurnacePilot.isWatched(id) || HomesPilot.isWatched(id)
@@ -214,6 +217,18 @@ public final class Pilots
 	{
 		useGarden = on;
 		garden.settings(season, goal, target);
+	}
+
+	/**
+	 * The "Soul Wars" settings: on, the reward zeal is saved for (null for none), the skill and level
+	 * bought with zeal (0 for the next), the zeal to price in experience (0 for the tokens held), and
+	 * whether imbues are at half price.
+	 */
+	public void soulWars(boolean on, com.codex.minigamepilot.core.SoulWars.Reward reward, com.codex.minigamepilot.core.SoulWars.ZealSkill skill,
+		int level, int spend, boolean halfImbue)
+	{
+		useSoulWars = on;
+		soulWars.settings(reward, skill, level, spend, halfImbue);
 	}
 
 	/** The "Tempoross" settings: on, cook before loading, and the storm at which to load what you hold. */
@@ -349,6 +364,7 @@ public final class Pilots
 			barracuda.newAccount();
 			brewing.newAccount();
 			garden.newAccount();
+			soulWars.newAccount();
 			said.clear();
 			unsaid.clear();
 		}
@@ -495,6 +511,11 @@ public final class Pilots
 		{
 			garden.watch(client, npcs(), scene, now);
 		}
+		// A Soul Wars game is followed every tick too, so its end, its zeal and a logout are kept.
+		if (useSoulWars)
+		{
+			soulWars.watch(client, now);
+		}
 		if (useMotherlode && MotherlodePilot.inMine(client))
 		{
 			activity = View.Activity.MOTHERLODE;
@@ -635,6 +656,13 @@ public final class Pilots
 			state = garden.lastState;
 			units = garden.units();
 		}
+		else if (useSoulWars && soulWars.active(client))
+		{
+			activity = View.Activity.SOUL_WARS;
+			flight = soulWars.fly(client, now);
+			state = soulWars.lastState;
+			units = soulWars.units();
+		}
 		else if (useAssault && assault.active(client, scene, npcs()))
 		{
 			activity = View.Activity.BARBARIAN_ASSAULT;
@@ -726,6 +754,10 @@ public final class Pilots
 			else if (last == View.Activity.SORCERESS_GARDEN)
 			{
 				garden.left();
+			}
+			else if (last == View.Activity.SOUL_WARS)
+			{
+				soulWars.left();
 			}
 			last = activity;
 		}
@@ -831,6 +863,8 @@ public final class Pilots
 		brewing.relogged(client, now, client.getTickCount());
 		// A trip to the garden's fountain already made is kept on logging out.
 		garden.relogged(client, now, client.getTickCount());
+		// A Soul Wars game ends on logging out.
+		soulWars.relogged(client, now, client.getTickCount());
 		motherlode.relogged();
 		furnace.relogged();
 		coach.left();
@@ -960,6 +994,7 @@ public final class Pilots
 		v.brief(barracuda.brief(client.getRealSkillLevel(net.runelite.api.Skill.SAILING)));
 		v.brief(brewing.brief());
 		v.brief(garden.brief());
+		v.brief(soulWars.brief());
 		return v;
 	}
 }

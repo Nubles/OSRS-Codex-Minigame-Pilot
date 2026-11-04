@@ -1,0 +1,111 @@
+# Soul Wars: Nomad's camp with three games already kept, a game for the red team played to its end,
+# its zeal read from the rise in your tokens and its result and your part from the end-of-game scroll,
+# the Ectoplasmator bought once affordable, and what zeal buys at your levels. Information only:
+# never a plaque, a target or a route, in the camp or in the game.
+#
+# Facts (OSRS wiki):
+#  - Soul Wars: "Players require a total level of 500 and a combat level of 40 to play Soul Wars."
+#  - Soul Wars: "players on the winning team can get up to 60 zeal." "Each game lasts up to 15 minutes."
+#  - Soul Wars/Rewards: Ectoplasmator, 250 Zeal Tokens; "Exp = floor(Level^2/600) x N", N = 30 for Attack.
+# RuneLite: Zeal Tokens held are VarPlayerID.SOUL_WARS_ZEAL_TOKENS (the shop's "Zeal Tokens:" line,
+# [proc,soul_wars_display_zeal]); the overlay, lobby and scroll are InterfaceID.SoulWarsGame, SoulWarsLobby
+# and SoulWarsGameEnd; the arena is region 8749 (RuneLite's loot tracker). The scroll's texts are schematic.
+soulwars reward ECTOPLASMATOR
+# Three games kept, twenty minutes apart: 54, 36 and 45 zeal.
+saved soulwars.kept "1;1767221000000,1500,b,w,54,3,1,-1,-1,-1,-1,-1,f;1767222200000,1500,b,l,36,0,2,-1,-1,-1,-1,-1,f;1767223400000,1500,r,d,45,2,2,-1,-1,-1,-1,-1,f"
+scene 2160 2800
+at 2209 2855
+skill ATTACK 70
+skill STRENGTH 70
+skill DEFENCE 70
+skill HITPOINTS 70
+skill RANGED 60
+skill MAGIC 60
+skill PRAYER 52
+skill MINING 40
+varp SOUL_WARS_ZEAL_TOKENS 230
+varp SOUL_WARS_TOTAL_WINS 5
+varp SOUL_WARS_TOTAL_GAMES 9
+never quiet = false
+never target != NONE
+always route = 0
+tick
+expect activity = SOUL_WARS
+expect place = "Soul Wars · Nomad's camp"
+expect step = "Join a game of Soul Wars"
+expect detail = "Up to 60 zeal a win, 50 a draw, 40 a loss, if you keep your activity bar up"
+expect stat.Zeal_Tokens = "230"
+# 81 zeal over 40 minutes with the waits between games.
+expect stat.Zeal_an_hour = "122"
+expect stat.Zeal_a_game = "45"
+expect goal = "230/250"
+expect goal.note = "20 zeal to go: about 1 game, 10m at your pace, waits counted."
+# 54 + 36 + 45 of 60 + 40 + 50.
+expect gauge.Zeal_of_the_most_possible = "90/100"
+expect pick = "33% won"
+# Attack 70: floor(4900/600) = 8, x 30 = 240 a token; 230 tokens buy 55,200.
+expect lines ~ "Attack 70 · 240 a token NEXT"
+expect lines ~ "Prayer 52 · 56 a token IDLE"
+expect lines.note = "230 held"
+expect supply.headline = "Best game: 54 zeal, won"
+
+# The lobby's overlay: still the camp.
+widget SoulWarsLobby.CONTENT text ""
+widget SoulWarsLobby.TIME_TEXT text "2:30"
+tick 50
+expect place = "Soul Wars · Nomad's camp"
+close SoulWarsLobby.CONTENT
+
+# Into the arena for the red team: the cape on, the overlay up.
+items WORN set COIF 1 SOUL_WARS_RED_CAPE 1
+at 2200 2900
+widget SoulWarsGame.CONTENT text ""
+widget SoulWarsGame.TIME_LEFT text "14:58"
+tick
+expect place = "Soul Wars · red team"
+expect step = "In a game for the red team"
+expect detail = "Your zeal is counted as it ends: up to 60 a win, 50 a draw, 40 a loss"
+expect stat.Time_left = "14:58"
+expect lines = -
+tick 1490
+
+# The game ends: out of the arena, then the scroll, the tokens risen by 57 and the game's counts by one.
+close SoulWarsGame.CONTENT
+close SoulWarsGame.TIME_LEFT
+items WORN set COIF 1
+at 2209 2855
+tick 3
+widget SoulWarsGameEnd.CONTENTS text ""
+widget SoulWarsGameEnd.ZEAL_EARNT_TEXT text "57"
+widget SoulWarsGameEnd.BLUE_SCORE_TEXT text "1"
+widget SoulWarsGameEnd.RED_SCORE_TEXT text "3"
+widget SoulWarsGameEnd.PLAYERS_KILLED_TEXT text "4"
+widget SoulWarsGameEnd.AREAS_CAPTURED_TEXT text "2"
+widget SoulWarsGameEnd.AVATAR_DAMAGE_TEXT text "310"
+widget SoulWarsGameEnd.OBELISK_SACRIFICES_TEXT text "24"
+widget SoulWarsGameEnd.BONES_BURIED_TEXT text "6"
+varp SOUL_WARS_ZEAL_TOKENS 287
+varp SOUL_WARS_TOTAL_WINS 6
+varp SOUL_WARS_TOTAL_GAMES 10
+tick
+expect place = "Soul Wars · the game's end"
+tick 5
+close SoulWarsGameEnd.CONTENTS
+tick 16
+expect saved.soulwars.kept ~ ",r,w,57,1,3,4,2,310,24,6,f"
+expect stat.Games_today = "1"
+expect supply.headline = "Best game: 57 zeal, won"
+expect pick = "50% won"
+# The tokens cover it now.
+expect step = "Buy the Ectoplasmator from Nomad"
+expect detail = "287 Zeal Tokens held; it costs 250"
+expect goal = "250/250"
+expect goal.note = "You hold the tokens: buy it from Nomad."
+
+# Bought: it is yours, kept as owned.
+varp SOUL_WARS_ZEAL_TOKENS 37
+items INV SOUL_WARS_ECTOPLASMATOR 1
+tick
+expect goal.note = "It is yours: choose another under Soul Wars reward."
+expect saved.soulwars.owned = "1;d"
+expect step = "Join a game of Soul Wars"

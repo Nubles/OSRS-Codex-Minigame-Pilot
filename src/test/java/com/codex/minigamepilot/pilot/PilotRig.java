@@ -35,6 +35,8 @@ import net.runelite.api.TileObject;
  * Cabin Fever by {@code quest CABIN_FEVER done}),
  * {@code garden season SEASON|last} and {@code garden goal KIND|none [TARGET]} (the Sorceress's Garden, by
  * {@code Garden.Season} and {@code GardenEta.Kind} names; setting name sorceressGarden),
+ * {@code soulwars reward REWARD|none}, {@code soulwars skill SKILL [LEVEL]}, {@code soulwars spend N} and
+ * {@code soulwars half on|off} (Soul Wars, by {@code SoulWars.Reward} and {@code SoulWars.ZealSkill} names; setting name soulWars),
  * {@code mixology plan ALL|PER_PASTE}, {@code mixology reward REWARD|none} and {@code mixology cue SPOTANIM} (a Mastering
  * Mixology setting, or a spot animation appearing, by its {@code SpotanimID} name; setting names mixology and mixologyCues),
  * {@code bank ITEM COUNT} (the bank as last seen), {@code teleport "Name" "Source" X Y SECONDS carried|banked},
@@ -121,6 +123,7 @@ final class PilotRig implements Rig
 		settings.put("barracudaWaypoint", true);
 		settings.put("troubleBrewing", true);
 		settings.put("sorceressGarden", true);
+		settings.put("soulWars", true);
 		pilots = new Pilots(game.client(), null, c -> { }, new FieldNotes(() -> null, new Gson()),
 			bests::get, bests::put, game::price, store::get, store::put, () -> bank);
 		pilots.atlas(() -> teleports == null ? null : com.codex.minigamepilot.core.WayfinderAtlas.of(walkPace, teleports));
@@ -172,6 +175,29 @@ final class PilotRig implements Rig
 				pilots.barracudaTrials(settings.get("barracudaTrials"), settings.get("barracudaWaypoint"));
 				brewing();
 				garden();
+				soulWars();
+				return true;
+			case "soulwars":
+				// soulwars reward REWARD|none, soulwars skill SKILL [LEVEL], soulwars spend N, soulwars half on|off
+				switch (args.get(0))
+				{
+					case "reward":
+						soulWarsReward = "none".equals(args.get(1)) ? null : com.codex.minigamepilot.core.SoulWars.Reward.valueOf(args.get(1));
+						break;
+					case "skill":
+						soulWarsSkill = com.codex.minigamepilot.core.SoulWars.ZealSkill.valueOf(args.get(1));
+						soulWarsLevel = args.size() > 2 ? Integer.parseInt(args.get(2)) : 0;
+						break;
+					case "spend":
+						soulWarsSpend = Integer.parseInt(args.get(1));
+						break;
+					case "half":
+						soulWarsHalf = "on".equals(args.get(1));
+						break;
+					default:
+						throw new IllegalArgumentException("soulwars reward|skill|spend|half ...");
+				}
+				soulWars();
 				return true;
 			case "garden":
 				// garden season SEASON|last, garden goal KIND|none [TARGET]
@@ -453,6 +479,17 @@ final class PilotRig implements Rig
 	private com.codex.minigamepilot.core.Garden.Season gardenSeason = com.codex.minigamepilot.core.Garden.Season.SUMMER;
 	private com.codex.minigamepilot.core.GardenEta.Kind gardenGoal = com.codex.minigamepilot.core.GardenEta.Kind.THIEVING_LEVEL;
 	private int gardenTarget;
+
+	private com.codex.minigamepilot.core.SoulWars.Reward soulWarsReward = com.codex.minigamepilot.core.SoulWars.Reward.LIL_CREATOR;
+	private com.codex.minigamepilot.core.SoulWars.ZealSkill soulWarsSkill = com.codex.minigamepilot.core.SoulWars.ZealSkill.ATTACK;
+	private int soulWarsLevel;
+	private int soulWarsSpend;
+	private boolean soulWarsHalf;
+
+	private void soulWars()
+	{
+		pilots.soulWars(settings.get("soulWars"), soulWarsReward, soulWarsSkill, soulWarsLevel, soulWarsSpend, soulWarsHalf);
+	}
 
 	private void garden()
 	{
