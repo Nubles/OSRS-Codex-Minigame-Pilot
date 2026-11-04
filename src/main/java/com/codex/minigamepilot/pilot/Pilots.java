@@ -51,6 +51,8 @@ public final class Pilots
 	private volatile boolean useAssault = true;
 	private final WintertodtPilot wintertodt = new WintertodtPilot();
 	private volatile boolean useWintertodt = true;
+	private final GnomeRestaurantPilot gnome = new GnomeRestaurantPilot();
+	private volatile boolean useGnome = true;
 	private final Coach coach;
 	private final Recorder recorder;
 	private final IntUnaryOperator price;
@@ -96,6 +98,8 @@ public final class Pilots
 		den.setStore(load, saveKey);
 		assault.setStore(load, saveKey);
 		wintertodt.setStore(load, saveKey);
+		gnome.setStore(load, saveKey);
+		gnome.setPrice(price);
 		this.coach = new Coach(loadBests, saveBests);
 		this.recorder = new Recorder(notes);
 		this.scene = new SceneIndex(client, id -> MotherlodePilot.isWatched(id) || FurnacePilot.isWatched(id) || HomesPilot.isWatched(id)
@@ -119,6 +123,13 @@ public final class Pilots
 	public void atlas(Supplier<com.codex.minigamepilot.core.WayfinderAtlas> atlas)
 	{
 		homes.readers(atlas, stock);
+		gnome.setAtlas(atlas);
+	}
+
+	/** The "Gnome Restaurant" setting. */
+	public void gnomeRestaurant(boolean on)
+	{
+		useGnome = on;
 	}
 
 	/** After a Mahogany Homes hand-in, a line when the planks left run low, once, or null. */
@@ -275,6 +286,7 @@ public final class Pilots
 			den.newAccount();
 			assault.newAccount();
 			wintertodt.newAccount();
+			gnome.newAccount();
 			said.clear();
 			unsaid.clear();
 		}
@@ -308,6 +320,7 @@ public final class Pilots
 		valuables.chat(message);
 		assault.chat(message, client.getTickCount());
 		wintertodt.chat(message);
+		gnome.chat(message, client.getTickCount());
 	}
 
 	/** @param bankCoal coal in the open bank, or -1 when the bank is closed */
@@ -387,6 +400,11 @@ public final class Pilots
 		if (useWintertodt)
 		{
 			wintertodt.watch(client, now);
+		}
+		// A Gnome Restaurant order is followed every tick, so a delivery is kept wherever it is handed over.
+		if (useGnome)
+		{
+			gnome.watch(client, now);
 		}
 		if (useMotherlode && MotherlodePilot.inMine(client))
 		{
@@ -486,6 +504,13 @@ public final class Pilots
 			state = wintertodt.lastState;
 			units = wintertodt.units();
 		}
+		else if (useGnome && gnome.active(client, npcs()))
+		{
+			activity = View.Activity.GNOME_RESTAURANT;
+			flight = gnome.fly(client, npcs(), now);
+			state = gnome.lastState;
+			units = gnome.units();
+		}
 		else if (useAssault && assault.active(client, scene, npcs()))
 		{
 			activity = View.Activity.BARBARIAN_ASSAULT;
@@ -553,6 +578,10 @@ public final class Pilots
 			else if (last == View.Activity.WINTERTODT)
 			{
 				wintertodt.left();
+			}
+			else if (last == View.Activity.GNOME_RESTAURANT)
+			{
+				gnome.left();
 			}
 			last = activity;
 		}
@@ -646,6 +675,8 @@ public final class Pilots
 		assault.relogged(now, client.getTickCount());
 		// A Wintertodt round under way is lost on logging out.
 		wintertodt.relogged(now, client.getTickCount());
+		// A Gnome Restaurant order's clock goes on in the save; it is picked up again on login.
+		gnome.relogged();
 		motherlode.relogged();
 		furnace.relogged();
 		coach.left();
@@ -769,6 +800,7 @@ public final class Pilots
 		v.brief(den.brief());
 		v.brief(assault.brief());
 		v.brief(wintertodt.brief());
+		v.brief(gnome.brief());
 		return v;
 	}
 }

@@ -696,6 +696,18 @@ public interface CodexMinigamePilotConfig extends Config
 		return 40;
 	}
 
+	@ConfigItem(
+		keyName = "gnomeRestaurant",
+		name = "Gnome Restaurant",
+		description = "Guide a Gnome Restaurant delivery one step at a time (the dish's recipe with what you lack, then the customer marked with the time left), keep every delivery with its time and tip, and show every gnome dish as a checklist",
+		section = MINIGAMES,
+		position = 30
+	)
+	default boolean gnomeRestaurant()
+	{
+		return true;
+	}
+
 	@ConfigItem(keyName = "plaque", name = "Step plaque", description = "Show the next step on a small plaque in the game view", section = GUIDANCE, position = 0)
 	default boolean plaque()
 	{

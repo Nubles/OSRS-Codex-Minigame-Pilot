@@ -52,6 +52,8 @@ public class SavedSettingsTest
 			"barbarianAssault", "assaultReward",
 			// Wintertodt.
 			"wintertodt", "wintertodtFletch", "wintertodtWarmth", "wintertodtReward",
+			// Gnome Restaurant.
+			"gnomeRestaurant",
 			"fieldNotes")), keys);
 		assertEquals("codexminigamepilot", CodexMinigamePilotConfig.GROUP);
 	}

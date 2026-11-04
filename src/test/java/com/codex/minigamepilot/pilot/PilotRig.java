@@ -27,7 +27,7 @@ import net.runelite.api.TileObject;
  * setting names stealingValuables and valuablesOwners), setting names roguesDen and roguesDenTraps (the Rogues' Den),
  * {@code assault reward REWARD|none} (Barbarian Assault, by {@code Assault.Reward} name; setting name barbarianAssault),
  * {@code wintertodt reward REWARD|none} and {@code wintertodt warmth N} (the Wintertodt, by {@code Wintertodt.Reward} name;
- * setting names wintertodt and wintertodtFletch),
+ * setting names wintertodt and wintertodtFletch), setting name gnomeRestaurant (the Gnome Restaurant),
  * {@code mixology plan ALL|PER_PASTE}, {@code mixology reward REWARD|none} and {@code mixology cue SPOTANIM} (a Mastering
  * Mixology setting, or a spot animation appearing, by its {@code SpotanimID} name; setting names mixology and mixologyCues),
  * {@code bank ITEM COUNT} (the bank as last seen), {@code teleport "Name" "Source" X Y SECONDS carried|banked},
@@ -106,6 +106,7 @@ final class PilotRig implements Rig
 		settings.put("barbarianAssault", true);
 		settings.put("wintertodt", true);
 		settings.put("wintertodtFletch", true);
+		settings.put("gnomeRestaurant", true);
 		pilots = new Pilots(game.client(), null, c -> { }, new FieldNotes(() -> null, new Gson()),
 			bests::get, bests::put, game::price, store::get, store::put, () -> bank);
 		pilots.atlas(() -> teleports == null ? null : com.codex.minigamepilot.core.WayfinderAtlas.of(walkPace, teleports));
@@ -151,6 +152,7 @@ final class PilotRig implements Rig
 				den();
 				assault();
 				wintertodt();
+				pilots.gnomeRestaurant(settings.get("gnomeRestaurant"));
 				return true;
 			case "wintertodt":
 				// wintertodt reward REWARD|none, or wintertodt warmth N

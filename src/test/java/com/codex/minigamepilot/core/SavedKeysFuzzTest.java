@@ -63,7 +63,7 @@ public class SavedKeysFuzzTest
 	}
 
 	/** Runs the reader over every damaged copy, collecting what throws or prints a bad figure. */
-	static void survive(String key, String good, Consumer<String> read)
+	public static void survive(String key, String good, Consumer<String> read)
 	{
 		List<String> failures = new ArrayList<>();
 		for (String saved : damaged(good))
@@ -483,6 +483,24 @@ public class SavedKeysFuzzTest
 				assertTrue(x.points >= 0 && x.points <= WintertodtLog.POINTS_MAX && x.hits >= 0);
 			}
 			WintertodtLog.decode(g.encode());
+		});
+	}
+
+	@Test
+	public void gnomeKept()
+	{
+		survive("gnome.kept", "1;1767225617400,E,CHEESE_TOM_BATTA,ROMETTI,16200,0,o,158,0,;1767226267200,H,DRUNK_DRAGON,CAPTAIN_NINTO,400000,2400,o,160,12000,257:2+9472:1", s ->
+		{
+			GnomeLog g = GnomeLog.decode(s);
+			assertTrue(!Double.isNaN(g.xpPerHour()) && !Double.isNaN(g.gpPerHour()) && !Double.isNaN(g.perHour()));
+			for (GnomeLog.Delivery d : g.all())
+			{
+				assertTrue(d.ms >= 0 && d.ms <= GnomeLog.LONGEST && d.wait >= 0 && d.wait <= GnomeLog.LONGEST_WAIT);
+				assertTrue(d.xp >= 0 && d.gp >= 0 && d.tip.size() <= 8);
+			}
+			g.byDish();
+			g.tips();
+			GnomeLog.decode(g.encode());
 		});
 	}
 
