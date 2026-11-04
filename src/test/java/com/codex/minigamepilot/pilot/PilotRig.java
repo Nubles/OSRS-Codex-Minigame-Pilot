@@ -28,6 +28,7 @@ import net.runelite.api.TileObject;
  * {@code assault reward REWARD|none} (Barbarian Assault, by {@code Assault.Reward} name; setting name barbarianAssault),
  * {@code wintertodt reward REWARD|none} and {@code wintertodt warmth N} (the Wintertodt, by {@code Wintertodt.Reward} name;
  * setting names wintertodt and wintertodtFletch), setting name gnomeRestaurant (the Gnome Restaurant),
+ * {@code nmz reward REWARD|none} (the Nightmare Zone, by {@code Nmz.Reward} name; setting names nightmareZone and nmzHalfImbues),
  * {@code mixology plan ALL|PER_PASTE}, {@code mixology reward REWARD|none} and {@code mixology cue SPOTANIM} (a Mastering
  * Mixology setting, or a spot animation appearing, by its {@code SpotanimID} name; setting names mixology and mixologyCues),
  * {@code bank ITEM COUNT} (the bank as last seen), {@code teleport "Name" "Source" X Y SECONDS carried|banked},
@@ -107,6 +108,8 @@ final class PilotRig implements Rig
 		settings.put("wintertodt", true);
 		settings.put("wintertodtFletch", true);
 		settings.put("gnomeRestaurant", true);
+		settings.put("nightmareZone", true);
+		settings.put("nmzHalfImbues", false);
 		pilots = new Pilots(game.client(), null, c -> { }, new FieldNotes(() -> null, new Gson()),
 			bests::get, bests::put, game::price, store::get, store::put, () -> bank);
 		pilots.atlas(() -> teleports == null ? null : com.codex.minigamepilot.core.WayfinderAtlas.of(walkPace, teleports));
@@ -153,6 +156,16 @@ final class PilotRig implements Rig
 				assault();
 				wintertodt();
 				pilots.gnomeRestaurant(settings.get("gnomeRestaurant"));
+				nmz();
+				return true;
+			case "nmz":
+				// nmz reward REWARD|none
+				if (!"reward".equals(args.get(0)))
+				{
+					throw new IllegalArgumentException("nmz reward REWARD|none");
+				}
+				nmzReward = "none".equals(args.get(1)) ? null : com.codex.minigamepilot.core.Nmz.Reward.valueOf(args.get(1));
+				nmz();
 				return true;
 			case "wintertodt":
 				// wintertodt reward REWARD|none, or wintertodt warmth N
@@ -381,6 +394,13 @@ final class PilotRig implements Rig
 	private com.codex.minigamepilot.core.Wintertodt.Reward wintertodtReward = com.codex.minigamepilot.core.Wintertodt.Reward.PYROMANCER_OUTFIT;
 	private int wintertodtWarmth = 40;
 
+	private com.codex.minigamepilot.core.Nmz.Reward nmzReward = com.codex.minigamepilot.core.Nmz.Reward.HERB_BOX;
+
+	private void nmz()
+	{
+		pilots.nightmareZone(settings.get("nightmareZone"), nmzReward, settings.get("nmzHalfImbues"));
+	}
+
 	private void wintertodt()
 	{
 		pilots.wintertodt(settings.get("wintertodt"), settings.get("wintertodtFletch"), wintertodtWarmth, wintertodtReward);
@@ -469,6 +489,7 @@ final class PilotRig implements Rig
 		last = f;
 		Map<String, String> r = new TreeMap<>();
 		r.put("activity", f.activity.name());
+		r.put("quiet", String.valueOf(f.quiet));
 		if (f.step != null)
 		{
 			r.put("step", f.step.getTitle());

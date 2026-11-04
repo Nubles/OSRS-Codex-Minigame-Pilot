@@ -1,6 +1,7 @@
 package com.codex.minigamepilot;
 
 import com.codex.minigamepilot.core.Assault;
+import com.codex.minigamepilot.core.Nmz;
 import com.codex.minigamepilot.core.Wintertodt;
 import com.codex.minigamepilot.core.Goals;
 import com.codex.minigamepilot.core.MixCycle;
@@ -264,6 +265,45 @@ public interface CodexMinigamePilotConfig extends Config
 		public String toString()
 		{
 			return reward == null ? "None" : reward.getTitle();
+		}
+	}
+
+	/** What Nightmare Zone reward points are saved for. */
+	enum NmzReward
+	{
+		NONE(null),
+		HERB_BOX(Nmz.Reward.HERB_BOX),
+		BLACK_MASK(Nmz.Reward.BLACK_MASK),
+		SLAYER_HELMET(Nmz.Reward.SLAYER_HELMET),
+		SALVE_AMULET(Nmz.Reward.SALVE_AMULET),
+		SALVE_AMULET_E(Nmz.Reward.SALVE_AMULET_E),
+		RING_OF_SUFFERING(Nmz.Reward.RING_OF_SUFFERING),
+		RING_OF_THE_GODS(Nmz.Reward.RING_OF_THE_GODS),
+		BERSERKER_RING(Nmz.Reward.BERSERKER_RING),
+		WARRIOR_RING(Nmz.Reward.WARRIOR_RING),
+		ARCHERS_RING(Nmz.Reward.ARCHERS_RING),
+		SEERS_RING(Nmz.Reward.SEERS_RING),
+		TYRANNICAL_RING(Nmz.Reward.TYRANNICAL_RING),
+		TREASONOUS_RING(Nmz.Reward.TREASONOUS_RING),
+		GRANITE_RING(Nmz.Reward.GRANITE_RING);
+
+		private final Nmz.Reward reward;
+
+		NmzReward(Nmz.Reward reward)
+		{
+			this.reward = reward;
+		}
+
+		/** The reward, or null for none. */
+		public Nmz.Reward reward()
+		{
+			return reward;
+		}
+
+		@Override
+		public String toString()
+		{
+			return reward == null ? "None" : reward == Nmz.Reward.HERB_BOX ? "Herb boxes" : reward.getTitle();
 		}
 	}
 
@@ -708,6 +748,18 @@ public interface CodexMinigamePilotConfig extends Config
 		return true;
 	}
 
+	@ConfigItem(
+		keyName = "nightmareZone",
+		name = "Nightmare Zone",
+		description = "Keep every Nightmare Zone dream (mode, bosses, points, time, potions), rank your points an hour by the bosses you dream, and give the next step in the lobby. Nothing is said inside a dream",
+		section = MINIGAMES,
+		position = 31
+	)
+	default boolean nightmareZone()
+	{
+		return true;
+	}
+
 	@ConfigItem(keyName = "plaque", name = "Step plaque", description = "Show the next step on a small plaque in the game view", section = GUIDANCE, position = 0)
 	default boolean plaque()
 	{
@@ -883,6 +935,30 @@ public interface CodexMinigamePilotConfig extends Config
 	default WintertodtReward wintertodtReward()
 	{
 		return WintertodtReward.PYROMANCER_OUTFIT;
+	}
+
+	@ConfigItem(
+		keyName = "nmzReward",
+		name = "Nightmare Zone reward",
+		description = "What your reward points are for: herb boxes (with their herbs' worth at today's prices) or an imbue, with the time to it at your pace",
+		section = GOALS,
+		position = 12
+	)
+	default NmzReward nmzReward()
+	{
+		return NmzReward.HERB_BOX;
+	}
+
+	@ConfigItem(
+		keyName = "nmzHalfImbues",
+		name = "Imbues at half price",
+		description = "The Hard Combat Achievements are done: Dom Onion's imbues cost half",
+		section = GOALS,
+		position = 13
+	)
+	default boolean nmzHalfImbues()
+	{
+		return false;
 	}
 
 	@ConfigItem(

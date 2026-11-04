@@ -487,6 +487,45 @@ public class SavedKeysFuzzTest
 	}
 
 	@Test
+	public void nmzKept()
+	{
+		survive("nmz.kept", "1;1767000000000,3000,60000,C,H,26,w,Count Draynor|Elvarg,O6+A20;1767000003000,1500,9000,?,?,-1,l,,P3", s ->
+		{
+			NmzLog g = NmzLog.decode(s);
+			sane(String.valueOf(g.pointsPerHour() < 0 ? 0 : Math.round(g.pointsPerHour())));
+			sane(String.valueOf(g.netPointsPerHour() < 0 ? 0 : Math.round(g.netPointsPerHour())));
+			for (NmzLog.Dream d : g.all())
+			{
+				assertTrue(d.ticks >= 0 && d.ticks <= NmzLog.LONGEST && d.points >= 0 && d.points <= NmzLog.POINTS_MAX);
+				assertTrue(d.bosses.size() <= NmzLog.BOSSES_MAX && d.potionPoints() >= 0);
+			}
+			for (NmzLog.Pace p : g.bySet())
+			{
+				assertTrue(!Double.isNaN(p.perHour()) && !Double.isNaN(p.netPerHour()));
+			}
+			for (double h : g.habit())
+			{
+				assertTrue(!Double.isNaN(h) && h >= 0);
+			}
+			NmzLog.decode(g.encode());
+		});
+	}
+
+	@Test
+	public void nmzKills()
+	{
+		survive("nmz.kills", "1;H|Count Draynor|1|2600;N|Elvarg|3|7200", s ->
+		{
+			NmzKills k = NmzKills.decode(s);
+			for (NmzKills.Boss b : k.all())
+			{
+				assertTrue(b.kills > 0 && b.points > 0 && b.average() <= NmzKills.KILL_MAX && !b.name.isEmpty());
+			}
+			NmzKills.decode(k.encode());
+		});
+	}
+
+	@Test
 	public void gnomeKept()
 	{
 		survive("gnome.kept", "1;1767225617400,E,CHEESE_TOM_BATTA,ROMETTI,16200,0,o,158,0,;1767226267200,H,DRUNK_DRAGON,CAPTAIN_NINTO,400000,2400,o,160,12000,257:2+9472:1", s ->

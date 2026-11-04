@@ -28,7 +28,8 @@ public final class View
 		ROGUES_DEN("Rogues' Den"),
 		BARBARIAN_ASSAULT("Barbarian Assault"),
 		WINTERTODT("Wintertodt"),
-		GNOME_RESTAURANT("Gnome Restaurant");
+		GNOME_RESTAURANT("Gnome Restaurant"),
+		NIGHTMARE_ZONE("Nightmare Zone");
 
 		private final String title;
 
@@ -640,6 +641,8 @@ public final class View
 			"Chop, fletch and feed one step at a time, your brazier lit, fixed and its Pyromancer healed, warmth watched, every round kept, and the pyromancer outfit's odds at your pace."));
 		v.brief(new Brief(Activity.GNOME_RESTAURANT, null,
 			"Each order's recipe one step at a time with what you lack, then the customer marked with the time left, every delivery kept with its tip, and every gnome dish as a checklist."));
+		v.brief(new Brief(Activity.NIGHTMARE_ZONE, null,
+			"Every dream kept with its bosses, points, time and potions, your points an hour by the bosses you dream, and the time to your imbue or herb boxes."));
 		return v;
 	}
 

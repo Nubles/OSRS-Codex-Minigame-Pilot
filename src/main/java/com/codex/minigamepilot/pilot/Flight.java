@@ -38,6 +38,8 @@ public final class Flight
 	public final List<TileObject> hazards = new ArrayList<>();
 	/** Interface components to ring, such as the right spirits among Vale Totems' carving choices. */
 	public final List<Integer> widgets = new ArrayList<>();
+	/** Panel only: no plaque in the game view, as inside a Nightmare Zone dream. */
+	public boolean quiet;
 
 	public Flight(View.Activity activity, Step step, View view)
 	{

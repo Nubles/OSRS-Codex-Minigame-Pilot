@@ -1,0 +1,48 @@
+# Nightmare Zone: herb boxes as the reward, worth their herbs at today's prices, and a dream
+# ended by logging out, kept with what it counted.
+#
+# Facts (OSRS wiki, Dom Onion's Reward Shop; Herb box; Nightmare Zone):
+#  - "Herb box 9,500"; "players can only purchase 15 herb boxes per day"
+#  - "The box rolls the herb drop table seven times"; Grimy ranarr weed 11/128 a roll
+#  - "Ironmen cannot purchase herb boxes from the Nightmare Zone but can from Tithe Farm."
+#  - "Logging out while inside the arena ends the dream and returns the player to the Nightmare Zone lobby."
+#  - Account type: RuneLite's HiscorePlugin and DailyTasksPlugin read varbit IRONMAN 0 as a normal account.
+# Only ranarr is priced here, so a box is 7 x 11/128 x 7,000 = 4,211 coins.
+scene 2560 3070
+at 2606 3110
+object NZONE_LOBBY_CHEST 2612 3115 as chest
+npc NZONE_HOST "Dominic Onion" 2606 3117 as dominic
+item UNIDENTIFIED_RANARR "Grimy ranarr weed" price 7000
+varp NZONE_REWARDPOINTS 30000
+tick
+expect activity = NIGHTMARE_ZONE
+# No dreams kept: nothing known of the dream you like, so ask Dominic.
+expect step = "Ask Dominic Onion for a dream"
+expect detail = "Choose the dream, then drink the potion he fills"
+expect goal = "1500/9500"
+expect goal.note ~ "3 boxes affordable now, 15 a day at most."
+expect goal.note ~ "about 4,211 coins at today's prices (0.44 a point)"
+expect goal.note ~ "8,000 points to the next box. Dream once and the time to it follows from your pace."
+expect goal.pieces ~ "A box's herbs IDLE"
+expect goal.pieces ~ "Today's 3 boxes DONE"
+
+# An ironman: the boxes are not for sale here.
+varbit IRONMAN 2
+tick
+expect goal.note ~ "Ironmen cannot buy herb boxes here; the Tithe Farm sells them."
+expect goal.pieces !~ "Today's"
+
+# Into a normal dream, the coffer's price not seen: kept as a normal dream.
+scene 2240 4672 2
+at 2270 4700 2
+varbit NZONE_CURRENTPOINTS 0
+npc NZONE_KHAZARD_WARLORD_NORMAL "Khazard Warlord" 2265 4705 2 as warlord
+tick
+expect step = "Normal dream"
+expect quiet = true
+varbit NZONE_CURRENTPOINTS 900
+tick 10
+expect stat.Dream_points = "900"
+state LOGIN_SCREEN
+tick
+expect saved.nmz.kept ~ ",900,?,N,-1,l,Khazard Warlord,"

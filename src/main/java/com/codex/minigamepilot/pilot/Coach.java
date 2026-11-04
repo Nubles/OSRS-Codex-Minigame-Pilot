@@ -406,6 +406,16 @@ final class Coach
 				return "the customer";
 			case GIANNE:
 				return "Gianne jnr.";
+			case DOMINIC:
+				return "Dominic Onion";
+			case DREAM_VIAL:
+				return "the dream potion";
+			case POTION_BARREL:
+				return "the barrel";
+			case REWARDS_CHEST:
+				return "the Rewards chest";
+			case DREAM_COFFER:
+				return "the coffer";
 			default:
 				return null;
 		}

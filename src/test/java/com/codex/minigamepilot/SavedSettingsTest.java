@@ -54,6 +54,8 @@ public class SavedSettingsTest
 			"wintertodt", "wintertodtFletch", "wintertodtWarmth", "wintertodtReward",
 			// Gnome Restaurant.
 			"gnomeRestaurant",
+			// Nightmare Zone.
+			"nightmareZone", "nmzReward", "nmzHalfImbues",
 			"fieldNotes")), keys);
 		assertEquals("codexminigamepilot", CodexMinigamePilotConfig.GROUP);
 	}
