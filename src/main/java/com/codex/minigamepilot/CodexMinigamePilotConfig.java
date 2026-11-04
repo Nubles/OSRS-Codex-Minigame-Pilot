@@ -527,6 +527,30 @@ public interface CodexMinigamePilotConfig extends Config
 		return true;
 	}
 
+	@ConfigItem(
+		keyName = "stealingValuables",
+		name = "Stealing valuables",
+		description = "Guide stealing valuables in Civitas illa Fortis once you are at it (keys or valuables carried, or Thieving experience in the last three minutes): the citizen an urchin has distracted, the vacant house once its owner has gone and how long you have, the open window out, and every haul kept with coins and experience an hour",
+		section = MINIGAMES,
+		position = 22
+	)
+	default boolean stealingValuables()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "valuablesOwners",
+		name = "Mark homeowners",
+		description = "While you are inside a house or at its locked door, outline the homeowners near you in ember with a wedge on the ground the way each faces",
+		section = MINIGAMES,
+		position = 23
+	)
+	default boolean valuablesOwners()
+	{
+		return true;
+	}
+
 	@ConfigItem(keyName = "plaque", name = "Step plaque", description = "Show the next step on a small plaque in the game view", section = GUIDANCE, position = 0)
 	default boolean plaque()
 	{
@@ -557,13 +581,13 @@ public interface CodexMinigamePilotConfig extends Config
 		return true;
 	}
 
-	@ConfigItem(keyName = "hintArrow", name = "Hint arrow", description = "Point the game's hint arrow at a Mahogany Homes client's house, at the next Vale totem site when it is out of sight, or at the house of your artefact task", section = GUIDANCE, position = 5)
+	@ConfigItem(keyName = "hintArrow", name = "Hint arrow", description = "Point the game's hint arrow at a Mahogany Homes client's house, at the next Vale totem site when it is out of sight, at the house of your artefact task, or at the vacant house in Civitas illa Fortis", section = GUIDANCE, position = 5)
 	default boolean hintArrow()
 	{
 		return true;
 	}
 
-	@ConfigItem(keyName = "worldMap", name = "World map marker", description = "Mark a Mahogany Homes client's house, the next Vale totem site out of sight, or the house of your artefact task on the world map", section = GUIDANCE, position = 6)
+	@ConfigItem(keyName = "worldMap", name = "World map marker", description = "Mark a Mahogany Homes client's house, the next Vale totem site out of sight, the house of your artefact task, or the vacant house in Civitas illa Fortis on the world map", section = GUIDANCE, position = 6)
 	default boolean worldMap()
 	{
 		return true;
@@ -668,11 +692,24 @@ public interface CodexMinigamePilotConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = "valuablesLevel",
+		name = "Stealing valuables level",
+		description = "The Thieving level to work toward when stealing valuables, in valuables and time at your pace, with 0 for the next level",
+		section = GOALS,
+		position = 7
+	)
+	@Range(max = 99)
+	default int valuablesLevel()
+	{
+		return 0;
+	}
+
+	@ConfigItem(
 		keyName = "showGoals",
 		name = "Show goals",
 		description = "Show the goal card on the panel",
 		section = GOALS,
-		position = 7
+		position = 8
 	)
 	default boolean showGoals()
 	{
@@ -684,7 +721,7 @@ public interface CodexMinigamePilotConfig extends Config
 		name = "Reward road",
 		description = "In each minigame, show its rewards as a road (at the Blast Furnace, the bars each Smithing level opens): what you own, what you can have now and how far off the rest is at your pace",
 		section = GOALS,
-		position = 8
+		position = 9
 	)
 	default boolean rewardRoad()
 	{

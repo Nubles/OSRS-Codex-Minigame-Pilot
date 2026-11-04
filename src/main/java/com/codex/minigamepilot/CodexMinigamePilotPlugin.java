@@ -74,8 +74,8 @@ import net.runelite.client.util.Text;
 	name = "Codex Minigame Pilot",
 	internalName = "codex-minigame-pilot",
 	legacyDataDirectory = "codex-minigame-pilot",
-	description = "One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes, Guardians of the Rift, Tempoross, the Giants' Foundry, Mastering Mixology, Vale Totems, the Tithe Farm and stealing artefacts: what to click, the path there, and why",
-	tags = {"motherlode", "mlm", "blast furnace", "mahogany homes", "construction", "mining", "smithing", "guardians of the rift", "gotr", "runecraft", "tempoross", "fishing", "giants foundry", "mastering mixology", "mixology", "herblore", "vale totems", "fletching", "varlamore", "tithe farm", "farming", "stealing artefacts", "thieving", "piscarilius", "guide", "codex"}
+	description = "One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes, Guardians of the Rift, Tempoross, the Giants' Foundry, Mastering Mixology, Vale Totems, the Tithe Farm, stealing artefacts and stealing valuables: what to click, the path there, and why",
+	tags = {"motherlode", "mlm", "blast furnace", "mahogany homes", "construction", "mining", "smithing", "guardians of the rift", "gotr", "runecraft", "tempoross", "fishing", "giants foundry", "mastering mixology", "mixology", "herblore", "vale totems", "fletching", "varlamore", "tithe farm", "farming", "stealing artefacts", "thieving", "piscarilius", "stealing valuables", "house thieving", "civitas illa fortis", "guide", "codex"}
 )
 public class CodexMinigamePilotPlugin extends Plugin
 {
@@ -184,6 +184,7 @@ public class CodexMinigamePilotPlugin extends Plugin
 		pilots.totems(config.valeTotems(), config.totemsWood().wood(), config.totemsClaim(), config.totemsReward().reward());
 		pilots.tithe(config.titheFarm(), config.tithePlants().plan(), config.titheReward().reward());
 		pilots.artefacts(config.stealingArtefacts(), config.artefactsPatrols(), config.artefactsLevel());
+		pilots.valuables(config.stealingValuables(), config.valuablesOwners(), config.valuablesLevel());
 		goals = new GoalWatch(key -> configManager.getRSProfileConfiguration(CodexMinigamePilotConfig.GROUP, key),
 			(key, value) -> configManager.setRSProfileConfiguration(CodexMinigamePilotConfig.GROUP, key, value),
 			this::navigatorBoard);
@@ -295,6 +296,12 @@ public class CodexMinigamePilotPlugin extends Plugin
 			&& ("stealingArtefacts".equals(event.getKey()) || event.getKey().startsWith("artefacts")) && pilots != null)
 		{
 			pilots.artefacts(config.stealingArtefacts(), config.artefactsPatrols(), config.artefactsLevel());
+			return;
+		}
+		if (CodexMinigamePilotConfig.GROUP.equals(event.getGroup()) && event.getKey() != null
+			&& ("stealingValuables".equals(event.getKey()) || event.getKey().startsWith("valuables")) && pilots != null)
+		{
+			pilots.valuables(config.stealingValuables(), config.valuablesOwners(), config.valuablesLevel());
 			return;
 		}
 		if (CodexMinigamePilotConfig.GROUP.equals(event.getGroup()) && "tickCoach".equals(event.getKey()) && pilots != null)
@@ -667,7 +674,8 @@ public class CodexMinigamePilotPlugin extends Plugin
 	/** Whether a step's destination beyond the scene gets the hint arrow and a world map marker. */
 	private static boolean travels(Flight f)
 	{
-		return f.activity == View.Activity.HOMES || f.activity == View.Activity.TOTEMS || f.activity == View.Activity.ARTEFACTS;
+		return f.activity == View.Activity.HOMES || f.activity == View.Activity.TOTEMS || f.activity == View.Activity.ARTEFACTS
+			|| f.activity == View.Activity.HOUSES;
 	}
 
 	/** Clears the hint arrow only if it is still the one the Pilot set. */
@@ -710,6 +718,10 @@ public class CodexMinigamePilotPlugin extends Plugin
 		if (f.activity == View.Activity.TOTEMS)
 		{
 			return "Vale totem site";
+		}
+		if (f.activity == View.Activity.HOUSES)
+		{
+			return "Vacant house";
 		}
 		if (f.activity == View.Activity.ARTEFACTS)
 		{

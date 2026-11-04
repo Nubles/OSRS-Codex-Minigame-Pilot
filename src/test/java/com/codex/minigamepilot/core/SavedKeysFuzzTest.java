@@ -404,6 +404,33 @@ public class SavedKeysFuzzTest
 	}
 
 	@Test
+	public void valuablesKept()
+	{
+		survive("valuables.kept", "1;1760000000000,LAVINIA,250,400,120,120,5400,6300,900;1760000100000,-,0,0,100,10,4500,4500,0", s ->
+		{
+			HouseLog g = HouseLog.decode(s);
+			for (int rate : new int[]{55, 65})
+			{
+				sane(String.valueOf(g.coinsPerHour(rate) < 0 ? 0 : Math.round(g.coinsPerHour(rate))));
+			}
+			sane(String.valueOf(g.xpPerHour() < 0 ? 0 : Math.round(g.xpPerHour())));
+			sane(String.valueOf(g.housesPerHour() < 0 ? 0 : Math.round(g.housesPerHour())));
+			double h = g.hoursFor(400_000);
+			sane(String.valueOf(h < 0 ? 0 : Math.round(h)));
+			for (Houses.House house : Houses.House.values())
+			{
+				sane(String.valueOf(Math.max(0, g.typical(house))));
+			}
+			for (HouseLog.Haul r : g.all())
+			{
+				assertTrue(r.ticks >= 0 && r.round >= r.ticks && r.kept >= 0 && r.kept <= r.taken && r.items >= 0 && r.value(65) >= 0);
+			}
+			sane(String.valueOf(g.kept()));
+			HouseLog.decode(g.encode());
+		});
+	}
+
+	@Test
 	public void artefactsKept()
 	{
 		survive("artefacts.kept", "1;1760000000000,100,NORTH,1,4710,800;1760000100000,0,-,0,750,0", s ->

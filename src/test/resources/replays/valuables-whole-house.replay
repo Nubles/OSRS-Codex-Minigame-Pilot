@@ -1,0 +1,136 @@
+# Stealing valuables: a whole round. A citizen is pickpocketed while an urchin distracts him, a
+# house key comes, Lavinia locks up and leaves, the Pilot waits until she has walked off, the key
+# goes in her door, the furniture is searched (the flashing arrow too), the whistle sends you out
+# of the open window, the haul is kept with its ring at the Grand Exchange price, and Oriana's
+# trade-in teaches the Pilot what she pays you.
+#
+# Facts (OSRS wiki, Stealing valuables; Wealthy citizen; House keys; Valuables; Locked Door
+# (stealing valuables); Window (stealing valuables); Oriana):
+#  - "requiring level 50 Thieving and completion of Children of the Sun to participate."
+#  - "You notice an urchin distract a wealthy citizen nearby."; urchins distract a citizen
+#    "for approximately 20 seconds" "Every 84-99 seconds"
+#  - Wealthy citizen: "Thieving XP" "96 xp"; House keys "~5/85"
+#  - house keys "break in the door when used"; "The doors are only locked while the house is vacant"
+#  - "The player must wait outside until the homeowner has left the immediate vicinity of the house"
+#  - "The homeowner will return 180–190 seconds after they left the house"
+#  - "gaining 45 Thieving experience per stolen valuable."
+#  - "You notice something shine somewhere else in the house."; "a one-time bonus of 14 valuables
+#    and 630 Thieving experience"
+#  - "You hear someone outside spot the homeowner coming back!"; "the player cannot use the front
+#    door to exit the house and must instead escape through an open window."
+#  - Oriana buys them "for 55 coins each", "increased to 65 for players who have earned the Gladiator rank"
+include /replays/scenes/valuables.scene
+skill HITPOINTS 10
+skill THIEVING 60
+items INV set COINS 100
+item SAPPHIRE_RING "Sapphire ring" price 900
+# A passer-by in the bazaar is left alone.
+tick
+expect activity = NONE
+# A first pick: now at it.
+xp THIEVING 273838
+tick
+expect activity = HOUSES
+expect step = "Pickpocket a wealthy citizen"
+expect target = CITIZEN
+expect lines ~ "House keys TODO"
+expect district = "target none, 3 houses, 0 owners, Oriana"
+expect saved.valuables.places ~ "LAVINIA:1660,3090,0"
+expect saved.valuables.places ~ "VICTOR:1625,3080,0"
+expect saved.valuables.places ~ "CAIUS:1630,3125,0"
+expect saved.valuables.places ~ "ORIANA:1640,3108,0"
+expect goal.note ~ "valuables at 45 xp each; the time shows after your first house"
+
+# Leo distracts the citizen beside him: every pick succeeds for about twenty seconds.
+chat GAMEMESSAGE "You notice an urchin distract a wealthy citizen nearby."
+tick
+expect step = "Pickpocket the distracted citizen"
+expect npc = "Wealthy citizen"
+expect detail = "Every pick succeeds for about 20s more"
+expect lines ~ "Next distraction NEXT"
+
+# A key in the third pick: 96 xp a pick.
+items INV set COINS 355 VARLAMORE_THIEVING_HOUSE_KEY 1
+xp THIEVING 274030
+tick 34
+expect step = "Find the house with a Locked Door"
+expect detail = "One is vacant at a time; distraction in 64-79s"
+expect lines ~ "House keys DONE"
+
+# Lavinia locks her door and leaves; she is still by it.
+remove lavDoor
+object VARLAMORE_THIEVING_HOUSE_DOOR_LOCKED 1660 3090 as lavLocked
+remove lavinia
+npc VARLAMORE_THIEVING_HOUSE_OWNER_1 "Lavinia" 1661 3088 as lavinia
+tick
+expect step = "Lavinia is still by the door"
+expect waiting = true
+expect place = "Civitas illa Fortis · Lavinia out"
+expect district = "target Lavinia, 3 houses, 1 owner, Oriana"
+expect pick.current = "Lavinia's house Vacant"
+
+# She has walked off: the door, and how long she is away.
+remove lavinia
+npc VARLAMORE_THIEVING_HOUSE_OWNER_1 "Lavinia" 1690 3070 as lavinia
+tick
+expect step = "Open the locked door of Lavinia's house"
+expect object = lavLocked
+expect detail = "Back in 180-190s; out by an open window"
+walk 1660 3089
+
+# The key breaks in the door; inside.
+items INV set COINS 355
+xp THIEVING 274031
+at 1660 3092
+tick
+expect step = "Search a chest, wardrobe or jewellery case"
+expect target = LOOT
+expect object = lavChest
+expect others = lavWindow
+expect place = "Civitas illa Fortis · in Lavinia's house"
+never step = "Open the locked door of Lavinia's house"
+
+# Valuables come in: the search runs by itself.
+items INV set COINS 355 VARLAMORE_THIEVING_HOUSE_VALUABLE 30
+xp THIEVING 275381
+tick
+expect step = "Keep searching: valuables keep coming"
+expect waiting = true
+
+# Something shines.
+chat GAMEMESSAGE "You notice something shine somewhere else in the house."
+tick
+expect step = "Search where the flashing arrow points"
+expect detail = "Once: 14 valuables and 630 xp, gone in about 7s"
+items INV set COINS 355 VARLAMORE_THIEVING_HOUSE_VALUABLE 120 SAPPHIRE_RING 1
+xp THIEVING 280061
+tick 12
+
+# The whistle: out by the window.
+chat GAMEMESSAGE "You hear someone outside spot the homeowner coming back!"
+tick
+expect step = "Leave by the open window now"
+expect object = lavWindow
+expect detail = "Lavinia is coming back: caught, you lose about 90%"
+expect lines ~ "Owner back TODO"
+at 1653 3094
+tick 2
+expect saved.valuables.kept ~ ",LAVINIA,"
+expect saved.valuables.kept ~ ",120,120,6031,"
+expect saved.valuables.kept ~ ",900"
+expect stat.Houses = "1"
+expect stat.Haul_value = "7,500"
+expect supply.headline = "Best: 120 valuables and 900 gp of finds at Lavinia's"
+forget
+
+# To Oriana: she pays 65 a valuable, and the Pilot keeps that.
+walk 1641 3106
+tick
+expect step = "Trade your valuables in to Oriana"
+expect npc = "Oriana"
+expect detail = "120 valuables at 55 coins: 6,600 coins"
+items INV set COINS 8155 SAPPHIRE_RING 1
+tick
+expect saved.valuables.rate = "65"
+expect lines.note = "Oriana pays 65 a valuable"
+expect step = "Pickpocket a wealthy citizen"

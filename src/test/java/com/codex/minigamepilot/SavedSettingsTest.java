@@ -44,6 +44,8 @@ public class SavedSettingsTest
 			"titheFarm", "tithePlants", "titheReward",
 			// Stealing artefacts.
 			"stealingArtefacts", "artefactsPatrols", "artefactsLevel",
+			// Stealing valuables.
+			"stealingValuables", "valuablesOwners", "valuablesLevel",
 			"fieldNotes")), keys);
 		assertEquals("codexminigamepilot", CodexMinigamePilotConfig.GROUP);
 	}

@@ -139,6 +139,7 @@ final class Coach
 			case TITHE:
 				return Skill.FARMING;
 			case ARTEFACTS:
+			case HOUSES:
 				return Skill.THIEVING;
 			default:
 				return null;
@@ -365,6 +366,18 @@ final class Coach
 				return "the drawers";
 			case HOUSE:
 				return "the house";
+			case CITIZEN:
+				return "the citizen";
+			case LOCKED_DOOR:
+				return "the locked door";
+			case LOOT:
+				return "the chest";
+			case WINDOW:
+				return "the window";
+			case ORIANA:
+				return "Oriana";
+			case URCHIN:
+				return "the urchin";
 			default:
 				return null;
 		}

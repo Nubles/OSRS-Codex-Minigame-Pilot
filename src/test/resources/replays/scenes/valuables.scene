@@ -1,0 +1,42 @@
+# A schematic Civitas illa Fortis for replays. Not the real map: the wiki gives where the houses
+# stand only in words ("Lavinia's house, directly south-west of the bazaar"; Victor's "directly
+# south-west of the western bank"; Caius' "directly north-west of the western bank"), so the
+# tiles here are made up, kept to those directions: the bazaar's citizens east, Lavinia's house
+# south-west of them, Oriana by a western bank, Victor's house south-west of her and Caius' north-west.
+#
+# Facts:
+#  - names are RuneLite's (net.runelite.api.gameval): the doors VARLAMORE_THIEVING_HOUSE_DOOR_OPEN
+#    (the door while the owner is home) and _DOOR_LOCKED (the wiki's Locked Door, 51998), the
+#    window _WINDOW_OPEN (the wiki's 52000), the chest _CHEST04 (52008), wardrobe _WARDROBE02
+#    (52010) and jewellery case _JEWELLERY_CASE01 (52011); the citizens VARLAMORE_WEALTHY_CITIZEN_*,
+#    Leo VARLAMORE_THIEVING_STREET_URCHIN_A, Lucia _HOUSE_URCHIN_C, Oriana VARLAMORE_DODGY_CHARACTER_MET
+#    and the owners VARLAMORE_THIEVING_HOUSE_OWNER_1 to _3 (Lavinia, Victor, Caius)
+#
+#   y 3130  Caius' door (1630, 3125)
+#   y 3110                   Oriana (1640, 3108)          citizens and Leo (1680-1684, 3110)
+#   y 3095  Lavinia's house: window (1655, 3094), chest, wardrobe, case (1657-1662, 3092-3095)
+#   y 3090                   Lavinia's door (1660, 3090)
+#   y 3080  Victor's door (1625, 3080)
+
+scene 1600 3050
+
+at 1681 3108
+# The bazaar: three citizens, Leo beside one of them.
+npc VARLAMORE_WEALTHY_CITIZEN_A "Wealthy citizen" 1680 3112 as citizenA
+npc VARLAMORE_WEALTHY_CITIZEN_B "Wealthy citizen" 1684 3110 as citizenB
+npc VARLAMORE_WEALTHY_CITIZEN_C "Wealthy citizen" 1676 3106 as citizenC
+npc VARLAMORE_THIEVING_STREET_URCHIN_A "Leo" 1685 3111 as leo
+# Lavinia's house, her home.
+object VARLAMORE_THIEVING_HOUSE_DOOR_OPEN 1660 3090 as lavDoor
+object VARLAMORE_THIEVING_HOUSE_CHEST04 1658 3092 as lavChest
+object VARLAMORE_THIEVING_HOUSE_WARDROBE02 1657 3095 as lavWardrobe
+object VARLAMORE_THIEVING_HOUSE_JEWELLERY_CASE01 1662 3095 as lavCase
+object VARLAMORE_THIEVING_HOUSE_WINDOW_OPEN 1655 3094 as lavWindow
+npc VARLAMORE_THIEVING_HOUSE_OWNER_1 "Lavinia" 1660 3092 as lavinia
+npc VARLAMORE_THIEVING_HOUSE_URCHIN_C "Lucia" 1664 3088 as lucia
+# The other two houses, their owners home.
+object VARLAMORE_THIEVING_HOUSE_DOOR_OPEN 1625 3080 as vicDoor
+npc VARLAMORE_THIEVING_HOUSE_OWNER_2 "Victor" 1625 3082 as victor
+object VARLAMORE_THIEVING_HOUSE_DOOR_OPEN 1630 3125 as caiDoor
+npc VARLAMORE_THIEVING_HOUSE_OWNER_3 "Caius" 1630 3127 as caius
+npc VARLAMORE_DODGY_CHARACTER_MET "Oriana" 1640 3108 as oriana

@@ -194,7 +194,7 @@ class DistrictMap extends JComponent
 				arrow.closePath();
 				g.setColor(Theme.TEAL);
 				g.fill(arrow);
-				String k = "Khaled";
+				String k = d.keeperName;
 				g.drawString(k, x - fm.stringWidth(k) / 2f, y + 8 + fm.getAscent());
 			}
 			else
@@ -222,8 +222,25 @@ class DistrictMap extends JComponent
 		}
 
 		// The key.
-		String[] names = target != null ? new String[]{"Task", "Patrol", "Khaled", "You"} : new String[]{"Patrol", "Khaled", "You"};
-		Color[] tones = target != null ? new Color[]{Theme.GOLD_BRIGHT, Theme.EMBER, Theme.TEAL, Theme.TEXT} : new Color[]{Theme.EMBER, Theme.TEAL, Theme.TEXT};
+		java.util.List<String> names = new java.util.ArrayList<>();
+		java.util.List<Color> tones = new java.util.ArrayList<>();
+		if (target != null)
+		{
+			names.add(d.targetName);
+			tones.add(Theme.GOLD_BRIGHT);
+		}
+		if (d.keyPatrols || !d.patrols.isEmpty())
+		{
+			names.add(d.patrolName);
+			tones.add(Theme.EMBER);
+		}
+		if (d.keyPatrols || d.khaled != null)
+		{
+			names.add(d.keeperName);
+			tones.add(Theme.TEAL);
+		}
+		names.add("You");
+		tones.add(Theme.TEXT);
 		int row = 0;
 		for (String n : names)
 		{
@@ -232,13 +249,13 @@ class DistrictMap extends JComponent
 		row -= 10;
 		int kx = Math.max(2, (w - row) / 2);
 		int ky = PAD + mapH + 8;
-		for (int i = 0; i < names.length; i++)
+		for (int i = 0; i < names.size(); i++)
 		{
-			g.setColor(tones[i]);
+			g.setColor(tones.get(i));
 			g.fill(new Ellipse2D.Float(kx, ky, 7, 7));
 			g.setColor(Theme.TEXT_MUTED);
-			g.drawString(names[i], kx + 10, ky + 7);
-			kx += 10 + fm.stringWidth(names[i]) + 10;
+			g.drawString(names.get(i), kx + 10, ky + 7);
+			kx += 10 + fm.stringWidth(names.get(i)) + 10;
 		}
 		g.dispose();
 	}

@@ -103,7 +103,20 @@ public final class Step
 		/** The drawers in the house of the task. */
 		DRAWERS,
 		/** The house of the task, before its drawers or ladder are in sight. */
-		HOUSE
+		HOUSE,
+		// Stealing valuables (the vacant house out of sight is HOUSE)
+		/** A wealthy citizen to pickpocket, the distracted one first. */
+		CITIZEN,
+		/** The vacant house's Locked Door. */
+		LOCKED_DOOR,
+		/** A chest, wardrobe or jewellery case in the house. */
+		LOOT,
+		/** An open window: the way out of the house. */
+		WINDOW,
+		/** Oriana, who trades valuables in for coins. */
+		ORIANA,
+		/** A street urchin who tells you which house is vacant. */
+		URCHIN
 	}
 
 	private final String verb;
