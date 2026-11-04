@@ -50,6 +50,7 @@ import net.runelite.api.Skill;
  * item ITEM "Name" [price N] [stacks]  name an item (and its price) for plugins that read them
  * items INV clear                empty an inventory (INV, WORN, BANK)
  * items INV ITEM COUNT [stacked] add COUNT of an item, one a slot unless stacked
+ * items INV set ITEM COUNT...    replace what an inventory holds in one change (a sip, a bite)
  * widget ID [child N] text "T" | hidden true|false | width N | item ID QTY
  *                                show an interface component (InterfaceID.Group.COMPONENT) and set it
  * close ID                       close an interface component
@@ -414,6 +415,19 @@ public final class Replay
 		if (a.get(1).equals("clear"))
 		{
 			game.emptyContainer(inv);
+			return;
+		}
+		if (a.get(1).equals("set"))
+		{
+			// One change, as the game sends it: a pack emptied and filled again would read as
+			// everything gone in between.
+			int[] idQuantity = new int[a.size() - 2];
+			for (int i = 2; i + 1 < a.size(); i += 2)
+			{
+				idQuantity[i - 2] = id("ItemID", a.get(i));
+				idQuantity[i - 1] = num(a, i + 1);
+			}
+			game.container(inv, idQuantity);
 			return;
 		}
 		game.fill(inv, id("ItemID", a.get(1)), num(a, 2), a.size() > 3 && a.get(3).equals("stacked"));
