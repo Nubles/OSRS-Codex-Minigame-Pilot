@@ -65,6 +65,8 @@ public final class Pilots
 	private volatile boolean useGarden = true;
 	private final SoulWarsPilot soulWars = new SoulWarsPilot();
 	private volatile boolean useSoulWars = true;
+	private final GolemPilot golem = new GolemPilot();
+	private volatile boolean useGolem = true;
 	private final Coach coach;
 	private final Recorder recorder;
 	private final IntUnaryOperator price;
@@ -119,6 +121,8 @@ public final class Pilots
 		brewing.setStore(load, saveKey);
 		garden.setStore(load, saveKey);
 		soulWars.setStore(load, saveKey);
+		golem.setStore(load, saveKey);
+		golem.setPrice(price);
 		this.coach = new Coach(loadBests, saveBests);
 		this.recorder = new Recorder(notes);
 		this.scene = new SceneIndex(client, id -> MotherlodePilot.isWatched(id) || FurnacePilot.isWatched(id) || HomesPilot.isWatched(id)
@@ -126,7 +130,7 @@ public final class Pilots
 			|| MixologyPilot.isWatched(id) || TotemsPilot.isWatched(id) || TithePilot.isWatched(id)
 			|| ArtefactsPilot.isWatched(id) || HousesPilot.isWatched(id) || RoguesDenPilot.isWatched(id)
 			|| AssaultPilot.isWatched(id) || WintertodtPilot.isWatched(id) || NmzPilot.isWatched(id) || VolcanicPilot.isWatched(id)
-			|| GardenPilot.isWatched(id));
+			|| GardenPilot.isWatched(id) || GolemPilot.isWatched(id));
 		this.homes = new HomesPilot(saved, save, load, saveKey);
 		homes.readers(null, stock);
 	}
@@ -229,6 +233,17 @@ public final class Pilots
 	{
 		useSoulWars = on;
 		soulWars.settings(reward, skill, level, spend, halfImbue);
+	}
+
+	/**
+	 * The "Golem crafting" settings: on, the target (null for none) and its level or golems (0 for the
+	 * next level or 100 golems), and the fur to reckon with (null for the one last used).
+	 */
+	public void golemCrafting(boolean on, com.codex.minigamepilot.core.GolemEta.Kind goal, int target,
+		com.codex.minigamepilot.core.GolemCrafting.Fur fur)
+	{
+		useGolem = on;
+		golem.settings(goal, target, fur);
 	}
 
 	/** The "Tempoross" settings: on, cook before loading, and the storm at which to load what you hold. */
@@ -365,6 +380,7 @@ public final class Pilots
 			brewing.newAccount();
 			garden.newAccount();
 			soulWars.newAccount();
+			golem.newAccount();
 			said.clear();
 			unsaid.clear();
 		}
@@ -401,6 +417,10 @@ public final class Pilots
 		volcanic.chat(message);
 		barracuda.chat(message);
 		gnome.chat(message, client.getTickCount());
+		if (useGolem && "GAMEMESSAGE".equals(type))
+		{
+			golem.chat(message, client.getTickCount());
+		}
 	}
 
 	/** @param bankCoal coal in the open bank, or -1 when the bank is closed */
@@ -515,6 +535,11 @@ public final class Pilots
 		if (useSoulWars)
 		{
 			soulWars.watch(client, now);
+		}
+		// Golems are followed every tick too, so each gift line is kept with its experience and fur.
+		if (useGolem)
+		{
+			golem.watch(client, scene, now);
 		}
 		if (useMotherlode && MotherlodePilot.inMine(client))
 		{
@@ -663,6 +688,13 @@ public final class Pilots
 			state = soulWars.lastState;
 			units = soulWars.units();
 		}
+		else if (useGolem && golem.active(client))
+		{
+			activity = View.Activity.GOLEM_CRAFTING;
+			flight = golem.fly(client, now);
+			state = golem.lastState;
+			units = golem.units();
+		}
 		else if (useAssault && assault.active(client, scene, npcs()))
 		{
 			activity = View.Activity.BARBARIAN_ASSAULT;
@@ -758,6 +790,10 @@ public final class Pilots
 			else if (last == View.Activity.SOUL_WARS)
 			{
 				soulWars.left();
+			}
+			else if (last == View.Activity.GOLEM_CRAFTING)
+			{
+				golem.left();
 			}
 			last = activity;
 		}
@@ -865,6 +901,8 @@ public final class Pilots
 		garden.relogged(client, now, client.getTickCount());
 		// A Soul Wars game ends on logging out.
 		soulWars.relogged(client, now, client.getTickCount());
+		// A golem whose gift line came is kept on logging out.
+		golem.relogged(client, now, client.getTickCount());
 		motherlode.relogged();
 		furnace.relogged();
 		coach.left();
@@ -995,6 +1033,7 @@ public final class Pilots
 		v.brief(brewing.brief());
 		v.brief(garden.brief());
 		v.brief(soulWars.brief());
+		v.brief(golem.brief());
 		return v;
 	}
 }

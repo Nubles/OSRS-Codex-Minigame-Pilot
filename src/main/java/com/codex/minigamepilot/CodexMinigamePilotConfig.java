@@ -6,6 +6,8 @@ import com.codex.minigamepilot.core.Brewing;
 import com.codex.minigamepilot.core.Garden;
 import com.codex.minigamepilot.core.GardenEta;
 import com.codex.minigamepilot.core.SoulWars;
+import com.codex.minigamepilot.core.GolemCrafting;
+import com.codex.minigamepilot.core.GolemEta;
 import com.codex.minigamepilot.core.Volcanic;
 import com.codex.minigamepilot.core.Wintertodt;
 import com.codex.minigamepilot.core.Goals;
@@ -366,6 +368,75 @@ public interface CodexMinigamePilotConfig extends Config
 		public String toString()
 		{
 			return title;
+		}
+	}
+
+	/** What golem crafting is worked towards. */
+	enum GolemGoal
+	{
+		NONE(null, "None"),
+		CRAFTING_LEVEL(GolemEta.Kind.CRAFTING_LEVEL, "Crafting level"),
+		GOLEMS(GolemEta.Kind.GOLEMS, "Golems"),
+		JEWELLERS_CHISEL(GolemEta.Kind.JEWELLERS_CHISEL, "Jeweller's chisel");
+
+		private final GolemEta.Kind kind;
+		private final String title;
+
+		GolemGoal(GolemEta.Kind kind, String title)
+		{
+			this.kind = kind;
+			this.title = title;
+		}
+
+		/** The kind, or null for none. */
+		public GolemEta.Kind kind()
+		{
+			return kind;
+		}
+
+		@Override
+		public String toString()
+		{
+			return title;
+		}
+	}
+
+	/** The fur golem crafting is reckoned with. */
+	enum GolemFur
+	{
+		LAST_USED(null),
+		MOONLIGHT_ANTELOPE(GolemCrafting.Fur.MOONLIGHT_ANTELOPE),
+		SUNLIGHT_ANTELOPE(GolemCrafting.Fur.SUNLIGHT_ANTELOPE),
+		DASHING_KEBBIT(GolemCrafting.Fur.DASHING_KEBBIT),
+		KYATT(GolemCrafting.Fur.KYATT),
+		DARK_KEBBIT(GolemCrafting.Fur.DARK_KEBBIT),
+		FOX(GolemCrafting.Fur.FOX),
+		SPOTTED_KEBBIT(GolemCrafting.Fur.SPOTTED_KEBBIT),
+		GRAAHK(GolemCrafting.Fur.GRAAHK),
+		LARUPIA(GolemCrafting.Fur.LARUPIA),
+		FELDIP_WEASEL(GolemCrafting.Fur.FELDIP_WEASEL),
+		COMMON_KEBBIT(GolemCrafting.Fur.COMMON_KEBBIT),
+		DESERT_DEVIL(GolemCrafting.Fur.DESERT_DEVIL),
+		POLAR_KEBBIT(GolemCrafting.Fur.POLAR_KEBBIT),
+		WYRMSCRAIG_GOAT(GolemCrafting.Fur.WYRMSCRAIG_GOAT);
+
+		private final GolemCrafting.Fur fur;
+
+		GolemFur(GolemCrafting.Fur fur)
+		{
+			this.fur = fur;
+		}
+
+		/** The fur, or null for the one you last used. */
+		public GolemCrafting.Fur fur()
+		{
+			return fur;
+		}
+
+		@Override
+		public String toString()
+		{
+			return fur == null ? "The one you last used" : fur.getTitle();
 		}
 	}
 
@@ -989,6 +1060,18 @@ public interface CodexMinigamePilotConfig extends Config
 		return true;
 	}
 
+	@ConfigItem(
+		keyName = "golemCrafting",
+		name = "Golem crafting",
+		description = "Keep every golem crafted on Wyrmscraig (its gift, fur and Crafting xp), golems and xp an hour at your own pace, your gifts against the wiki's rates and your best session. Information only: no click cues, nothing lit",
+		section = MINIGAMES,
+		position = 37
+	)
+	default boolean golemCrafting()
+	{
+		return true;
+	}
+
 	@ConfigItem(keyName = "plaque", name = "Step plaque", description = "Show the next step on a small plaque in the game view", section = GUIDANCE, position = 0)
 	default boolean plaque()
 	{
@@ -1323,6 +1406,43 @@ public interface CodexMinigamePilotConfig extends Config
 	default boolean soulWarsHalfImbue()
 	{
 		return false;
+	}
+
+	@ConfigItem(
+		keyName = "golemGoal",
+		name = "Golem target",
+		description = "What golem crafting is for: a Crafting level, a number of golems, or the Jeweller's chisel (1/300 a golem), with the golems, sunstone and time to it at your own pace",
+		section = GOALS,
+		position = 24
+	)
+	default GolemGoal golemGoal()
+	{
+		return GolemGoal.CRAFTING_LEVEL;
+	}
+
+	@Range(min = 0, max = 100_000)
+	@ConfigItem(
+		keyName = "golemTarget",
+		name = "Golem target amount",
+		description = "The level or golems for Golem target. 0: the next level, or 100 golems",
+		section = GOALS,
+		position = 25
+	)
+	default int golemTarget()
+	{
+		return 0;
+	}
+
+	@ConfigItem(
+		keyName = "golemFur",
+		name = "Golem fur",
+		description = "The fur golems are reckoned with (its Crafting xp a golem) until your own golems give the figure",
+		section = GOALS,
+		position = 26
+	)
+	default GolemFur golemFur()
+	{
+		return GolemFur.LAST_USED;
 	}
 
 	@ConfigItem(

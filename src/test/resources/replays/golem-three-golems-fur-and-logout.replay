@@ -1,0 +1,95 @@
+# Golem crafting on Wyrmscraig: arriving at the stations, three golems (a sapphire, a ruby with a Jeweller's
+# chisel, an emerald), each kept with its fur and Crafting experience, golems and experience an hour at your own
+# pace, the gifts against the wiki's rates, the time to the next Crafting level, and a logout that keeps a gift
+# already shown. Information only: never a plaque, a target or a route.
+#
+# Facts (OSRS wiki, Golem crafting):
+#  - "the activity itself requires level 60 Crafting to do."
+#  - "This requires a chisel, a hammer, and four sunstones per golem."; Sunstone core: "requiring 1 sunstone core
+#    and 1 fur per golem."
+#  - "Crafting a golem gives a base of 1560 XP"; Dark kebbit fur: Fur XP 1,140, Total XP 2,700.
+#  - Gifts: uncut sapphire 15/23, emerald 5/23, ruby 2/23, diamond 1/23; Jeweller's chisel 1/300.
+# The gift line is the one RuneLite's own loot tracker reads (LootTrackerPlugin GOLEM_CRAFTING_PATTERN).
+# RuneLite gameval: ObjectID.GOLEM_STATION_EMPTY ("Empty plinth"), SUNSTONEROCK1, ItemID.SUNSTONE (34020),
+# SUNSTONE_CORE (34022), HUNTINGBEAST_SILENT_FUR ("Dark kebbit fur").
+# The scene is schematic: an empty plinth and a sunstone rock beside it.
+scene 2560 2200
+at 2600 2240
+object GOLEM_STATION_EMPTY 2602 2242 as plinth
+object SUNSTONEROCK1 2610 2236 as rock
+skill CRAFTING 70 800000
+items INV set CHISEL 1 HAMMER 1 SUNSTONE 20 SUNSTONE_CORE 5 HUNTINGBEAST_SILENT_FUR 5
+never quiet = false
+never target != NONE
+always route = 0
+tick
+expect activity = GOLEM_CRAFTING
+expect place = "Golem crafting · Wyrmscraig"
+expect step = "Golem crafting, at your own pace"
+expect detail = "Every golem is kept, and your pace follows from them"
+expect stat.Golems = "0"
+expect stat.Golems_an_hour = "-"
+expect stat.In_your_pack = "5"
+# 71 Crafting is 814,445 xp: 14,445 to go at the base 1,560 (no fur known yet) is 10 golems, 50 sunstone, 25 held.
+expect goal = "800000/814445"
+expect goal.note = "14,445 Crafting xp to go: about 10 golems (25 sunstone to mine). Craft a few and the time to it follows from your own pace."
+expect pick = "14 furs"
+
+# Golem one: the core and a Dark kebbit fur go, and the gift line comes.
+tick 60
+items INV set CHISEL 1 HAMMER 1 SUNSTONE 16 SUNSTONE_CORE 4 HUNTINGBEAST_SILENT_FUR 4
+xp CRAFTING 802700
+chat GAMEMESSAGE "As you complete the golem it leaves a gift on the ground for you: 1 x Uncut sapphire."
+tick
+expect saved.golem.kept ~ ",0,0,s,0,d"
+expect stat.Golems = "1"
+expect pick.current = "Dark kebbit 2,700 xp"
+expect lines ~ "Sapphire · 1 DONE"
+
+# Golem two, 100 ticks on: a side's experience on the way, then a ruby and a Jeweller's chisel in the same tick.
+tick 49
+xp CRAFTING 803500
+tick 50
+items INV set CHISEL 1 HAMMER 1 SUNSTONE 12 SUNSTONE_CORE 3 HUNTINGBEAST_SILENT_FUR 3
+xp CRAFTING 805400
+chat GAMEMESSAGE "As you complete the golem it leaves a gift in your gem bag for you: 1 x Uncut ruby."
+chat GAMEMESSAGE "As you complete the golem it leaves a gift in your gem bag for you: 1 x Jeweller's chisel."
+tick
+expect saved.golem.kept ~ ",100,2700,r,1,d"
+expect stat.Golems = "2"
+expect lines ~ "Jeweller's chisel · 1 DONE"
+expect stat.Last_golem = "1:00"
+
+# Golem three, 90 ticks on: an emerald.
+tick 89
+items INV set CHISEL 1 HAMMER 1 SUNSTONE 8 SUNSTONE_CORE 2 HUNTINGBEAST_SILENT_FUR 2
+xp CRAFTING 808100
+chat GAMEMESSAGE "As you complete the golem it leaves a gift on the ground for you: 1 x Uncut emerald."
+tick
+expect saved.golem.kept ~ ",90,2700,e,0,d"
+expect stat.Golems = "3"
+# Two timed golems in 190 ticks (1:54): 63 an hour, 5,400 xp.
+expect stat.Golems_an_hour = "63"
+expect stat.Xp_a_golem = "2,700"
+expect detail = "3 golems this visit, 63 an hour at your pace"
+expect lines ~ "Emerald · 1 DONE"
+expect lines ~ "Diamond · 0 IDLE"
+expect stat.In_your_pack = "2"
+# 6,345 to go at your own 2,700 a golem: 3 golems, 15 sunstone with 10 held (8 and 2 cores), about 3 minutes.
+expect goal = "808100/814445"
+expect goal.note = "6,345 Crafting xp to go: about 3 golems (5 sunstone to mine), 3m at your pace."
+
+# Logged out the tick the fourth gift line came: it is kept, and the next golem begins a new session.
+tick 40
+chat GAMEMESSAGE "As you complete the golem it leaves a gift on the ground for you: 1 x Uncut sapphire."
+state LOGIN_SCREEN
+tick
+state LOGGED_IN
+tick 3
+expect saved.golem.kept ~ ",s,0,-"
+tick 80
+chat GAMEMESSAGE "As you complete the golem it leaves a gift on the ground for you: 1 x Uncut sapphire."
+tick
+expect saved.golem.kept ~ ",41,0,s,0,-;"
+expect saved.golem.kept ~ ",0,0,s,0,-"
+expect stat.Golems = "1"

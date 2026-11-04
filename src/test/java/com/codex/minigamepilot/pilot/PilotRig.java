@@ -37,6 +37,8 @@ import net.runelite.api.TileObject;
  * {@code Garden.Season} and {@code GardenEta.Kind} names; setting name sorceressGarden),
  * {@code soulwars reward REWARD|none}, {@code soulwars skill SKILL [LEVEL]}, {@code soulwars spend N} and
  * {@code soulwars half on|off} (Soul Wars, by {@code SoulWars.Reward} and {@code SoulWars.ZealSkill} names; setting name soulWars),
+ * {@code golem goal KIND|none [TARGET]} and {@code golem fur FUR|last} (golem crafting, by {@code GolemEta.Kind} and
+ * {@code GolemCrafting.Fur} names; setting name golemCrafting),
  * {@code mixology plan ALL|PER_PASTE}, {@code mixology reward REWARD|none} and {@code mixology cue SPOTANIM} (a Mastering
  * Mixology setting, or a spot animation appearing, by its {@code SpotanimID} name; setting names mixology and mixologyCues),
  * {@code bank ITEM COUNT} (the bank as last seen), {@code teleport "Name" "Source" X Y SECONDS carried|banked},
@@ -124,6 +126,7 @@ final class PilotRig implements Rig
 		settings.put("troubleBrewing", true);
 		settings.put("sorceressGarden", true);
 		settings.put("soulWars", true);
+		settings.put("golemCrafting", true);
 		pilots = new Pilots(game.client(), null, c -> { }, new FieldNotes(() -> null, new Gson()),
 			bests::get, bests::put, game::price, store::get, store::put, () -> bank);
 		pilots.atlas(() -> teleports == null ? null : com.codex.minigamepilot.core.WayfinderAtlas.of(walkPace, teleports));
@@ -176,6 +179,24 @@ final class PilotRig implements Rig
 				brewing();
 				garden();
 				soulWars();
+				golem();
+				return true;
+			case "golem":
+				// golem goal KIND|none [TARGET], golem fur FUR|last
+				if ("goal".equals(args.get(0)))
+				{
+					golemGoal = "none".equals(args.get(1)) ? null : com.codex.minigamepilot.core.GolemEta.Kind.valueOf(args.get(1));
+					golemTarget = args.size() > 2 ? Integer.parseInt(args.get(2)) : 0;
+				}
+				else if ("fur".equals(args.get(0)))
+				{
+					golemFur = "last".equals(args.get(1)) ? null : com.codex.minigamepilot.core.GolemCrafting.Fur.valueOf(args.get(1));
+				}
+				else
+				{
+					throw new IllegalArgumentException("golem goal KIND|none [TARGET], golem fur FUR|last");
+				}
+				golem();
 				return true;
 			case "soulwars":
 				// soulwars reward REWARD|none, soulwars skill SKILL [LEVEL], soulwars spend N, soulwars half on|off
@@ -485,6 +506,15 @@ final class PilotRig implements Rig
 	private int soulWarsLevel;
 	private int soulWarsSpend;
 	private boolean soulWarsHalf;
+
+	private com.codex.minigamepilot.core.GolemEta.Kind golemGoal = com.codex.minigamepilot.core.GolemEta.Kind.CRAFTING_LEVEL;
+	private int golemTarget;
+	private com.codex.minigamepilot.core.GolemCrafting.Fur golemFur;
+
+	private void golem()
+	{
+		pilots.golemCrafting(settings.get("golemCrafting"), golemGoal, golemTarget, golemFur);
+	}
 
 	private void soulWars()
 	{
