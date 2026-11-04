@@ -162,7 +162,10 @@ public final class Step
 		/** Petrified Pete, who lets you into the Volcanic Mine and keeps its reward shop. */
 		PETRIFIED_PETE,
 		/** The bank chest by the Volcanic Mine's entrance. */
-		VOLCANO_BANK
+		VOLCANO_BANK,
+		// Barracuda Trials
+		/** The trial's master (Rum-dashed Ralph, Gurtob or Gwyna), who starts a run. */
+		TRIAL_MASTER
 	}
 
 	private final String verb;

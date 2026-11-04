@@ -420,6 +420,8 @@ final class Coach
 				return "Petrified Pete";
 			case VOLCANO_BANK:
 				return "the bank chest";
+			case TRIAL_MASTER:
+				return "the trial master";
 			default:
 				return null;
 		}

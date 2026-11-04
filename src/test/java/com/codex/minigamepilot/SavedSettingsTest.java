@@ -58,6 +58,8 @@ public class SavedSettingsTest
 			"nightmareZone", "nmzReward", "nmzHalfImbues",
 			// Volcanic Mine.
 			"volcanicMine", "volcanicReward",
+			// Barracuda Trials.
+			"barracudaTrials", "barracudaWaypoint",
 			"fieldNotes")), keys);
 		assertEquals("codexminigamepilot", CodexMinigamePilotConfig.GROUP);
 	}

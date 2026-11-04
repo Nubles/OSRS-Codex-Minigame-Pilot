@@ -30,6 +30,7 @@ import net.runelite.api.TileObject;
  * setting names wintertodt and wintertodtFletch), setting name gnomeRestaurant (the Gnome Restaurant),
  * {@code nmz reward REWARD|none} (the Nightmare Zone, by {@code Nmz.Reward} name; setting names nightmareZone and nmzHalfImbues),
  * {@code volcanic reward REWARD|none} (the Volcanic Mine, by {@code Volcanic.Reward} name; setting name volcanicMine),
+ * setting names barracudaTrials and barracudaWaypoint (the Barracuda Trials),
  * {@code mixology plan ALL|PER_PASTE}, {@code mixology reward REWARD|none} and {@code mixology cue SPOTANIM} (a Mastering
  * Mixology setting, or a spot animation appearing, by its {@code SpotanimID} name; setting names mixology and mixologyCues),
  * {@code bank ITEM COUNT} (the bank as last seen), {@code teleport "Name" "Source" X Y SECONDS carried|banked},
@@ -112,6 +113,8 @@ final class PilotRig implements Rig
 		settings.put("nightmareZone", true);
 		settings.put("nmzHalfImbues", false);
 		settings.put("volcanicMine", true);
+		settings.put("barracudaTrials", true);
+		settings.put("barracudaWaypoint", true);
 		pilots = new Pilots(game.client(), null, c -> { }, new FieldNotes(() -> null, new Gson()),
 			bests::get, bests::put, game::price, store::get, store::put, () -> bank);
 		pilots.atlas(() -> teleports == null ? null : com.codex.minigamepilot.core.WayfinderAtlas.of(walkPace, teleports));
@@ -160,6 +163,7 @@ final class PilotRig implements Rig
 				pilots.gnomeRestaurant(settings.get("gnomeRestaurant"));
 				nmz();
 				volcanic();
+				pilots.barracudaTrials(settings.get("barracudaTrials"), settings.get("barracudaWaypoint"));
 				return true;
 			case "volcanic":
 				// volcanic reward REWARD|none

@@ -1,0 +1,117 @@
+# Barracuda Trials: two Swordfish runs of the Tempor Tantrum. The first, over the rank's time, is
+# kept with its splits and becomes the ghost; the second races it, with the one next point marked
+# where the ghost passed its next objective, beats 1:48 and the rank moves on to Shark.
+#
+# Facts (OSRS wiki):
+#  - Barracuda Trials: "Only skiffs may be used in these trials."; ranks "(Swordfish, Shark, and Marlin)".
+#  - The Tempor Tantrum: level 30 Sailing; Swordfish 1:48 "Stormy key" 1,000 bonus xp; Shark 2:51
+#    "Barrel stand, Whirlpool surprise" 2,000 bonus xp.
+#  - Stormy key: "requiring a completion time of 1:48.00".
+# RuneLite gameval: SAILING_BT_TRIAL_MASTER_1_1OP is Rum-dashed Ralph; SAILING_BT_TEMPOR_TANTRUM_MASTER_STATE,
+# _SWORDFISH_FIRST, SAILING_BT_TRIAL_TEMPOR_TANTRUM_COMPLETED; InterfaceID.SailingBtHud. What the
+# varbits and interface lines hold is read from their names (unconfirmed). The scene, the places,
+# the interface's wording and the experience are schematic: none is the game's.
+scene 2900 2900
+at 2950 2950
+npc SAILING_BT_TRIAL_MASTER_1_1OP "Rum-dashed Ralph" 2955 2952 as ralph
+skill SAILING 40
+tick
+expect activity = BARRACUDA_TRIALS
+expect step = "Beat 1:48 for Swordfish"
+expect npc = "Rum-dashed Ralph"
+expect target = TRIAL_MASTER
+expect detail ~ "The stormy key and 1,000 bonus Sailing xp once. No Swordfish run kept yet"
+expect lines ~ "Swordfish  1:48 NEXT, Shark  2:51 TODO, Marlin  4:30 TODO"
+expect pick.current ~ "Tempor Tantrum"
+
+# The first run: over the rank's time.
+varbit SAILING_BT_TEMPOR_TANTRUM_MASTER_STATE 2
+widget SailingBtHud.BT_TITLE text "The Tempor Tantrum"
+widget SailingBtHud.BT_CURRENT_TIME text "0:00.00"
+widget SailingBtHud.BT_RANK_TIME text "1:48.00"
+widget SailingBtHud.BT_TRACKER_PROGRESS text "0/3"
+tick
+expect place = "The Tempor Tantrum · Swordfish"
+expect quiet = true
+expect step = "Objective 1 of 3"
+expect detail ~ "Your first Swordfish run here: it becomes the ghost to race."
+expect gauge.Swordfish_1:48 = "0/108"
+expect route = 0
+never route != 0
+at 2970 2960
+tick 59
+widget SailingBtHud.BT_TRACKER_PROGRESS text "1/3"
+tick
+expect lines ~ "#1  0:36.0 IDLE"
+at 2990 2980
+tick 59
+widget SailingBtHud.BT_TRACKER_PROGRESS text "2/3"
+tick
+at 2960 2950
+tick 69
+widget SailingBtHud.BT_TRACKER_PROGRESS text "3/3"
+widget SailingBtHud.BT_CURRENT_TIME text "1:54.00"
+varp SAILING_BT_TRIAL_TEMPOR_TANTRUM_COMPLETED 1
+xp SAILING 38000
+tick
+expect step = "Finished in 1:54.0"
+expect detail = "6.0s over the Swordfish rank's 1:48."
+varbit SAILING_BT_TEMPOR_TANTRUM_MASTER_STATE 0
+close SailingBtHud.BT_TITLE
+close SailingBtHud.BT_CURRENT_TIME
+close SailingBtHud.BT_RANK_TIME
+close SailingBtHud.BT_TRACKER_PROGRESS
+tick 4
+expect saved.barracuda.kept ~ ",t,s,190,"
+expect saved.barracuda.kept ~ ",f,60.2970.2960/120.2990.2980/190.2960.2950"
+expect step = "Beat 1:48 for Swordfish"
+expect detail ~ "Your best Swordfish run: 1:54.0, 6.0s over."
+expect lines ~ "Swordfish  1:48 NEXT"
+expect stat.Runs_today = "1"
+forget
+
+# The second run races the first: one point marked, where the ghost passed objective 1.
+varbit SAILING_BT_TEMPOR_TANTRUM_MASTER_STATE 2
+widget SailingBtHud.BT_TITLE text "The Tempor Tantrum"
+widget SailingBtHud.BT_CURRENT_TIME text "0:00.00"
+widget SailingBtHud.BT_RANK_TIME text "1:48.00"
+widget SailingBtHud.BT_TRACKER_PROGRESS text "0/3"
+tick
+expect route = 1
+expect detail ~ "Your best was at objective 1 by 0:36.0"
+expect stat.On_your_best = "Level"
+at 2970 2960
+tick 49
+widget SailingBtHud.BT_TRACKER_PROGRESS text "1/3"
+tick
+expect stat.On_your_best = "-6.0s"
+expect lines ~ "#1  0:30.0 DONE"
+expect route = 1
+at 2990 2980
+tick 49
+widget SailingBtHud.BT_TRACKER_PROGRESS text "2/3"
+tick
+at 2960 2950
+tick 69
+widget SailingBtHud.BT_TRACKER_PROGRESS text "3/3"
+widget SailingBtHud.BT_CURRENT_TIME text "1:42.00"
+varp SAILING_BT_TRIAL_TEMPOR_TANTRUM_COMPLETED 2
+varbit SAILING_BT_TEMPOR_TANTRUM_SWORDFISH_FIRST 1
+xp SAILING 39600
+tick
+expect step = "Finished in 1:42.0"
+expect detail = "Inside 1:48: the Swordfish rank's time is beaten."
+expect route = 0
+varbit SAILING_BT_TEMPOR_TANTRUM_MASTER_STATE 0
+close SailingBtHud.BT_TITLE
+close SailingBtHud.BT_CURRENT_TIME
+close SailingBtHud.BT_RANK_TIME
+close SailingBtHud.BT_TRACKER_PROGRESS
+tick 4
+expect saved.barracuda.kept ~ ",t,s,170,1600,f,50.2970.2960/100.2990.2980/170.2960.2950"
+expect saved.barracuda.ranks = "1;ts"
+expect step = "Beat 2:51 for Shark"
+expect detail ~ "The barrel stand and Whirlpool surprise and 2,000 bonus Sailing xp once. No Shark run kept yet"
+expect lines ~ "Swordfish  1:48 DONE, Shark  2:51 NEXT"
+expect stat.Runs_today = "2"
+expect supply.headline = "Best: Swordfish 1:42.0"

@@ -1,0 +1,75 @@
+# Barracuda Trials: a trial your level does not open yet, then at the Tempor Tantrum a Shark run
+# reset part way (kept as abandoned, and a new run begun), one sailed away from, and one cut off by
+# a logout. The rank is read from the trial's own rank time; with no interface at all the trial is
+# the one whose master you were just beside.
+#
+# Facts (OSRS wiki):
+#  - Barracuda Trials: The Jubbly Jive needs 55 Sailing; "The level requirement is not boostable."
+#  - Barrel stand: Shark rank of the Tempor Tantrum "requiring a completion time of 2:51.00".
+#  - Fetid key: Swordfish rank of the Jubbly Jive "requiring a completion time of 2:03.00".
+# RuneLite gameval: SAILING_BT_TRIAL_MASTER_2_1OP is Gurtob, _1_1OP Rum-dashed Ralph;
+# SAILING_BT_IN_TRIAL; SAILING_BT_TEMPOR_TANTRUM_SWORDFISH_FIRST. What they hold is read from their
+# names (unconfirmed). The scene, places and the interface's wording are schematic.
+scene 2900 2900
+at 2950 2950
+npc SAILING_BT_TRIAL_MASTER_2_1OP "Gurtob" 2955 2952 as gurtob
+skill SAILING 50
+tick
+expect step = "Sailing to 55"
+expect detail = "The Jubbly Jive needs 55 Sailing, and the level is not boostable."
+expect target = NONE
+
+# On to the Tempor Tantrum with Swordfish already held.
+remove gurtob
+npc SAILING_BT_TRIAL_MASTER_1_1OP "Rum-dashed Ralph" 2955 2952 as ralph
+varbit SAILING_BT_TEMPOR_TANTRUM_SWORDFISH_FIRST 1
+tick
+expect step = "Beat 2:51 for Shark"
+expect saved.barracuda.ranks = "1;ts"
+expect pick.current ~ "Tempor Tantrum"
+
+# A Shark run, reset after its first objective.
+varbit SAILING_BT_IN_TRIAL 1
+widget SailingBtHud.BT_CURRENT_TIME text "0:00.00"
+widget SailingBtHud.BT_RANK_TIME text "2:51.00"
+widget SailingBtHud.BT_TRACKER_PROGRESS text "0/4"
+widget SailingBtHud.BT_OPTIONAL_PROGRESS text "0/2"
+tick
+expect place = "The Tempor Tantrum · Shark"
+expect step = "Objective 1 of 6"
+expect gauge.Shark_2:51 = "0/171"
+tick 39
+widget SailingBtHud.BT_OPTIONAL_PROGRESS text "1/2"
+widget SailingBtHud.BT_CURRENT_TIME text "0:24.00"
+tick
+expect step = "Objective 2 of 6"
+tick 30
+widget SailingBtHud.BT_CURRENT_TIME text "0:00.00"
+widget SailingBtHud.BT_OPTIONAL_PROGRESS text "0/2"
+tick
+expect saved.barracuda.kept ~ ",t,k,71,0,a,40.2950.2950"
+expect step = "Objective 1 of 6"
+
+# Sailed away from mid-run: the trial ends without a completion.
+tick 20
+widget SailingBtHud.BT_TRACKER_PROGRESS text "1/4"
+tick
+varbit SAILING_BT_IN_TRIAL 0
+close SailingBtHud.BT_CURRENT_TIME
+close SailingBtHud.BT_RANK_TIME
+close SailingBtHud.BT_TRACKER_PROGRESS
+close SailingBtHud.BT_OPTIONAL_PROGRESS
+tick 4
+expect saved.barracuda.kept ~ ",t,k,22,0,a,21.2950.2950"
+expect step = "Beat 2:51 for Shark"
+expect supply.headline = "null"
+
+# A run with no interface read at all: the trial is Ralph's, the rank unread. Then a logout.
+varbit SAILING_BT_IN_TRIAL 1
+tick 30
+expect place = "The Tempor Tantrum · in a run"
+expect step = "Under way"
+state LOGIN_SCREEN
+tick
+expect saved.barracuda.kept ~ ",t,-,"
+expect saved.barracuda.kept ~ ",o,"

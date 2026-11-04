@@ -30,7 +30,8 @@ public final class View
 		WINTERTODT("Wintertodt"),
 		GNOME_RESTAURANT("Gnome Restaurant"),
 		NIGHTMARE_ZONE("Nightmare Zone"),
-		VOLCANIC_MINE("Volcanic Mine");
+		VOLCANIC_MINE("Volcanic Mine"),
+		BARRACUDA_TRIALS("Barracuda Trials");
 
 		private final String title;
 
@@ -145,6 +146,26 @@ public final class View
 			this.ticks = ticks;
 			this.best = best;
 			this.slowest = slowest;
+		}
+
+		public String name()
+		{
+			return name;
+		}
+
+		public int ticks()
+		{
+			return ticks;
+		}
+
+		public int best()
+		{
+			return best;
+		}
+
+		public boolean isSlowest()
+		{
+			return slowest;
 		}
 	}
 
@@ -646,6 +667,8 @@ public final class View
 			"Every dream kept with its bosses, points, time and potions, your points an hour by the bosses you dream, and the time to your imbue or herb boxes."));
 		v.brief(new Brief(Activity.VOLCANIC_MINE, null,
 			"Every game kept with its points, Mining experience, length and how it ended, points and experience an hour at your pace, and the time to your prospector kit or tome."));
+		v.brief(new Brief(Activity.BARRACUDA_TRIALS, null,
+			"Every Sailing trial run kept with its splits, a ghost of your best run of each course, Sailing experience an hour by trial, and the next rank's time to beat."));
 		return v;
 	}
 
