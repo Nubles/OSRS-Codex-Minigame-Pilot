@@ -104,7 +104,26 @@ public final class HomeWay
 	 */
 	public static Plan plan(Home home, int x, int y, int plane, WayfinderAtlas atlas)
 	{
-		if (home == null || atlas == null)
+		if (home == null)
+		{
+			return null;
+		}
+		return plan(home::distanceTo, x, y, plane, atlas);
+	}
+
+	/**
+	 * The quickest way to a tile on the surface, such as a Gnome Restaurant customer.
+	 *
+	 * @return the plan, or null without an atlas
+	 */
+	public static Plan planTo(int tx, int ty, int x, int y, int plane, WayfinderAtlas atlas)
+	{
+		return plan((wx, wy) -> Math.max(Math.abs(wx - tx), Math.abs(wy - ty)), x, y, plane, atlas);
+	}
+
+	private static Plan plan(java.util.function.IntBinaryOperator distance, int x, int y, int plane, WayfinderAtlas atlas)
+	{
+		if (atlas == null)
 		{
 			return null;
 		}
@@ -112,7 +131,7 @@ public final class HomeWay
 		Way walk = null;
 		if (y < SURFACE_TOP && plane == 0)
 		{
-			int tiles = home.distanceTo(x, y);
+			int tiles = distance.applyAsInt(x, y);
 			walk = new Way(null, tiles, (int) Math.round(tiles * pace));
 		}
 		Way carried = null;
@@ -123,7 +142,7 @@ public final class HomeWay
 			{
 				continue;
 			}
-			int tiles = home.distanceTo(t.getX(), t.getY());
+			int tiles = distance.applyAsInt(t.getX(), t.getY());
 			Way w = new Way(t, tiles, t.getSeconds() + (int) Math.round(tiles * pace));
 			if (t.isCarried() && (carried == null || w.seconds < carried.seconds))
 			{

@@ -1,0 +1,99 @@
+# Gnome Restaurant: an easy delivery from order to hand-over. Gianne jnr. asked for an order; a
+# cheese+tom batta for Rometti; the ingredients fetched; every stage of the recipe in order, as
+# the cheese+tom batta's wiki page gives it; Rometti found and the batta handed over; the delivery
+# kept with its time, and the token's credits from the game's own line.
+#
+# Facts (OSRS wiki, Gnome Restaurant; Cheese+tom batta; Half made batta (cheese+tom) 9483;
+# Unfinished batta (cheese+tom) 9484; Transcript: Rometti):
+#  - "A minimum cooking level of 29 is required in order to complete the training."
+#  - "Easy tasks have a time limit of 6 minutes, whereas hard tasks have a limit of 11 minutes."
+#  - "Use a gianne dough on a batta tin to make a raw batta"; "Cook the raw batta on a range to
+#    make half baked batta"; "Prepare a half made batta (cheese+tom) with 1 cheese and 1 tomato";
+#    "Cook the half made batta (cheese+tom) on a range to make unfinished batta (cheese+tom)";
+#    "Use 1 equa leaves on the unfinished batta (cheese+tom) to finish a cheese+tom batta"
+#  - "You hand over your delivery of [a/some] [ordered gnome food/drink item] to Rometti"
+#  - "You have [number] credits towards your free delivery token."
+# Unconfirmed (source: Gnome Restaurant plugin): order varbit 13 is the cheese+tom batta, customer 6 Rometti.
+# The Grand Tree's layout here is schematic: only who is in sight matters.
+scene 2420 3460 1
+at 2449 3500 1
+skill COOKING 40
+npc ALUFT_GIANNE "Gianne jnr." 2449 3501 1 as gianne
+never step ~ "Train Cooking"
+tick
+expect activity = GNOME_RESTAURANT
+expect place = "The Grand Tree"
+expect step = "Ask Gianne jnr. for a delivery"
+expect target = GIANNE
+expect npc = "Gianne jnr."
+expect pick ~ "0 of 20 delivered"
+
+# The order: a cheese+tom batta for Rometti.
+varbit ALUFT_CURRENT_ORDER 13
+varbit ALUFT_CURRENT_CUSTOMER 6
+tick
+expect place = "Easy delivery"
+expect step = "Fetch 1 gianne dough and 1 batta tin"
+expect gauge.Seconds_left = "360/360"
+expect lines ~ "Dough: gianne dough, batta tin NEXT"
+expect lines ~ "Deliver to Rometti TODO"
+
+items INV GIANNE_DOUGH 1
+items INV BATTA_TIN 1
+items INV CHEESE 1
+items INV TOMATO 1
+items INV EQUA_LEAVES 1
+tick
+expect step = "Use gianne dough on a batta tin"
+expect detail ~ "left · 4 more steps, then to Rometti"
+
+items INV set RAW_BATTA 1 CHEESE 1 TOMATO 1 EQUA_LEAVES 1
+tick
+expect step = "Cook the raw batta on a range"
+expect verb = "Cook"
+
+items INV set HALF_BAKED_BATTA 1 CHEESE 1 TOMATO 1 EQUA_LEAVES 1
+tick
+expect step = "Prepare the half baked batta with 1 cheese and 1 tomato"
+
+items INV set ALUFT_HALF_MADE_CHEESE_TOM_BATTA 1 EQUA_LEAVES 1
+tick
+expect step = "Cook the half made batta (cheese+tom) on a range"
+
+items INV set ALUFT_BAKED_CHEESE_TOM_BATTA 1 EQUA_LEAVES 1
+tick
+expect step = "Add 1 equa leaves to finish the cheese+tom batta"
+
+items INV set CHEESE_TOM_BATTA 1
+xp COOKING 37382
+tick
+expect step = "Deliver the cheese+tom batta to Rometti"
+expect target = GNOME_CUSTOMER
+expect detail ~ "not yet on your map"
+expect lines ~ "Deliver to Rometti NEXT"
+
+# Rometti in sight: lit, and his place learnt.
+tick 20
+npc GNOME_ROMETTI "Rometti" 2482 3510 1 as rometti
+tick
+expect npc = "Rometti"
+expect detail ~ "Rometti is in sight"
+expect destination = "2482 3510"
+expect saved.gnome.places ~ "ROMETTI:2482:3510:1"
+
+chat GAMEMESSAGE "You hand over your delivery of a cheese+tom batta to Rometti"
+varbit ALUFT_CURRENT_ORDER 0
+varbit ALUFT_CURRENT_CUSTOMER 0
+items INV clear
+chat GAMEMESSAGE "You have 13 credits towards your free delivery token. You may get 1 pieces of gnome food delivered to you."
+tick 3
+expect step = "Ask Gianne jnr. for a delivery"
+expect saved.gnome.kept ~ ",E,CHEESE_TOM_BATTA,ROMETTI,"
+expect saved.gnome.credits = "13"
+expect gauge.Token_credits = "13/24"
+expect stat.Deliveries = "1"
+expect supply.headline ~ "Quickest: easy"
+expect pick ~ "1 of 20 delivered"
+expect saved.gnome.kept ~ ",o,158,0,"
+expect stat.Cooking_xp = "158"
+expect stat.Xp_an_hour = "35k"

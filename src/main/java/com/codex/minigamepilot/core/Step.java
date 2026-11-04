@@ -141,7 +141,12 @@ public final class Step
 		/** The crates of free tools in the prison. */
 		TOOL_CRATE,
 		/** The reward cart in the camp. */
-		REWARD_CART
+		REWARD_CART,
+		// Gnome Restaurant
+		/** The customer a delivery is for. */
+		GNOME_CUSTOMER,
+		/** Gianne jnr., who gives the deliveries. */
+		GIANNE
 	}
 
 	private final String verb;

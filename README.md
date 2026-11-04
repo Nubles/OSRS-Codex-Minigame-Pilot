@@ -1,6 +1,6 @@
 # Codex Minigame Pilot
 
-**One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes, Guardians of the Rift, Tempoross, the Giants' Foundry, Mastering Mixology, Vale Totems, the Tithe Farm, stealing artefacts, stealing valuables, the Rogues' Den maze and the Wintertodt, with a Barbarian Assault companion.** The Pilot watches the minigame you are in and always shows the single thing to do next: what to click, lit in gold in the world, the path there drawn on the ground and the minimap, and a line on why. You still do every click. It only reads the game and draws.
+**One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes, Guardians of the Rift, Tempoross, the Giants' Foundry, Mastering Mixology, Vale Totems, the Tithe Farm, stealing artefacts, stealing valuables, the Rogues' Den maze, the Wintertodt and Gnome Restaurant deliveries, with a Barbarian Assault companion.** The Pilot watches the minigame you are in and always shows the single thing to do next: what to click, lit in gold in the world, the path there drawn on the ground and the minimap, and a line on why. You still do every click. It only reads the game and draws.
 
 It is part of the **Codex** suite of RuneLite plugins and shares their look: warm ink, aged gold and the game's own fonts.
 
@@ -192,6 +192,25 @@ RuneLite's own Wintertodt plugin already tells you when a round is about to star
   <img src="docs/screenshots/wintertodt-plaque-cold.png" alt="Plaque when warmth is low">
 </p>
 
+### Gnome Restaurant
+The popular Gnome Restaurant plugin shows the current delivery's food, customer and a timer. The Pilot turns the order into one step at a time, and keeps what your deliveries come to.
+- **The recipe, one step at a time.** From whatever stage of the dish you hold (raw, half baked, half made, unfinished, or the cocktail mixed, poured or garnished), the next step as the dish's wiki page gives it, with the items lit in your pack. Every step left is listed with what you lack for it once the steps before have taken theirs, so a fetch names everything at once; a slice or chunk you can cut from a fruit you hold is cut first. All twenty dishes and cocktails, gnome spice kept as the tool it is.
+- **Then the customer.** Who it is for and where, in the wiki's words, with any quest or level the wiki says reaching them needs. In sight, they are lit with the path to them; out of sight, the hint arrow and a world map marker point at where you last saw them (the Pilot learns every customer you pass), or at RuneLite's own world-map glider for the glider pilots. With Codex Wayfinder installed, its quickest teleport there is named.
+- **The clock.** Six minutes for an easy delivery, eleven for a hard one, counted from the moment the order is taken and carried over a logout; at the end, back to Gianne jnr. An order above your Cooking level says so, rather than send you to a range that will not let you.
+- **Every delivery kept.** Per account: the dish and customer as the game's own hand-over line names them, easy or hard, its time, the Cooking experience gained on the way, and the tip handed over with its worth at today's prices. A delivery that came too late is kept too. Cooking experience and tips an hour at your own pace, the waits between orders in, and your quickest easy and hard deliveries.
+- **The reward token.** Your credits from the game's own line after each delivery, against the 12 a free food needs and the ten a token holds.
+- **Gnome recipes.** All twenty dishes and cocktails with the Cooking level each needs and its experience, ticked off as you deliver them, dimmed until your level reaches them.
+
+<p align="center">
+  <img src="docs/screenshots/gnome-panel-recipe.png" width="225" alt="Gnome Restaurant: the recipe, with what you lack">
+  <img src="docs/screenshots/gnome-panel-deliver.png" width="225" alt="Gnome Restaurant: delivering, with Wayfinder's way there">
+  <img src="docs/screenshots/gnome-panel-recipes.png" width="225" alt="Gnome Restaurant: the recipe checklist">
+</p>
+<p align="center">
+  <img src="docs/screenshots/gnome-plaque-fetch.png" alt="Plaque: fetch what you lack">
+  <img src="docs/screenshots/gnome-plaque-deliver.png" alt="Plaque: deliver">
+</p>
+
 ### Barbarian Assault (a companion, outside the fight)
 The calls, the eggs and the healers are left to RuneLite's own Barbarian Assault plugin. The Pilot keeps the rest: what your games come to, and what to play next.
 - **Every game kept.** Each game, per account: its waves, the role you played in each (read from the role's horn), each wave's time from its "---- Wave: N ----" line to its end, lost waves and retries, and the honour points the game gave every role, read from the game's own point counters as they rise. The panel shows the game under way wave by wave, your last games, the quickest full game and queen wave, and honour points an hour.
@@ -342,7 +361,7 @@ Codex Minigame Pilot is guidance only. It reads what the game already shows you 
 
 ## Settings that matter
 
-- **Minigames:** turn each one off; *Mark patrols* for stealing artefacts; *Mark homeowners* for stealing valuables; *Tithe plants a round* for the Tithe Farm; *Vale totem wood* and *Claim offerings as you pass* for Vale Totems; *Mixology orders to make* (every order, or the most resin per paste) and *Mixology station cues*; *Cook before loading* and *Load what you hold at storm* (80%) for Tempoross; *Fragments before first craft* for Guardians of the Rift (120 by default); fix the *Blast Furnace bar* instead of letting the Pilot work it out; *Top up coffer below* (2,500 coins by default); *Barbarian Assault* for the companion; *Wintertodt*, *Fletch kindling* and *Warm up at* (40%) for the Wintertodt.
+- **Minigames:** turn each one off; *Mark patrols* for stealing artefacts; *Mark homeowners* for stealing valuables; *Tithe plants a round* for the Tithe Farm; *Vale totem wood* and *Claim offerings as you pass* for Vale Totems; *Mixology orders to make* (every order, or the most resin per paste) and *Mixology station cues*; *Cook before loading* and *Load what you hold at storm* (80%) for Tempoross; *Fragments before first craft* for Guardians of the Rift (120 by default); fix the *Blast Furnace bar* instead of letting the Pilot work it out; *Top up coffer below* (2,500 coins by default); *Barbarian Assault* for the companion; *Wintertodt*, *Fletch kindling* and *Warm up at* (40%) for the Wintertodt; *Gnome Restaurant*.
 - **Guidance:** *Step plaque*, *Path on the ground*, *Path on minimap*, *Action labels*, *Mark what comes after*, *Hint arrow*, *World map marker* and *Low planks in chat* for Mahogany Homes, and *Visit summary in chat*. All on by default.
 - **Goals:** what Motherlode nuggets and Mahogany Homes points are saved for, the *Mixology reward* your resin is saved for, the *Vale Totems reward* your research points are saved for, the *Tithe Farm reward* your points are saved for, the *Barbarian Assault reward* your honour points are saved for (the fighter torso by default, or every role to level 5), the *Wintertodt reward* (the pyromancer outfit by default), the *Stealing artefacts level* and *Stealing valuables level* (0 for the next), the *Blast Furnace level* to work toward (0 for the next), *Show goals* and *Reward road*.
 - **Tick coach:** *Tick coach*, on by default.

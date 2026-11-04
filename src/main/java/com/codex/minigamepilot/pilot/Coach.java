@@ -402,6 +402,10 @@ final class Coach
 				return "the crate";
 			case REWARD_CART:
 				return "the reward cart";
+			case GNOME_CUSTOMER:
+				return "the customer";
+			case GIANNE:
+				return "Gianne jnr.";
 			default:
 				return null;
 		}

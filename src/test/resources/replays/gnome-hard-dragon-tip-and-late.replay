@@ -1,0 +1,112 @@
+# Gnome Restaurant: a hard delivery picked up again after a login, and one that came too late.
+# A drunk dragon for Captain Bleemadge, taken five minutes before this login: its clock picked up
+# from the save. Mixed, poured, the pineapple cut for its chunks, garnished and heated, as the
+# wiki's pages for the drunk dragon and its mixed stages give them. The captain is not in sight,
+# so his place is RuneLite's world-map glider on White Wolf Mountain, with Codex Wayfinder's
+# quickest way there. Handed over with a tip, kept with the tip's worth; then toad crunchies for
+# Captain Klemfoodle that ran out of time, kept as late, and the way back to the restaurant.
+#
+# Facts (OSRS wiki, Gnome Restaurant; Drunk dragon; Mixed dragon (shaker) 9574, (poured) 9575,
+# (garnished) 9576; Lime chunks; Transcript: Captain Bleemadge; Reward token (Gnome Restaurant)):
+#  - hard orders: "These are located anywhere in Gielinor and need to be completed within 11 minutes."
+#  - Captain Bleemadge: "Glider pilot on top of White Wolf Mountain."
+#  - mix "vodka, gin, and dwellberries in a a cocktail shaker"; "Pour" with a cocktail glass;
+#    "garnished with pineapple chunks and a pot of cream"; "heated on a range, creating a Drunk dragon"
+#  - cut fruit: "obtained by using a knife on a lime"
+#  - "You hand over your delivery of [item] to Captain Bleemadge"; "You are given [a/some] [reward
+#    item(s)] as a tip."; "You have [number] credits towards your free delivery token."
+#  - RuneLite's world map: TransportationPointLocation.GNOME_GLIDER_WHITEWOLF 2845 3501, and
+#    MinigameLocation.GNOME_RESTAURANT 2436 3502
+# Unconfirmed (source: Gnome Restaurant plugin): order 15 the drunk dragon, 3 toad crunchies;
+# customer 119 Captain Bleemadge, 120 Captain Klemfoodle.
+scene 2420 3440
+at 2465 3495
+skill COOKING 60
+item RANARR_WEED "Ranarr weed" price 6000
+item POH_TABLET_CAMELOTTELEPORT "Camelot teleport"
+saved gnome.order "1;15,119,1767225300000,273742"
+saved gnome.credits "40"
+varbit ALUFT_CURRENT_ORDER 15
+varbit ALUFT_CURRENT_CUSTOMER 119
+items INV VODKA 1
+items INV GIN 1
+items INV DWELLBERRIES 1
+items INV COCKTAIL_SHAKER 1
+items INV COCKTAIL_GLASS_EMPTY 1
+items INV PINEAPPLE 1
+items INV KNIFE 1
+items INV POT_OF_CREAM 1
+tick
+expect activity = GNOME_RESTAURANT
+expect place = "Hard delivery"
+expect step = "Mix vodka, gin and dwellberries in a cocktail shaker"
+expect detail ~ "6:00 left"
+expect gauge.Seconds_left = "360/660"
+expect gauge.Token_credits = "40/48"
+expect lines.note = "Lv 32"
+
+items INV set ALUFT_SHAKER_DRUNK_DRAGON 1 COCKTAIL_GLASS_EMPTY 1 PINEAPPLE 1 KNIFE 1 POT_OF_CREAM 1
+tick
+expect step = "Pour the mixed dragon into a cocktail glass"
+
+items INV set ALUFT_SHAKER_DRUNK_DRAGON_PREFINISH 1 COCKTAIL_SHAKER 1 PINEAPPLE 1 KNIFE 1 POT_OF_CREAM 1
+tick
+expect step = "Cut a pineapple into chunks"
+expect verb = "Cut"
+expect lines ~ "Garnish: pineapple chunks, pot of cream NEXT"
+
+items INV set ALUFT_SHAKER_DRUNK_DRAGON_PREFINISH 1 COCKTAIL_SHAKER 1 PINEAPPLE_CHUNKS 1 KNIFE 1 POT_OF_CREAM 1
+tick
+expect step = "Add pineapple chunks and a pot of cream"
+
+items INV set ALUFT_SHAKER_DRUNK_DRAGON_PREHEAT 1 COCKTAIL_SHAKER 1 KNIFE 1
+tick
+expect step = "Heat it on a range to finish the drunk dragon"
+expect verb = "Cook"
+
+# Made: the captain's glider, and Wayfinder's way there.
+teleport "Camelot teleport" "Camelot teleport" 2757 3477 4 carried
+items INV set DRUNK_DRAGON 1 COCKTAIL_SHAKER 1 KNIFE 1 POH_TABLET_CAMELOTTELEPORT 1
+tick
+expect step = "Deliver the drunk dragon to Captain Bleemadge"
+expect destination = "2845 3501"
+expect detail ~ "The glider on top of White Wolf Mountain"
+expect detail ~ "Camelot teleport, about"
+never step = "Back to Gianne jnr. for a new order"
+
+# On the mountain: the captain in sight, the batta handed over, a tip given.
+scene 2800 3460
+at 2843 3497
+npc PILOT_WHITE_WOLF_BASE "Captain Bleemadge" 2845 3501 as captain
+tick
+expect npc = "Captain Bleemadge"
+expect saved.gnome.places ~ "CAPTAIN_BLEEMADGE:2845:3501:0"
+chat GAMEMESSAGE "You hand over your delivery of some drunk dragon to Captain Bleemadge"
+varbit ALUFT_CURRENT_ORDER 0
+varbit ALUFT_CURRENT_CUSTOMER 0
+items INV set COCKTAIL_SHAKER 1 KNIFE 1 POH_TABLET_CAMELOTTELEPORT 1 RANARR_WEED 2
+chat GAMEMESSAGE "You are given some ranarr weed as a tip."
+chat GAMEMESSAGE "You have 43 credits towards your free delivery token. You may get 3 pieces of gnome food delivered to you."
+tick 3
+expect saved.gnome.kept ~ ",H,DRUNK_DRAGON,CAPTAIN_BLEEMADGE,"
+expect saved.gnome.kept ~ ",o,"
+expect saved.gnome.kept ~ ",12000,257:2"
+expect saved.gnome.credits = "43"
+forget
+
+# Toad crunchies for Captain Klemfoodle, never made: eleven minutes pass.
+varbit ALUFT_CURRENT_ORDER 3
+varbit ALUFT_CURRENT_CUSTOMER 120
+tick
+expect step = "Fetch 1 gianne dough and 1 crunchy tray"
+expect gauge.Seconds_left = "660/660"
+tick 1100
+expect step = "Back to Gianne jnr. for a new order"
+expect target = GIANNE
+expect destination = "2436 3502"
+varbit ALUFT_CURRENT_ORDER 0
+varbit ALUFT_CURRENT_CUSTOMER 0
+tick
+expect saved.gnome.kept ~ ",H,TOAD_CRUNCHIES,CAPTAIN_KLEMFOODLE,"
+expect saved.gnome.kept ~ ",l,"
+expect activity = NONE

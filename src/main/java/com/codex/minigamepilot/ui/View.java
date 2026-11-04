@@ -27,7 +27,8 @@ public final class View
 		HOUSES("Stealing Valuables"),
 		ROGUES_DEN("Rogues' Den"),
 		BARBARIAN_ASSAULT("Barbarian Assault"),
-		WINTERTODT("Wintertodt");
+		WINTERTODT("Wintertodt"),
+		GNOME_RESTAURANT("Gnome Restaurant");
 
 		private final String title;
 
@@ -637,6 +638,8 @@ public final class View
 			"Every game kept with its waves, roles and times, your honour points in each role against the reward you want, and the role to play next to get there soonest."));
 		v.brief(new Brief(Activity.WINTERTODT, null,
 			"Chop, fletch and feed one step at a time, your brazier lit, fixed and its Pyromancer healed, warmth watched, every round kept, and the pyromancer outfit's odds at your pace."));
+		v.brief(new Brief(Activity.GNOME_RESTAURANT, null,
+			"Each order's recipe one step at a time with what you lack, then the customer marked with the time left, every delivery kept with its tip, and every gnome dish as a checklist."));
 		return v;
 	}
 

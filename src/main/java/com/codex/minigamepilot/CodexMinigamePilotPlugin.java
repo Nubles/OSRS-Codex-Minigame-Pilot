@@ -74,8 +74,8 @@ import net.runelite.client.util.Text;
 	name = "Codex Minigame Pilot",
 	internalName = "codex-minigame-pilot",
 	legacyDataDirectory = "codex-minigame-pilot",
-	description = "One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes, Guardians of the Rift, Tempoross, the Giants' Foundry, Mastering Mixology, Vale Totems, the Tithe Farm, stealing artefacts, stealing valuables, the Rogues' Den and the Wintertodt, with a Barbarian Assault companion: what to click, the path there, and why",
-	tags = {"motherlode", "mlm", "blast furnace", "mahogany homes", "construction", "mining", "smithing", "guardians of the rift", "gotr", "runecraft", "tempoross", "fishing", "giants foundry", "mastering mixology", "mixology", "herblore", "vale totems", "fletching", "varlamore", "tithe farm", "farming", "stealing artefacts", "thieving", "piscarilius", "stealing valuables", "house thieving", "civitas illa fortis", "rogues den", "rogue equipment", "agility", "barbarian assault", "ba", "honour points", "fighter torso", "wintertodt", "firemaking", "pyromancer", "guide", "codex"}
+	description = "One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes, Guardians of the Rift, Tempoross, the Giants' Foundry, Mastering Mixology, Vale Totems, the Tithe Farm, stealing artefacts, stealing valuables, the Rogues' Den, the Wintertodt and the Gnome Restaurant, with a Barbarian Assault companion: what to click, the path there, and why",
+	tags = {"motherlode", "mlm", "blast furnace", "mahogany homes", "construction", "mining", "smithing", "guardians of the rift", "gotr", "runecraft", "tempoross", "fishing", "giants foundry", "mastering mixology", "mixology", "herblore", "vale totems", "fletching", "varlamore", "tithe farm", "farming", "stealing artefacts", "thieving", "piscarilius", "stealing valuables", "house thieving", "civitas illa fortis", "rogues den", "rogue equipment", "agility", "barbarian assault", "ba", "honour points", "fighter torso", "wintertodt", "firemaking", "pyromancer", "gnome restaurant", "gnome cooking", "cooking", "guide", "codex"}
 )
 public class CodexMinigamePilotPlugin extends Plugin
 {
@@ -188,6 +188,7 @@ public class CodexMinigamePilotPlugin extends Plugin
 		pilots.roguesDen(config.roguesDen(), config.roguesDenTraps());
 		pilots.barbarianAssault(config.barbarianAssault(), config.assaultReward().reward());
 		pilots.wintertodt(config.wintertodt(), config.wintertodtFletch(), config.wintertodtWarmth(), config.wintertodtReward().reward());
+		pilots.gnomeRestaurant(config.gnomeRestaurant());
 		goals = new GoalWatch(key -> configManager.getRSProfileConfiguration(CodexMinigamePilotConfig.GROUP, key),
 			(key, value) -> configManager.setRSProfileConfiguration(CodexMinigamePilotConfig.GROUP, key, value),
 			this::navigatorBoard);
@@ -321,6 +322,11 @@ public class CodexMinigamePilotPlugin extends Plugin
 		if (CodexMinigamePilotConfig.GROUP.equals(event.getGroup()) && event.getKey() != null && event.getKey().startsWith("wintertodt") && pilots != null)
 		{
 			pilots.wintertodt(config.wintertodt(), config.wintertodtFletch(), config.wintertodtWarmth(), config.wintertodtReward().reward());
+			return;
+		}
+		if (CodexMinigamePilotConfig.GROUP.equals(event.getGroup()) && "gnomeRestaurant".equals(event.getKey()) && pilots != null)
+		{
+			pilots.gnomeRestaurant(config.gnomeRestaurant());
 			return;
 		}
 		if (CodexMinigamePilotConfig.GROUP.equals(event.getGroup()) && "tickCoach".equals(event.getKey()) && pilots != null)
@@ -694,7 +700,7 @@ public class CodexMinigamePilotPlugin extends Plugin
 	private static boolean travels(Flight f)
 	{
 		return f.activity == View.Activity.HOMES || f.activity == View.Activity.TOTEMS || f.activity == View.Activity.ARTEFACTS
-			|| f.activity == View.Activity.HOUSES;
+			|| f.activity == View.Activity.HOUSES || f.activity == View.Activity.GNOME_RESTAURANT;
 	}
 
 	/** Clears the hint arrow only if it is still the one the Pilot set. */
@@ -741,6 +747,12 @@ public class CodexMinigamePilotPlugin extends Plugin
 		if (f.activity == View.Activity.HOUSES)
 		{
 			return "Vacant house";
+		}
+		if (f.activity == View.Activity.GNOME_RESTAURANT)
+		{
+			String t = f.step == null ? null : f.step.getTitle();
+			int to = t == null ? -1 : t.lastIndexOf(" to ");
+			return t != null && f.step.getTarget() == com.codex.minigamepilot.core.Step.Target.GNOME_CUSTOMER && to > 0 ? t.substring(to + 4) : "Gianne jnr.";
 		}
 		if (f.activity == View.Activity.ARTEFACTS)
 		{
