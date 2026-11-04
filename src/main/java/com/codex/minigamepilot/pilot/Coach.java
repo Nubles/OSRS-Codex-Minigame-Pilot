@@ -9,6 +9,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import net.runelite.api.Client;
 import net.runelite.api.Player;
+import net.runelite.api.Skill;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.widgets.Widget;
 
@@ -87,7 +88,10 @@ final class Coach
 		String leg = step.getVerb() + "|" + step.getTarget() + "|" + where;
 		int route = flight.route == null || flight.route.isEmpty() ? -1 : flight.route.size();
 		Pace pace = pace(flight.activity);
-		Pace.Round done = pace.tick(flight.view.loopAt(), leg, place(step), still, step.isWaiting(), moved, route, units, kindHint);
+		Skill skill = skill(flight.activity);
+		// Every account has some Hitpoints experience: none means the skills have not arrived yet.
+		int xp = skill == null || client.getSkillExperience(Skill.HITPOINTS) <= 0 ? -1 : client.getSkillExperience(skill);
+		Pace.Round done = pace.tick(flight.view.loopAt(), leg, place(step), still, step.isWaiting(), moved, route, units, kindHint, xp);
 		// Every fair round can set a stage best even when the round as a whole was slower.
 		if (done != null && !done.hadBreak)
 		{
@@ -109,6 +113,50 @@ final class Coach
 		}
 		lastActivity = View.Activity.NONE;
 		lastAt = null;
+	}
+
+	/** The skill a minigame trains. */
+	static Skill skill(View.Activity activity)
+	{
+		switch (activity)
+		{
+			case MOTHERLODE:
+				return Skill.MINING;
+			case FURNACE:
+				return Skill.SMITHING;
+			case HOMES:
+				return Skill.CONSTRUCTION;
+			default:
+				return null;
+		}
+	}
+
+	/**
+	 * Adds the tick coach's card: the last loop in ticks against your best and the floor of its
+	 * walks, its biggest leak, loops and experience an hour, and the loops as a histogram.
+	 */
+	void tickCard(View view, View.Activity activity)
+	{
+		Pace p = paces.get(activity);
+		Pace.Round last = p == null ? null : p.last();
+		if (last == null)
+		{
+			return;
+		}
+		view.ticks(card(p, last, view.loopNames(), skill(activity)));
+	}
+
+	/** The tick coach's card for the last round of a pace. Package-private for tests. */
+	static View.TickCard card(Pace p, Pace.Round last, String[] names, Skill skill)
+	{
+		com.codex.minigamepilot.core.Loops loops = com.codex.minigamepilot.core.Loops.of(p.rounds());
+		Pace.Leak leak = last.leak();
+		String text = last.hadBreak ? "A break in this loop, so it is left out" : leak.text(names);
+		String xpLabel = skill == null ? "xp" : skill.getName() + " xp";
+		int best = p.best(last.kind);
+		return new View.TickCard(last.ticks, best, last.footTicks(), last.floorTicks(), text,
+			leak.kind != Pace.Leak.Kind.NONE, loops.perHour(), loops.xpPerHour(), xpLabel, loops.count(),
+			loops.histogram(last, best)).first(last.bestBefore == 0 && !last.hadBreak);
 	}
 
 	/** Adds the coach's card to the panel, once a round has been timed. */

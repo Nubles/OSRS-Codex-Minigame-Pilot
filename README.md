@@ -71,6 +71,22 @@ Each round is also split into the stages of its loop (Mine, Hopper, Sack, Bank; 
   <img src="docs/screenshots/pace.png" width="225" alt="Pace coach">
 </p>
 
+## Tick coach
+
+The game runs on 0.6-second ticks, and the tick coach counts every loop in them: Motherlode's mine, hopper, sack and bank; the Blast Furnace's bank, belt and bars; a Mahogany Homes contract from the contractor through the furniture and back. After each loop the panel shows:
+
+- **The loop in ticks against your best** of the same kind ("176 ticks, +26 on best"), or "new best".
+- **Its walking against a floor.** Every walk the Pilot sends you on is measured over the game's collision map, so its shortest way is known; at run pace (two tiles a tick) that walk has a floor nobody can beat. The card sets the ticks you spent on foot against it: "On foot 19 ticks against a floor of 17 at run pace, 2 over". Mining, smelting and building have no fixed duration the wiki states, so the coach never invents a floor for them: those parts are only compared with your own best.
+- **The single biggest leak**, named and placed: "idle 7 ticks at the sack" (standing still with something to do; the bank, dialogue and menus don't count) or "11 ticks lost on foot to the belt" (a detour, or walking where you could run). When neither cost two ticks or more, the stage furthest over its own best stands in.
+- **Loops an hour and experience an hour** while looping, from the loops themselves, so a break never drags them down.
+- **A histogram of your loop times**, the bar holding the last loop lit in teal and a gilt pennant over your best.
+
+Loops with a break in them are left out, as in the pace coach. It is stats only: it changes nothing about the guidance, and can be turned off under *Tick coach*.
+
+<p align="center">
+  <img src="docs/screenshots/tick-coach.png" width="225" alt="Tick coach at the Motherlode Mine">
+</p>
+
 ## Goals
 
 Each minigame works toward something, chosen in the settings: a reward from its shop or a level.
@@ -128,6 +144,7 @@ Codex Minigame Pilot is guidance only. It reads what the game already shows you 
 - **Minigames:** turn each of the three off; fix the *Blast Furnace bar* instead of letting the Pilot work it out; *Top up coffer below* (2,500 coins by default).
 - **Guidance:** *Step plaque*, *Path on the ground*, *Path on minimap*, *Action labels*, *Mark what comes after*, *Hint arrow* and *World map marker* for Mahogany Homes, and *Visit summary in chat*. All on by default.
 - **Goals:** what Motherlode nuggets and Mahogany Homes points are saved for, the *Blast Furnace level* to work toward (0 for the next), *Show goals* and *Reward road*.
+- **Tick coach:** *Tick coach*, on by default.
 - **Field notes:** *Keep field notes*, off by default.
 
 ## Development

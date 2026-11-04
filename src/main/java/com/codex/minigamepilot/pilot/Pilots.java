@@ -67,6 +67,14 @@ public final class Pilots
 		this.homes = new HomesPilot(saved, save, load, saveKey);
 	}
 
+	private volatile boolean tickCoach = true;
+
+	/** The "Tick coach" setting: the tick coach's card on the panel. */
+	public void tickCoach(boolean on)
+	{
+		tickCoach = on;
+	}
+
 	/** The "Upper hopper unlocked" setting for the Motherlode Mine. */
 	public void upperHopper(boolean on)
 	{
@@ -234,6 +242,10 @@ public final class Pilots
 		homes.settle(client.getSkillExperience(net.runelite.api.Skill.CONSTRUCTION));
 		Pace.Round round = coach.tick(client, flight, units, kind);
 		coach.decorate(flight.view, activity);
+		if (tickCoach)
+		{
+			coach.tickCard(flight.view, activity);
+		}
 		BankStock banked = stock == null ? null : stock.get();
 		if (activity == View.Activity.FURNACE)
 		{

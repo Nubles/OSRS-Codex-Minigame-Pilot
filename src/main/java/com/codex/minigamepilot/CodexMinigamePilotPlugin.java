@@ -165,6 +165,7 @@ public class CodexMinigamePilotPlugin extends Plugin
 		// later login to another account would not be told apart from it.
 		pilots.profile(configManager.getRSProfileKey());
 		pilots.upperHopper(config.upperHopper());
+		pilots.tickCoach(config.tickCoach());
 		goals = new GoalWatch(key -> configManager.getRSProfileConfiguration(CodexMinigamePilotConfig.GROUP, key),
 			(key, value) -> configManager.setRSProfileConfiguration(CodexMinigamePilotConfig.GROUP, key, value),
 			this::navigatorBoard);
@@ -235,6 +236,11 @@ public class CodexMinigamePilotPlugin extends Plugin
 		if (CodexMinigamePilotConfig.GROUP.equals(event.getGroup()) && "upperHopper".equals(event.getKey()) && pilots != null)
 		{
 			pilots.upperHopper(config.upperHopper());
+			return;
+		}
+		if (CodexMinigamePilotConfig.GROUP.equals(event.getGroup()) && "tickCoach".equals(event.getKey()) && pilots != null)
+		{
+			pilots.tickCoach(config.tickCoach());
 			return;
 		}
 		if (!CodexMinigamePilotConfig.GROUP.equals(event.getGroup()) || !"fieldNotes".equals(event.getKey()) || notes == null)

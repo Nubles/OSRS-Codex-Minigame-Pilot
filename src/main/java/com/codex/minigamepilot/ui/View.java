@@ -171,6 +171,88 @@ public final class View
 		}
 	}
 
+	/**
+	 * The tick coach: the last loop in ticks against your best and against the floor of its walks,
+	 * its single biggest leak, loops and experience an hour, and every loop as a histogram.
+	 */
+	public static final class TickCard
+	{
+		final int lastTicks;
+		/** Your best loop of the same kind, this one included, or 0. */
+		final int bestTicks;
+		/** Ticks the loop spent on foot on walks of known length, and their floor at run pace. */
+		final int footTicks;
+		final int floorTicks;
+		final String leak;
+		/** Whether the leak is one worth fixing, rather than a clean loop. */
+		final boolean leaking;
+		final long perHour;
+		/** Experience an hour while looping, or -1 when not known. */
+		final long xpPerHour;
+		/** "Mining xp", for the tile under the figure. */
+		final String xpLabel;
+		final int loops;
+		final List<com.codex.minigamepilot.core.Loops.Bin> bins = new ArrayList<>();
+		/** True when no loop of this kind was timed before, so there was no best to beat. */
+		boolean first;
+
+		/** Marks the loop as the first of its kind. */
+		public TickCard first(boolean f)
+		{
+			first = f;
+			return this;
+		}
+
+		public TickCard(int lastTicks, int bestTicks, int footTicks, int floorTicks, String leak, boolean leaking,
+			long perHour, long xpPerHour, String xpLabel, int loops, List<com.codex.minigamepilot.core.Loops.Bin> bins)
+		{
+			this.lastTicks = lastTicks;
+			this.bestTicks = bestTicks;
+			this.footTicks = footTicks;
+			this.floorTicks = floorTicks;
+			this.leak = leak;
+			this.leaking = leaking;
+			this.perHour = perHour;
+			this.xpPerHour = xpPerHour;
+			this.xpLabel = xpLabel;
+			this.loops = loops;
+			if (bins != null)
+			{
+				this.bins.addAll(bins);
+			}
+		}
+
+		public String getLeak()
+		{
+			return leak;
+		}
+
+		public int getLastTicks()
+		{
+			return lastTicks;
+		}
+
+		public int getFloorTicks()
+		{
+			return floorTicks;
+		}
+
+		public int getFootTicks()
+		{
+			return footTicks;
+		}
+
+		public long getPerHour()
+		{
+			return perHour;
+		}
+
+		public int getLoops()
+		{
+			return loops;
+		}
+	}
+
 	/** A goal being worked toward in a minigame: a reward from its shop, or a level. */
 	public static final class GoalCard
 	{
@@ -296,6 +378,7 @@ public final class View
 	String linesNote;
 	final List<Brief> briefs = new ArrayList<>();
 	PaceCard pace;
+	TickCard ticks;
 	final List<GoalCard> goals = new ArrayList<>();
 	/** The minigame's whole shop as a road, or empty. */
 	final List<RewardRoad.Stop> road = new ArrayList<>();
@@ -387,6 +470,18 @@ public final class View
 		return this;
 	}
 
+	public View ticks(TickCard t)
+	{
+		ticks = t;
+		return this;
+	}
+
+	/** The tick coach's card, or null. */
+	public TickCard ticks()
+	{
+		return ticks;
+	}
+
 	public View gauge(Gauge g)
 	{
 		gauges.add(g);
@@ -427,6 +522,12 @@ public final class View
 		if (pace != null)
 		{
 			b.append("|pace").append(pace.lastTicks).append(pace.bestTicks).append(pace.advice).append(pace.tail).append(pace.splitNote);
+		}
+		if (ticks != null)
+		{
+			b.append("|ticks").append(ticks.lastTicks).append('/').append(ticks.bestTicks).append('/').append(ticks.footTicks)
+				.append('/').append(ticks.floorTicks).append(ticks.leak).append(ticks.perHour).append('/').append(ticks.xpPerHour)
+				.append('/').append(ticks.loops);
 		}
 		for (GoalCard g : goals)
 		{

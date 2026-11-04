@@ -1,0 +1,79 @@
+# The tick coach times a whole Motherlode loop (mine, then deposit at the hopper, then mine again)
+# in ticks, weighs its walk against the floor of that walk at run pace, and names the loop's one
+# biggest leak. Running covers two tiles a tick and walking one (oldschool.runescape.wiki/w/Energy:
+# "move one tile per game tick while walking" and "two tiles per game tick while running"), so a
+# walk here, one tile a tick, costs about twice its floor.
+include /replays/scenes/motherlode.scene
+skill MINING 70
+at 3721 5641
+tick 2
+expect step = "Mine pay-dirt"
+expect ticks.loops = -
+
+# A full load: the step turns to the hopper, and the walk there is made at walking pace.
+items INV PAYDIRT 27
+tick
+expect object = hopper
+walk 3749 5649
+tick
+items INV clear
+items INV RUNE_PICKAXE 1
+varbit MOTHERLODE_SACK_TRANSMIT 27
+xp MINING 740000
+tick
+# Back at a vein the loop has come round: 32 ticks, 28 of them on foot against a floor of 14.
+expect step = "Mine pay-dirt"
+expect ticks.loops = "1"
+expect ticks.last = "32"
+expect ticks.foot = "28"
+expect ticks.floor = "14"
+expect ticks.leak = "14 ticks lost on foot to the hopper"
+
+# The second loop: the next vein, a full load, and this time the run there two tiles a tick
+# (stepped by hand), then six ticks standing at the hopper before depositing.
+at 3725 5641
+tick
+items INV PAYDIRT 27
+tick
+expect object = hopper
+at 3727 5643
+tick
+at 3729 5645
+tick
+at 3731 5647
+tick
+at 3733 5649
+tick
+at 3735 5649
+tick
+at 3737 5649
+tick
+at 3739 5649
+tick
+at 3741 5649
+tick
+at 3743 5649
+tick
+at 3745 5649
+tick
+at 3747 5649
+tick
+at 3749 5649
+tick
+tick 6
+items INV clear
+items INV RUNE_PICKAXE 1
+varbit MOTHERLODE_SACK_TRANSMIT 54
+xp MINING 741000
+tick
+expect ticks.loops = "2"
+# The run was on its floor, so the leak is the standing still: six ticks, less the one a click takes.
+expect ticks.leak = "Idle 5 ticks at the hopper"
+expect ticks.foot = "12"
+expect ticks.floor = "12"
+expect ticks.last = "21"
+
+# Turned off, the card is gone.
+setting tickCoach off
+tick
+expect ticks.loops = -
