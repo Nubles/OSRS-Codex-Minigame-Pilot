@@ -6,6 +6,7 @@ import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 import net.runelite.client.config.ConfigSection;
 import net.runelite.client.config.Range;
+import net.runelite.client.config.Units;
 
 @ConfigGroup(CodexMinigamePilotConfig.GROUP)
 public interface CodexMinigamePilotConfig extends Config
@@ -193,6 +194,44 @@ public interface CodexMinigamePilotConfig extends Config
 	default int riftFragments()
 	{
 		return 120;
+	}
+
+	@ConfigItem(
+		keyName = "tempoross",
+		name = "Tempoross",
+		description = "Guide Tempoross: the double fishing spot when it is up, the shrine, the ammunition crate, a tether before each wave and the spirit pool",
+		section = MINIGAMES,
+		position = 8
+	)
+	default boolean tempoross()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "temporossCook",
+		name = "Cook before loading",
+		description = "Cook harpoonfish at the shrine before loading them: cooked ones drain 15 of Tempoross's energy, raw 10. Off loads them raw",
+		section = MINIGAMES,
+		position = 9
+	)
+	default boolean temporossCook()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "temporossStormLoad",
+		name = "Load what you hold at storm",
+		description = "Once the storm intensity reaches this percentage, load the fish you hold at once. At 100% the wave washes you away and the game's points are lost. 0 turns it off",
+		section = MINIGAMES,
+		position = 10
+	)
+	@Range(min = 0, max = 100)
+	@Units(Units.PERCENT)
+	default int temporossStormLoad()
+	{
+		return 80;
 	}
 
 	@ConfigItem(keyName = "plaque", name = "Step plaque", description = "Show the next step on a small plaque in the game view", section = GUIDANCE, position = 0)

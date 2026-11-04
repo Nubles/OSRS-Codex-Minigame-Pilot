@@ -21,7 +21,7 @@ import net.runelite.api.NPC;
 import net.runelite.api.Scene;
 import net.runelite.api.Tile;
 
-/** The three pilots, the scene they share, and which one is flying this tick. */
+/** The pilots, the scene they share, and which one is flying this tick. */
 public final class Pilots
 {
 	private final Client client;
@@ -31,6 +31,8 @@ public final class Pilots
 	private final HomesPilot homes;
 	private final RiftPilot rift = new RiftPilot();
 	private volatile boolean useRift = true;
+	private final StormPilot storm = new StormPilot();
+	private volatile boolean useStorm = true;
 	private final Coach coach;
 	private final Recorder recorder;
 	private final IntUnaryOperator price;
@@ -64,10 +66,11 @@ public final class Pilots
 		motherlode.setPrice(price);
 		motherlode.setStore(load, saveKey);
 		rift.setStore(load, saveKey);
+		storm.setStore(load, saveKey);
 		this.coach = new Coach(loadBests, saveBests);
 		this.recorder = new Recorder(notes);
 		this.scene = new SceneIndex(client, id -> MotherlodePilot.isWatched(id) || FurnacePilot.isWatched(id) || HomesPilot.isWatched(id)
-			|| RiftPilot.isWatched(id));
+			|| RiftPilot.isWatched(id) || StormPilot.isWatched(id));
 		this.homes = new HomesPilot(saved, save, load, saveKey);
 	}
 
@@ -98,6 +101,14 @@ public final class Pilots
 	void riftReaders(java.util.function.Predicate<net.runelite.api.Quest> quest, IntUnaryOperator sprite)
 	{
 		rift.readers(quest, sprite);
+	}
+
+	/** The "Tempoross" settings: on, cook before loading, and the storm at which to load what you hold. */
+	public void tempoross(boolean on, boolean cook, int stormLoad)
+	{
+		useStorm = on;
+		storm.setCook(cook);
+		storm.setStormLoad(stormLoad);
 	}
 
 	/** The "Upper hopper unlocked" setting for the Motherlode Mine. */
@@ -134,6 +145,7 @@ public final class Pilots
 			furnace.newAccount();
 			homes.newAccount();
 			rift.newAccount();
+			storm.newAccount();
 			said.clear();
 			unsaid.clear();
 		}
@@ -162,6 +174,7 @@ public final class Pilots
 		furnace.coalBag.chat(message);
 		homes.chat(message);
 		rift.chat(message);
+		storm.chat(message);
 	}
 
 	/** @param bankCoal coal in the open bank, or -1 when the bank is closed */
@@ -255,6 +268,13 @@ public final class Pilots
 			state = rift.lastState;
 			units = rift.units();
 		}
+		else if (useStorm && storm.active(client))
+		{
+			activity = View.Activity.TEMPOROSS;
+			flight = storm.fly(client, scene, now);
+			state = storm.lastState;
+			units = storm.units();
+		}
 		else
 		{
 			activity = View.Activity.NONE;
@@ -276,9 +296,14 @@ public final class Pilots
 			{
 				rift.left();
 			}
+			else if (last == View.Activity.TEMPOROSS)
+			{
+				storm.left(client.getTickCount(), now);
+			}
 			last = activity;
 		}
 		homes.settle(client.getSkillExperience(net.runelite.api.Skill.CONSTRUCTION));
+		storm.settle(client);
 		Pace.Round round = coach.tick(client, flight, units, kind);
 		coach.decorate(flight.view, activity);
 		if (tickCoach)
@@ -434,6 +459,7 @@ public final class Pilots
 		v.brief(motherlode.brief(lastVisit(View.Activity.MOTHERLODE), best(View.Activity.MOTHERLODE), now));
 		v.brief(furnace.brief(lastVisit(View.Activity.FURNACE), best(View.Activity.FURNACE), now));
 		v.brief(rift.brief());
+		v.brief(storm.brief());
 		return v;
 	}
 }

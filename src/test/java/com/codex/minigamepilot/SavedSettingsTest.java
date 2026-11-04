@@ -30,6 +30,8 @@ public class SavedSettingsTest
 			"tickCoach",
 			// Guardians of the Rift.
 			"rift", "riftFragments",
+			// Tempoross.
+			"tempoross", "temporossCook", "temporossStormLoad",
 			"fieldNotes")), keys);
 		assertEquals("codexminigamepilot", CodexMinigamePilotConfig.GROUP);
 	}

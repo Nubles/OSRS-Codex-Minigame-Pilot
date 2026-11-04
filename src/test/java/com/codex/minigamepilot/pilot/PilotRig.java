@@ -14,10 +14,11 @@ import net.runelite.api.GameState;
 import net.runelite.api.TileObject;
 
 /**
- * Runs the Minigame Pilot's three pilots on a replay, wired as the plugin wires them: the same
+ * Runs the Minigame Pilot's pilots on a replay, wired as the plugin wires them: the same
  * object, varbit, chat and game-state events, its settings, and its saved per-account state.
  *
  * <p>Commands it adds: {@code setting NAME on|off} (motherlode, furnace, homes, upperHopper, rift, tickCoach),
+ * {@code stormload N} (Tempoross's "Load what you hold at storm"; setting names tempoross and temporossCook too),
  * {@code fragments N} (fragments before the first Guardians of the Rift craft), {@code quest QUEST done|not}
  * (by RuneLite's {@code Quest} name), {@code hud elemental|catalytic ALTAR|none} (the rune icon the
  * Guardians of the Rift HUD shows for an open altar; the HUD component itself is a {@code widget}),
@@ -40,6 +41,8 @@ final class PilotRig implements Rig
 	private final java.util.Set<net.runelite.api.Quest> quests = java.util.EnumSet.noneOf(net.runelite.api.Quest.class);
 	/** Sprites shown on HUD components by id; FakeGame's widgets have no sprites. */
 	private final Map<Integer, Integer> sprites = new HashMap<>();
+	/** The "Load what you hold at storm" setting for Tempoross. */
+	private int stormLoad = 80;
 	PilotRig(FakeGame game)
 	{
 		this.game = game;
@@ -49,6 +52,8 @@ final class PilotRig implements Rig
 		settings.put("upperHopper", false);
 		settings.put("tickCoach", true);
 		settings.put("rift", true);
+		settings.put("tempoross", true);
+		settings.put("temporossCook", true);
 		pilots = new Pilots(game.client(), null, c -> { }, new FieldNotes(() -> null, new Gson()),
 			bests::get, bests::put, id -> 0, store::get, store::put, () -> null);
 		pilots.profile("replay");
@@ -69,6 +74,11 @@ final class PilotRig implements Rig
 				pilots.upperHopper(settings.get("upperHopper"));
 				pilots.tickCoach(settings.get("tickCoach"));
 				pilots.rift(settings.get("rift"));
+				pilots.tempoross(settings.get("tempoross"), settings.get("temporossCook"), stormLoad);
+				return true;
+			case "stormload":
+				stormLoad = Integer.parseInt(args.get(0));
+				pilots.tempoross(settings.get("tempoross"), settings.get("temporossCook"), stormLoad);
 				return true;
 			case "fragments":
 				pilots.riftFragments(Integer.parseInt(args.get(0)));

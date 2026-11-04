@@ -48,7 +48,21 @@ public final class Step
 		DEPOSIT_POOL,
 		/** The portal to the huge guardian remains, or back from them. */
 		RIFT_PORTAL,
-		HUGE_REMAINS
+		HUGE_REMAINS,
+		// Tempoross
+		/** A harpoonfish spot, the double one first when it is up. */
+		FISHING_SPOT,
+		/** The shrine on the island, where harpoonfish are cooked. */
+		SHRINE,
+		/** An ammunition crate by a cannon. */
+		AMMO_CRATE,
+		/** A totem pole or mast to tether to before a wave. */
+		TETHER,
+		FIRE,
+		SPIRIT_POOL,
+		/** A crate of harpoons, ropes, buckets or hammers. */
+		SUPPLY_CRATE,
+		WATER_PUMP
 	}
 
 	private final String verb;
