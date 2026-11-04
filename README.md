@@ -29,10 +29,21 @@ It is part of the **Codex** suite of RuneLite plugins and shares their look: war
 
 ### Mahogany Homes
 - **From contract to points.** Which contractor to ask and for which tier, the planks and steel bars to bring (counted from the job's own furniture, plank sack included), the way to the client's house with a hint arrow and a world map marker, the teleport you carry that gets there quickest, then each piece of furniture in walking order.
+- **The tier your planks can finish.** The best tier your level reaches, unless its planks (bank, pack and sack) would not finish a contract and a lower tier's would: "Not enough mahogany planks for an expert contract; your teak planks cover at least 9 contracts". Contracts cannot be cancelled, so until you have finished one of a tier it counts a contract as the most any can take (every piece in the largest house, 17 planks), then as what yours have taken.
+- **The quickest way there, door to door.** With Codex Wayfinder installed, every teleport you own is weighed, cast and walk, at your own walking pace, against walking from where you stand: "Falador tablet, about 25s. Ring of wealth in your bank: 15s". Without it, the teleport you carry for the city, or the one the wiki recommends.
+- **Repairs apart from rebuilds.** Furniture one click mends is outlined in teal, and what you take out and build in gold, so you can see at a glance what is one action and what is two.
+- **The plank sack's fill.** A gauge of the sack against its 28, by wood, and when you are short of planks the step says how much room the sack still has.
+- **Every contract kept.** Each contract you hand in is kept per account with its client, tier, experience and loop time, and the panel shows your last five, the quickest of each tier ticked, with your points an hour. After a hand-in, when the planks left cover fewer than two more contracts, the chat says so (*Low planks in chat*).
 - **Floor by floor.** When the rest of the work, or the client, is upstairs, the step is the ladder.
 - **A checklist.** Every piece of furniture with what it needs (repair, remove, build) and what it costs, ticked off as you go.
 - **What a contract costs you.** Each contract you finish is measured: the Construction experience it gave (any outfit bonus included), the planks and steel the job took, and the whole loop's time. Priced at today's Grand Exchange prices, the tiers you have done are ranked by coins per experience point, with experience an hour, so you can see whether expert contracts are worth their mahogany. Nothing is guessed: a tier is ranked once you have finished one, and a job first seen half done is not measured.
 - **Planks in the bank.** Your tier's planks and steel bars in the bank, carried and in the plank sack, counted in contracts at what your own contracts take, and in time: "Mahogany planks for about 24 contracts, 1h 48m". Away from the minigames the Mahogany Homes card says the same.
+
+<p align="center">
+  <img src="docs/screenshots/homes-sack.png" width="225" alt="Mahogany Homes: the plank sack's fill">
+  <img src="docs/screenshots/homes-way.png" width="225" alt="Mahogany Homes: the quickest way there">
+  <img src="docs/screenshots/homes-history.png" width="225" alt="Mahogany Homes: your contracts kept">
+</p>
 
 ### Guardians of the Rift
 - **One step through the whole game.** Take uncharged cells, wait for the rift, mine fragments, craft essence at the workbench, fill your pouches, enter the altar, craft, empty the pouches and craft again, take the portal back, power up the Great Guardian with your stones, place the charged cell, deposit the runes, and round again. Each one is lit in the world with its path and a line of why.
@@ -189,14 +200,15 @@ At the furnace the panel ranks every bar by what it makes at today's Grand Excha
 
 ## Works with other Codex plugins
 
-Both are read only, never written, and everything works without them.
+All are read only, never written, and everything works without them.
 
 - **[Codex Bank Steward](https://github.com/Nubles/OSRS-Codex-Bank-Steward):** its shared snapshot of your bank (`bankV1`) gives the supply counts (ore, coal, planks, steel bars) from the first login, before you open the bank with the Pilot on. The newer of its snapshot and the Pilot's own last look is used, and the card says which and how long ago.
+- **[Codex Wayfinder](https://github.com/Nubles/osrs-codex-wayfinder):** its shared atlas (`atlasV1`) of the teleports this account owns, where each lands and your walking pace, for the quickest way to a Mahogany Homes client.
 - **[Codex Navigator](https://github.com/Nubles/OSRS-Codex-Navigator):** its goal board (`goalBoard`). A level goal the Pilot picks (the Blast Furnace level left at 0, or Next level and Next reward once the rewards are owned) follows the level your pinned goals need, your focus goal's first, and the card names it: "Dragon Slayer II needs Smithing 70". The reward road ends on that level.
 
 ## Your data
 
-Your bank's goal items and supplies as last seen, your Mahogany Homes points, your Guardians of the Rift points, your last thirty Tempoross games, your last fifty Giants' Foundry swords and the moulds the jig has shown you own, your last hundred Mastering Mixology deliveries, the rewards you own, your round bests, your last and best visit to each minigame and what your contracts take are saved in your RuneLite profile, per account. A damaged or hand-edited value is read as far as it can be and the rest left out, so it never stops the Pilot.
+Your bank's goal items and supplies as last seen, your Mahogany Homes points, your Guardians of the Rift points, your last thirty Tempoross games, your last fifty Giants' Foundry swords and the moulds the jig has shown you own, your last hundred Mastering Mixology deliveries, your last fifty Mahogany Homes contracts, the rewards you own, your round bests, your last and best visit to each minigame and what your contracts take are saved in your RuneLite profile, per account. A damaged or hand-edited value is read as far as it can be and the rest left out, so it never stops the Pilot.
 
 ## Field notes
 
@@ -209,7 +221,7 @@ Codex Minigame Pilot is guidance only. It reads what the game already shows you 
 ## Settings that matter
 
 - **Minigames:** turn each of the seven off; *Mixology orders to make* (every order, or the most resin per paste) and *Mixology station cues*; *Cook before loading* and *Load what you hold at storm* (80%) for Tempoross; *Fragments before first craft* for Guardians of the Rift (120 by default); fix the *Blast Furnace bar* instead of letting the Pilot work it out; *Top up coffer below* (2,500 coins by default).
-- **Guidance:** *Step plaque*, *Path on the ground*, *Path on minimap*, *Action labels*, *Mark what comes after*, *Hint arrow* and *World map marker* for Mahogany Homes, and *Visit summary in chat*. All on by default.
+- **Guidance:** *Step plaque*, *Path on the ground*, *Path on minimap*, *Action labels*, *Mark what comes after*, *Hint arrow*, *World map marker* and *Low planks in chat* for Mahogany Homes, and *Visit summary in chat*. All on by default.
 - **Goals:** what Motherlode nuggets and Mahogany Homes points are saved for, the *Mixology reward* your resin is saved for, the *Blast Furnace level* to work toward (0 for the next), *Show goals* and *Reward road*.
 - **Tick coach:** *Tick coach*, on by default.
 - **Field notes:** *Keep field notes*, off by default.

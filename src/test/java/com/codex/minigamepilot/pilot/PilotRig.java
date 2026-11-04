@@ -22,13 +22,15 @@ import net.runelite.api.TileObject;
  * {@code foundry stages TOOL...} and {@code foundry bonus on|off} (the Giants' Foundry HUD's stage icons and sweet spot),
  * {@code mixology plan ALL|PER_PASTE}, {@code mixology reward REWARD|none} and {@code mixology cue SPOTANIM} (a Mastering
  * Mixology setting, or a spot animation appearing, by its {@code SpotanimID} name; setting names mixology and mixologyCues),
+ * {@code bank ITEM COUNT} (the bank as last seen), {@code teleport "Name" "Source" X Y SECONDS carried|banked},
+ * {@code teleport pace S} and {@code teleport none} (Codex Wayfinder's shared atlas),
  * {@code fragments N} (fragments before the first Guardians of the Rift craft), {@code quest QUEST done|not}
  * (by RuneLite's {@code Quest} name), {@code hud elemental|catalytic ALTAR|none} (the rune icon the
  * Guardians of the Rift HUD shows for an open altar; the HUD component itself is a {@code widget}),
  * {@code saved KEY VALUE} to seed the account's saved state, and {@code profile NAME} for an
  * account login. Readings each tick: {@code activity}, {@code step} (its title), {@code verb},
  * {@code target}, {@code waiting}, {@code place}, {@code object} (the script's name for the
- * object lit up, else its id), {@code route} (tiles to walk), and {@code saved.KEY} for every
+ * object lit up, else its id), {@code route} (tiles to walk), {@code lowPlanks} (the last low-planks line for the chat), and {@code saved.KEY} for every
  * saved key.
  */
 final class PilotRig implements Rig
@@ -52,6 +54,14 @@ final class PilotRig implements Rig
 	/** The Mastering Mixology settings as the script sets them. */
 	private com.codex.minigamepilot.core.MixCycle.Plan mixPlan = com.codex.minigamepilot.core.MixCycle.Plan.ALL;
 	private com.codex.minigamepilot.core.Mixology.Reward mixReward;
+	/** The bank as last seen, set by {@code bank ITEM COUNT}; null until the script sets one. */
+	private com.codex.minigamepilot.core.BankStock bank;
+	private final Map<Integer, Long> bankItems = new HashMap<>();
+	/** Codex Wayfinder's atlas as the script sets it with {@code teleport}; null without Wayfinder. */
+	private List<com.codex.minigamepilot.core.WayfinderAtlas.Teleport> teleports;
+	private double walkPace = 0.3;
+	/** The last low-planks line said in the chat. */
+	private String lowPlanks;
 	PilotRig(FakeGame game)
 	{
 		this.game = game;
@@ -67,7 +77,8 @@ final class PilotRig implements Rig
 		settings.put("mixology", true);
 		settings.put("mixologyCues", true);
 		pilots = new Pilots(game.client(), null, c -> { }, new FieldNotes(() -> null, new Gson()),
-			bests::get, bests::put, game::price, store::get, store::put, () -> null);
+			bests::get, bests::put, game::price, store::get, store::put, () -> bank);
+		pilots.atlas(() -> teleports == null ? null : com.codex.minigamepilot.core.WayfinderAtlas.of(walkPace, teleports));
 		pilots.profile("replay");
 		pilots.riftReaders(q -> quests.contains(q), c -> sprites.getOrDefault(c, -1));
 		pilots.foundryHud(new FoundryPilot.Hud()
@@ -192,6 +203,35 @@ final class PilotRig implements Rig
 				}
 				return true;
 			}
+			case "bank":
+			{
+				// bank ITEM COUNT: the bank as the Pilot last saw it (by ItemID name or number).
+				int id = itemId(args.get(0));
+				bankItems.put(id, Long.parseLong(args.get(1)));
+				bank = com.codex.minigamepilot.core.BankStock.seen(new HashMap<>(bankItems), Replay.START);
+				return true;
+			}
+			case "teleport":
+			{
+				// teleport "Name" "Source" X Y SECONDS carried|banked | teleport pace S | teleport none
+				if ("none".equals(args.get(0)))
+				{
+					teleports = null;
+					return true;
+				}
+				if ("pace".equals(args.get(0)))
+				{
+					walkPace = Double.parseDouble(args.get(1));
+					return true;
+				}
+				if (teleports == null)
+				{
+					teleports = new java.util.ArrayList<>();
+				}
+				teleports.add(new com.codex.minigamepilot.core.WayfinderAtlas.Teleport(args.get(0), args.get(1),
+					Integer.parseInt(args.get(2)), Integer.parseInt(args.get(3)), 0, Integer.parseInt(args.get(4)), "carried".equals(args.get(5))));
+				return true;
+			}
 			case "saved":
 				store.put(args.get(0), args.get(1));
 				return true;
@@ -200,6 +240,25 @@ final class PilotRig implements Rig
 				return true;
 			default:
 				return false;
+		}
+	}
+
+	private static int itemId(String name)
+	{
+		try
+		{
+			return Integer.parseInt(name);
+		}
+		catch (NumberFormatException e)
+		{
+			try
+			{
+				return net.runelite.api.gameval.ItemID.class.getField(name).getInt(null);
+			}
+			catch (ReflectiveOperationException x)
+			{
+				throw new IllegalArgumentException("No ItemID." + name);
+			}
 		}
 	}
 
@@ -294,6 +353,15 @@ final class PilotRig implements Rig
 			r.put("ticks.leak", t.getLeak());
 			r.put("ticks.loops", String.valueOf(t.getLoops()));
 			r.put("ticks.perHour", String.valueOf(t.getPerHour()));
+		}
+		String low = pilots.takeLowPlanks();
+		if (low != null)
+		{
+			lowPlanks = low;
+		}
+		if (lowPlanks != null)
+		{
+			r.put("lowPlanks", lowPlanks);
 		}
 		store.forEach((k, v) -> r.put("saved." + k, v));
 		return r;

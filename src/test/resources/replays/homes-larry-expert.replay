@@ -1,0 +1,108 @@
+# Mahogany Homes: an expert contract for Larry in Falador from the plank sack to the hand-in. The
+# way there comes from Codex Wayfinder's atlas, a repair is told apart from a rebuild, and the
+# finished contract is kept with its experience and time; the planks left then run low, and the
+# chat says so.
+#
+# Facts:
+#  - OSRS wiki, Mahogany Homes: expert contracts need Construction 70 and mahogany planks; the
+#    wiki's Larry table is in scenes/homes-larry.scene
+#  - OSRS wiki, Plank sack: "a total of 28 planks of any type", and planks can be used straight
+#    from the sack; its counts are VarbitID.PLANK_SACK_PLAIN to _ROSEWOOD
+#  - OSRS wiki, Carpenter points: an expert contract is 5 points and 2,750 bonus experience
+#  - Codex Wayfinder's atlas (transports/teleportation_items.tsv): the Falador tablet lands at
+#    2964 3378 and the ring of wealth's Falador Park teleport at 2995 3375, each a 4 second cast
+#  - hotspot values, as the Pilot reads them: 1 to mend, 3 to take out, 4 to build, 5 to 8 built
+#    at tiers one to four; 0 is not part of this job
+scene 3150 3400
+skill CONSTRUCTION 72 1000000
+item PLANK_MAHOGANY "Mahogany plank"
+item STEEL_BAR "Steel bar"
+item PLANK_SACK "Plank sack"
+item POH_TABLET_FALADORTELEPORT "Falador teleport"
+bank PLANK_MAHOGANY 4
+bank PLANK_TEAK 300
+
+# At the Varrock bank (a bare scene: only the walk from here counts) with the contract just given: four planks carried and four in the sack.
+at 3185 3436
+items INV PLANK_SACK 1
+items INV PLANK_MAHOGANY 4
+items INV STEEL_BAR 1
+items INV POH_TABLET_FALADORTELEPORT 1 stacked
+varbit PLANK_SACK_MAHOGANY 4
+chat GAMEMESSAGE "Expert Contract: Go see Larry."
+varbit CON_CONTRACT_HOTSPOT_1_DISPLAY 1
+varbit CON_CONTRACT_HOTSPOT_2_DISPLAY 3
+varbit CON_CONTRACT_HOTSPOT_4_DISPLAY 3
+varbit CON_CONTRACT_HOTSPOT_5_DISPLAY 1
+varbit CON_CONTRACT_HOTSPOT_6_DISPLAY 3
+varbit CON_CONTRACT_HOTSPOT_7_DISPLAY 1
+tick
+expect activity = HOMES
+expect place = "Larry, Falador"
+expect verb = Fetch
+expect step = "Bring 2 mahogany planks"
+expect detail = "The job needs 10 mahogany planks and 1 steel; you have 8 and 1. Your plank sack has room for 24"
+expect gauge.Plank_sack = 4/28
+expect gauge.Expert_planks = 8/10
+
+# Two more into the sack: enough. The atlas names the carried tablet, and the ring left in the bank.
+varbit PLANK_SACK_MAHOGANY 6
+teleport "Falador tablet" "Falador teleport" 2964 3378 4 carried
+teleport "Ring of wealth: Falador Park" "Ring of wealth" 2995 3375 4 banked
+tick
+expect verb = Travel
+expect step = "Go to Larry's house"
+expect detail = "Falador, north of the fountain. Falador tablet, about 25s. Ring of wealth in your bank: 15s"
+expect gauge.Plank_sack = 6/28
+
+# Without Wayfinder, the tablet carried is still named.
+teleport none
+tick
+expect detail = "Falador, north of the fountain. Your Falador teleport is the quickest way"
+
+# In the house: the nearest piece first, and the checklist.
+include /replays/scenes/homes-larry.scene
+at 3038 3364
+tick
+expect verb = Remove
+expect step = "Remove the table"
+expect lines ~ "Range TODO"
+expect lines ~ "Hat stand TODO"
+expect lines.note = "6 left"
+
+# Everything done but the range: mend it.
+varbit CON_CONTRACT_HOTSPOT_2_DISPLAY 8
+varbit CON_CONTRACT_HOTSPOT_4_DISPLAY 8
+varbit CON_CONTRACT_HOTSPOT_5_DISPLAY 2
+varbit CON_CONTRACT_HOTSPOT_6_DISPLAY 8
+varbit CON_CONTRACT_HOTSPOT_7_DISPLAY 2
+tick
+expect step = "Repair the range"
+expect object = range
+
+# All done: tell Larry, and hand in. The hand-in's experience lands, and the contract is kept.
+varbit CON_CONTRACT_HOTSPOT_1_DISPLAY 2
+items INV set PLANK_MAHOGANY 0
+varbit PLANK_SACK_MAHOGANY 0
+tick
+expect step = "Tell Larry the work is done"
+expect npc = Larry
+chat GAMEMESSAGE "You have completed 12 contracts with a total of 40 points."
+xp CONSTRUCTION 1003900
+tick 4
+expect saved.homes.log ~ ",LARRY,EXPERT,3900,0"
+expect lowPlanks = "Mahogany Homes: not enough mahogany planks for another expert contract (4 left)"
+
+# The next job, for Tau: before its furniture is seen, the panel shows the contracts kept.
+varbit CON_CONTRACT_HOTSPOT_1_DISPLAY 0
+varbit CON_CONTRACT_HOTSPOT_2_DISPLAY 0
+varbit CON_CONTRACT_HOTSPOT_4_DISPLAY 0
+varbit CON_CONTRACT_HOTSPOT_5_DISPLAY 0
+varbit CON_CONTRACT_HOTSPOT_6_DISPLAY 0
+varbit CON_CONTRACT_HOTSPOT_7_DISPLAY 0
+chat GAMEMESSAGE "Expert Contract: Go see Tau."
+tick
+expect place = "Tau, Falador"
+expect lines = "Larry · Expert IDLE"
+expect lines.note = "1 kept"
+expect stat.Points = 5

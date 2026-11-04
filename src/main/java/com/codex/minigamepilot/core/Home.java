@@ -286,6 +286,35 @@ public enum Home
 		return -1;
 	}
 
+	/**
+	 * Planks every piece of this house takes, which is what its largest contract can ask for: the
+	 * OSRS wiki's estimated expert costs top out at this sum (Jess 15, Larry 12, Barbara 10,
+	 * Leela 13, Mariah 14).
+	 */
+	public int fullPlanks()
+	{
+		int n = 0;
+		for (Hotspot h : hotspots)
+		{
+			if (!h.kind.isSteel())
+			{
+				n += h.kind.getAmount();
+			}
+		}
+		return n;
+	}
+
+	/** The most planks any contract, in any house, can take. */
+	public static int mostPlanks()
+	{
+		int most = 0;
+		for (Home h : values())
+		{
+			most = Math.max(most, h.fullPlanks());
+		}
+		return most;
+	}
+
 	public static Home byName(String name)
 	{
 		for (Home h : values())

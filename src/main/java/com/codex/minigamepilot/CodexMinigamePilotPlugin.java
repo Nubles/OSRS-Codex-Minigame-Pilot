@@ -1,6 +1,7 @@
 package com.codex.minigamepilot;
 
 import com.codex.minigamepilot.core.BankStock;
+import com.codex.minigamepilot.core.WayfinderAtlas;
 import com.codex.minigamepilot.core.Bar;
 import com.codex.minigamepilot.core.Goals;
 import com.codex.minigamepilot.core.NavigatorGoals;
@@ -146,6 +147,9 @@ public class CodexMinigamePilotPlugin extends Plugin
 	private BankStock ownStock;
 	private String stewardJson;
 	private BankStock stewardStock;
+	/** Codex Wayfinder's atlas as last read, and the text it was parsed from. */
+	private String atlasJson;
+	private WayfinderAtlas atlas;
 
 	@Provides
 	CodexMinigamePilotConfig provideConfig(ConfigManager configManager)
@@ -169,6 +173,7 @@ public class CodexMinigamePilotPlugin extends Plugin
 		// Turned on while logged in, no profile change arrives for this account: note it now, or a
 		// later login to another account would not be told apart from it.
 		pilots.profile(configManager.getRSProfileKey());
+		pilots.atlas(this::wayfinderAtlas);
 		pilots.upperHopper(config.upperHopper());
 		pilots.tickCoach(config.tickCoach());
 		pilots.rift(config.rift());
@@ -473,6 +478,26 @@ public class CodexMinigamePilotPlugin extends Plugin
 		return BankStock.newest(ownStock, stewardStock, System.currentTimeMillis());
 	}
 
+	/**
+	 * Codex Wayfinder's shared atlas of the teleports this account owns, or null when Wayfinder is
+	 * not installed. Read only, and parsed again only when it changes.
+	 */
+	private WayfinderAtlas wayfinderAtlas()
+	{
+		String json = configManager.getRSProfileConfiguration(WayfinderAtlas.GROUP, WayfinderAtlas.KEY);
+		if (json == null || json.isEmpty())
+		{
+			atlasJson = null;
+			atlas = null;
+		}
+		else if (!json.equals(atlasJson))
+		{
+			atlasJson = json;
+			atlas = WayfinderAtlas.parse(gson, json);
+		}
+		return atlas;
+	}
+
 	@Subscribe
 	public void onGameObjectSpawned(GameObjectSpawned e)
 	{
@@ -593,6 +618,11 @@ public class CodexMinigamePilotPlugin extends Plugin
 		if (note != null && config.visitChat())
 		{
 			chat(note);
+		}
+		String low = pilots.takeLowPlanks();
+		if (low != null && config.homesLowPlanks())
+		{
+			chat(low);
 		}
 		plaque.show(config.plaque() && f.step != null ? f.step : null);
 		updateArrow(f);

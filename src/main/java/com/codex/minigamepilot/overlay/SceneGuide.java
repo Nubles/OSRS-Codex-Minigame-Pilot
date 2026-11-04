@@ -87,8 +87,9 @@ public class SceneGuide extends Overlay
 				Shape box = o.getClickbox();
 				if (box != null)
 				{
-					g.setStroke(Ink.THIN);
-					g.setColor(Ink.OTHER_RIM);
+					boolean mend = f.mends.contains(o);
+					g.setStroke(mend ? Ink.MEDIUM : Ink.THIN);
+					g.setColor(mend ? Ink.MEND_RIM : Ink.OTHER_RIM);
 					g.draw(box);
 				}
 			}

@@ -28,6 +28,8 @@ public final class Flight
 	public WorldPoint destination;
 	/** Other objects worth a quieter mark, such as the rest of the furniture still to fix. */
 	public final List<TileObject> others = new ArrayList<>();
+	/** Of the objects lit up, those a single click mends (Mahogany Homes repairs), drawn apart from those to take out and build. */
+	public final List<TileObject> mends = new ArrayList<>();
 	/** Lines of an open interface to ring, by their text, such as the moulds to set in the jig. */
 	public final List<String> marks = new ArrayList<>();
 
