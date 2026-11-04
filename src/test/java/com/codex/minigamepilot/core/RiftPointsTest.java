@@ -62,6 +62,14 @@ public class RiftPointsTest
 	}
 
 	@Test
+	public void energyComesAsWholePointsAndAChance()
+	{
+		assertEquals("+4-5", RiftPoints.coming(470));
+		assertEquals("+3", RiftPoints.coming(300));
+		assertEquals("+0-1", RiftPoints.coming(73));
+	}
+
+	@Test
 	public void figures()
 	{
 		assertEquals("1,204", RiftPoints.show(1204));

@@ -112,8 +112,8 @@ public final class AltarPick
 			{
 				Altar a = pe < pc ? e : c;
 				Altar.Alignment low = a.alignment();
-				return new Choice(a, "Fewer " + low.word() + " points: " + Math.round(Math.min(pe, pc))
-					+ " to " + Math.round(Math.max(pe, pc)) + cell(a), open);
+				// The figures are on the panel, banked and this game's apart, as the game reports them.
+				return new Choice(a, "Fewer " + low.word() + " points" + cell(a), open);
 			}
 			Altar a = e.level() >= c.level() ? e : c;
 			return new Choice(a, "Points even, so the stronger cell" + cell(a), open);

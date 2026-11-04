@@ -130,6 +130,16 @@ public final class RiftPoints
 		}
 	}
 
+	/**
+	 * What this game's energy of a type comes to as the game pays it: one point per whole 100,
+	 * and a chance of one more as the remainder is of 100 (OSRS wiki). "+4" or "+4-5".
+	 */
+	public static String coming(int energy)
+	{
+		int whole = Math.max(0, energy) / 100;
+		return energy % 100 > 0 ? "+" + whole + "-" + (whole + 1) : "+" + whole;
+	}
+
 	/** Searches the banked points pay for: the fewer of the two. */
 	public int searches()
 	{

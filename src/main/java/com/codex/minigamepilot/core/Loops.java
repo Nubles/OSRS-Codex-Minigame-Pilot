@@ -89,7 +89,8 @@ public final class Loops
 
 	/**
 	 * Experience an hour while looping, over the loops whose experience is known, or -1 when
-	 * none is.
+	 * none is or none of them gained any yet (a rate of 0 beside experience gained between
+	 * loops would read as a contradiction).
 	 */
 	public long xpPerHour()
 	{
@@ -103,7 +104,7 @@ public final class Loops
 				t += r.ticks;
 			}
 		}
-		return t == 0 ? -1 : Math.round(xp * 3600 / (t * TICK_SECONDS));
+		return t == 0 || xp <= 0 ? -1 : Math.round(xp * 3600 / (t * TICK_SECONDS));
 	}
 
 	/**

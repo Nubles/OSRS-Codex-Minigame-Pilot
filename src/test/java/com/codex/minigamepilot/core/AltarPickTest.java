@@ -30,7 +30,7 @@ public class AltarPickTest
 		assertEquals(Altar.WATER, AltarPick.choose(Altar.WATER, Altar.NATURE, 99, q -> true, points(10, 40)).altar);
 		AltarPick.Choice c = AltarPick.choose(Altar.WATER, Altar.NATURE, 99, q -> true, points(40, 10));
 		assertEquals(Altar.NATURE, c.altar);
-		assertTrue(c.why, c.why.startsWith("Fewer catalytic points: 10 to 40"));
+		assertTrue(c.why, c.why.startsWith("Fewer catalytic points · strong cell"));
 	}
 
 	@Test

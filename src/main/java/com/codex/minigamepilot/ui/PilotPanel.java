@@ -367,7 +367,7 @@ public class PilotPanel extends PluginPanel
 		JPanel tiles = new JPanel(new GridLayout(1, 2, 6, 0));
 		tiles.setOpaque(false);
 		tiles.add(new StatTile(Figures.count(t.perHour), "Loops", "an hour", Theme.GOLD));
-		tiles.add(new StatTile(t.xpPerHour < 0 ? "-" : Figures.count(t.xpPerHour), t.xpLabel, "an hour", Theme.GREEN));
+		tiles.add(new StatTile(t.xpPerHour < 0 ? "-" : Figures.count(t.xpPerHour), t.xpLabel, t.xpPerHour < 0 ? "none yet" : "an hour", Theme.GREEN));
 		stack.add(tiles);
 		card.add(stack, BorderLayout.CENTER);
 		return card;

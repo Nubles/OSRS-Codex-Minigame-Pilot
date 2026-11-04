@@ -454,7 +454,7 @@ public final class RiftPilot
 			view.gauge(new View.Gauge("Essence this trip", carried, 0, tripRoom,
 				pouches.ids.length == 0 ? "Pack only: no pouches carried" : pouches.stored + " in pouches", Theme.GOLD));
 		}
-		view.pick(altarCard(choice, s));
+		view.pick(altarCard(choice, balanceLine()));
 		balance(view);
 		view.stat(new View.Stat(Integer.toString(trips), "Altar trips", session.perHour(trips, now), Theme.GOLD));
 		int xp = session.xp(client);
@@ -585,7 +585,7 @@ public final class RiftPilot
 	}
 
 	/** The open altars, which is yours and why, for the panel. */
-	private static View.PickCard altarCard(AltarPick.Choice choice, RiftCycle.Snapshot s)
+	private static View.PickCard altarCard(AltarPick.Choice choice, String note)
 	{
 		if (choice.open.isEmpty())
 		{
@@ -600,10 +600,13 @@ public final class RiftPilot
 			picks.add(new View.Pick(o.altar.rune(), "Lv " + o.altar.level(), detail, o.locked == null, o.altar == choice.altar,
 				o.altar.level() / 77.0, false));
 		}
-		return new View.PickCard("Open altars", choice.altar == null ? "None for you" : choice.altar.rune(), choice.why, picks);
+		return new View.PickCard("Open altars", choice.altar == null ? "None for you" : choice.altar.rune(), note, picks);
 	}
 
-	/** Your points of each type, banked and on the way, and which needs the next trip. */
+	/**
+	 * Your points of each type in whole points, as the Rewards Guardian's Check and the end of a
+	 * game report them, with what this game's energy is on its way to.
+	 */
 	private void balance(View view)
 	{
 		if (!points.known())
@@ -613,12 +616,34 @@ public final class RiftPilot
 			view.stat(new View.Stat(ge + " / " + gc, "Energy this game", "Points unseen yet", Theme.TEAL));
 			return;
 		}
-		double e = points.elemental();
-		double c = points.catalytic();
-		String lead = Math.abs(e - c) < 0.5 ? "Even" : (e < c ? "Elemental" : "Catalytic") + " lags";
-		view.stat(new View.Stat(RiftPoints.show(e), "Elemental points", points.gameElemental() > 0 ? "+" + points.gameElemental() + " this game" : "Banked", Theme.TEAL));
-		view.stat(new View.Stat(RiftPoints.show(c), "Catalytic points", points.gameCatalytic() > 0 ? "+" + points.gameCatalytic() + " this game" : "Banked", Theme.GOLD_BRIGHT));
-		view.stat(new View.Stat(Session.format((long) Math.floor(Math.min(e, c))), "Searches", lead, Theme.GOLD));
+		int ge = points.gameElemental();
+		int gc = points.gameCatalytic();
+		view.stat(new View.Stat(RiftPoints.show(points.bankedElemental()), "Elemental points",
+			ge > 0 ? RiftPoints.coming(ge) + " this game" : "Banked", Theme.TEAL));
+		view.stat(new View.Stat(RiftPoints.show(points.bankedCatalytic()), "Catalytic points",
+			gc > 0 ? RiftPoints.coming(gc) + " this game" : "Banked", Theme.GOLD_BRIGHT));
+		view.stat(new View.Stat(Session.format(points.searches()), "Searches", "1 of each", Theme.GOLD));
+	}
+
+	/** Which point runs out first, said plainly, for under the open altars; null when even. */
+	private String balanceLine()
+	{
+		if (!points.known())
+		{
+			return "Check your points at the Rewards Guardian and the Pilot keeps them even.";
+		}
+		int e = points.bankedElemental();
+		int c = points.bankedCatalytic();
+		String game = points.gameElemental() > 0 || points.gameCatalytic() > 0
+			? " This game adds about " + points.gameElemental() / 100 + " and " + points.gameCatalytic() / 100
+			+ ", each remainder a chance of one more." : "";
+		if (e == c)
+		{
+			return "Points even: " + Session.format(e) + " searches." + game;
+		}
+		String low = e < c ? "Elemental" : "Catalytic";
+		return low + " runs out first: " + Session.format(Math.min(e, c)) + " searches, "
+			+ Session.format(Math.abs(e - c)) + " " + (e < c ? "catalytic" : "elemental") + " to spare." + game;
 	}
 
 	/** How long the rift has been open, "2:15", or null when not known. */

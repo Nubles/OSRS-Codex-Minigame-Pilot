@@ -52,9 +52,16 @@ chat MESBOX "You have 200 catalytic energy and 120 elemental energy."
 tick
 expect step = "Enter the water altar"
 expect object = portalWater
-expect detail ~ "Fewer elemental points: 120 to 200"
+expect detail = "Fewer elemental points · medium cell"
 expect saved.rift.points = "120:200"
 expect stat.Searches = "120"
+# Whole points, as the game reports them, and the balance said once, under the open altars.
+expect stat.Elemental_points = "120"
+expect pick.note = "Elemental runs out first: 120 searches, 80 catalytic to spare."
+varbit GOTR_ELEMENTAL_EARNED_THIS_GAME 470
+tick
+expect stat.Elemental_points = "120"
+expect pick.note ~ "This game adds about 4 and 0"
 
 # A search spends one of each.
 chat GAMEMESSAGE "You found some loot: 20 x Mist rune"
