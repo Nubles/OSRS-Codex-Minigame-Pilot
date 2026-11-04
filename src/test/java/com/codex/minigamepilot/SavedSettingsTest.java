@@ -32,6 +32,8 @@ public class SavedSettingsTest
 			"rift", "riftFragments",
 			// Tempoross.
 			"tempoross", "temporossCook", "temporossStormLoad",
+			// Giants' Foundry.
+			"foundry",
 			"fieldNotes")), keys);
 		assertEquals("codexminigamepilot", CodexMinigamePilotConfig.GROUP);
 	}

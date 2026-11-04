@@ -62,7 +62,19 @@ public final class Step
 		SPIRIT_POOL,
 		/** A crate of harpoons, ropes, buckets or hammers. */
 		SUPPLY_CRATE,
-		WATER_PUMP
+		WATER_PUMP,
+		// Giants' Foundry
+		KOVAC,
+		MOULD_JIG,
+		CRUCIBLE,
+		/** The foundry's bank chest. */
+		BANK_CHEST,
+		TRIP_HAMMER,
+		GRINDSTONE,
+		POLISHING_WHEEL,
+		LAVA_POOL,
+		WATERFALL,
+		PREFORM_STORAGE
 	}
 
 	private final String verb;

@@ -130,6 +130,8 @@ final class Coach
 				return Skill.RUNECRAFT;
 			case TEMPOROSS:
 				return Skill.FISHING;
+			case FOUNDRY:
+				return Skill.SMITHING;
 			default:
 				return null;
 		}
@@ -301,6 +303,26 @@ final class Coach
 				return "the crate";
 			case WATER_PUMP:
 				return "the pump";
+			case KOVAC:
+				return "Kovac";
+			case MOULD_JIG:
+				return "the mould jig";
+			case CRUCIBLE:
+				return "the crucible";
+			case BANK_CHEST:
+				return "the bank chest";
+			case TRIP_HAMMER:
+				return "the trip hammer";
+			case GRINDSTONE:
+				return "the grindstone";
+			case POLISHING_WHEEL:
+				return "the polishing wheel";
+			case LAVA_POOL:
+				return "the lava pool";
+			case WATERFALL:
+				return "the waterfall";
+			case PREFORM_STORAGE:
+				return "the preform storage";
 			default:
 				return null;
 		}
