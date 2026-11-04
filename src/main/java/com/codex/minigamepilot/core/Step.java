@@ -146,7 +146,18 @@ public final class Step
 		/** The customer a delivery is for. */
 		GNOME_CUSTOMER,
 		/** Gianne jnr., who gives the deliveries. */
-		GIANNE
+		GIANNE,
+		// Nightmare Zone
+		/** Dominic Onion, who sets up a dream. */
+		DOMINIC,
+		/** The dream potion on the plinth, once Dominic has filled it. */
+		DREAM_VIAL,
+		/** A potion barrel in the lobby, as the step's title names its potion. */
+		POTION_BARREL,
+		/** The Rewards chest, Dom Onion's Reward Shop. */
+		REWARDS_CHEST,
+		/** Dominic's coffer, which pays for dreams. */
+		DREAM_COFFER
 	}
 
 	private final String verb;

@@ -1,0 +1,136 @@
+# Nightmare Zone: the lobby one step at a time, then a hard customisable rumble kept whole.
+# The lobby's step follows the potions you drank in your last dreams (six overload and twenty
+# absorption doses each): take what a barrel holds, buy what it lacks at the Rewards chest, top
+# up the coffer for the dream you paid for last, ask Dominic for a dream, drink the potion.
+# In the dream nothing is asked of you: the panel keeps the count, absorption and overload as
+# figures, and learns each boss's points a kill when one leaves the arena as the count rises.
+#
+# Facts (OSRS wiki, Nightmare Zone; Dom Onion's Reward Shop; Absorption; Overload (Nightmare Zone);
+# Potion (Nightmare Zone, dream); the potion barrels; Rewards chest; Dominic's coffer; Dominic Onion):
+#  - "Custom rumble 22,000 26,000" (normal, hard); "Upon entering the dream, coins from Dominic's
+#    coffer are deducted"; "Logging out while inside the arena ends the dream"
+#  - "Overload (1) 1,500", "Absorption (1) 1,000" points a dose, "automatically stored in the barrels"
+#  - "Each dose will absorb 50 damage ... up to 1,000 damage"; overload "Five minutes", reapplied
+#    "every 15 seconds" (RuneLite's Timers and Buffs reads its varbit as refreshes 25 ticks apart)
+#  - "Berserker ring (i) 650,000"
+#  - barrels: super ranging 26277, super magic 26278, overload 26279, absorption 26280; Rewards
+#    chest 26273; coffer 26272; the filled dream potion 26269; Dominic Onion 1120
+#  - The arena is map region 9033 above the ground floor (RuneLite's Nightmare Zone plugin).
+# The lobby's and arena's layouts here are schematic. The coffer varbit as thousands of coins
+# and the barrel varbits are unconfirmed (see Nmz).
+scene 2560 3070
+at 2606 3110
+skill HITPOINTS 99
+object NZONE_LOBBY_CHEST 2612 3115 as chest
+object NZONE_BARREL_1 2600 3118 as "ranging barrel"
+object NZONE_BARREL_2 2601 3118 as "magic barrel"
+object NZONE_BARREL_3 2602 3118 as "overload barrel"
+object NZONE_BARREL_4 2603 3118 as "absorption barrel"
+object NZONE_LOBBY_MONEYPOUCH_UNLOCKED 2609 3112 as coffer
+npc NZONE_HOST "Dominic Onion" 2606 3117 as dominic
+# Two kept dreams: 60,000 points in 30 minutes each, six overload and twenty absorption doses.
+saved nmz.kept "1;1767000000000,3000,60000,C,H,26,w,Count Draynor|Elvarg,O6+A20;1767000003000,3000,60000,C,H,26,w,Count Draynor|Elvarg,O6+A20"
+nmz reward BERSERKER_RING
+varp NZONE_REWARDPOINTS 600000
+varbit NZONE_POTION_3 12
+varbit NZONE_POTION_4 0
+varbit NZONE_CASH 20
+tick
+expect activity = NIGHTMARE_ZONE
+expect quiet = false
+expect step = "Take overload from its barrel"
+expect detail = "You drink about 6 doses a dream · 12 stored"
+expect object = "overload barrel"
+expect stat.Points_an_hour = "120k"
+# 60,000 less 9,000 for the overloads and 20,000 for the absorptions, a half hour.
+expect stat.After_potions = "62k"
+expect goal = "600000/650000"
+expect goal.note = "50k points to go: 48m of dreams at your pace, your potions paid for (about 1 dream)."
+expect pick = "1 set"
+expect pick.current ~ "Hard customisable rumble 120k/h"
+
+items INV NZONE4DOSEOVERLOADPOTION 2
+tick
+expect step = "Buy absorption at the Rewards chest"
+expect object = chest
+expect lines ~ "Overload DONE"
+expect lines ~ "Absorption NEXT"
+
+items INV NZONE4DOSEABSORPTIONPOTION 5
+tick
+expect step = "Put coins in Dominic's coffer"
+expect detail = "Hard customisable rumble costs 26,000; it holds 20,000"
+expect object = coffer
+
+varbit NZONE_CASH 100
+tick
+expect step = "Ask Dominic Onion for a dream"
+expect npc = "Dominic Onion"
+expect detail = "Last time: hard customisable rumble, 26,000 coins"
+
+object NZONE_LOBBY_VIAL_FULL 2606 3115 as vial
+tick
+expect step = "Drink the dream potion"
+expect object = vial
+
+# Into the dream: the coffer pays 26 thousand, a hard customisable rumble.
+scene 2240 4672 3
+at 2270 4700 3
+varbit NZONE_CASH 74
+varbit NZONE_CURRENTPOINTS 0
+npc NZONE_ELVARG_HARD "Elvarg" 2265 4705 3 as elvarg
+npc NZONE_COUNT_DRAYNOR_HARD "Count Draynor" 2275 4705 3 as draynor
+tick
+expect activity = NIGHTMARE_ZONE
+expect step = "Hard customisable rumble"
+
+expect quiet = true
+expect target = NONE
+expect stat.Dream_points = "0"
+# The panel says nothing to do in a dream.
+never verb != "Dreaming"
+never quiet = false
+
+# A dose of each: drunk, not told to.
+items INV set NZONE4DOSEOVERLOADPOTION 1 NZONE3DOSEOVERLOADPOTION 1 NZONE4DOSEABSORPTIONPOTION 4 NZONE3DOSEABSORPTIONPOTION 1
+varbit NZONE_ABSORB_POTION_EFFECTS 250
+varbit NZONE_OVERLOAD_POTION_EFFECTS 20
+tick
+expect gauge.Absorption = "250/1000"
+expect gauge.Overload = "300/300"
+expect lines ~ "Overload IDLE"
+expect lines ~ "Absorption IDLE"
+expect lines ~ "Elvarg IDLE"
+
+# Elvarg leaves the arena as the count rises: 2,400 points a kill, learnt.
+remove elvarg
+varbit NZONE_CURRENTPOINTS 2400
+tick
+expect stat.Dream_points = "2,400"
+expect lines ~ "Elvarg DONE"
+# Count Draynor leaves; the count rises three ticks later.
+remove draynor
+tick 3
+varbit NZONE_CURRENTPOINTS 5000
+tick
+expect stat.Dream_points = "5,000"
+expect lines ~ "Count Draynor DONE"
+# Reward points: the dream's count is held with them while the chest has not had it.
+expect stat.Reward_points = "605k"
+tick 100
+expect stat.Dream_pace ~ "k"
+
+# Awake in the lobby: the dream is kept, the points at the chest.
+forget
+scene 2560 3070
+at 2606 3110
+object NZONE_LOBBY_CHEST 2612 3115 as chest
+npc NZONE_HOST "Dominic Onion" 2606 3117 as dominic
+varp NZONE_REWARDPOINTS 605000
+tick
+expect quiet = false
+expect saved.nmz.kept ~ ",5000,C,H,26,w,Count Draynor|Elvarg,O1+A1"
+expect saved.nmz.kills = "1;H|Count Draynor|1|2600;H|Elvarg|1|2400"
+expect stat.Reward_points = "605k"
+expect supply.headline = "Best dream: 60k points"
+expect pick = "1 set"

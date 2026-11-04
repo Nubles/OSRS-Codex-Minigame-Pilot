@@ -1,6 +1,6 @@
 # Codex Minigame Pilot
 
-**One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes, Guardians of the Rift, Tempoross, the Giants' Foundry, Mastering Mixology, Vale Totems, the Tithe Farm, stealing artefacts, stealing valuables, the Rogues' Den maze, the Wintertodt and Gnome Restaurant deliveries, with a Barbarian Assault companion.** The Pilot watches the minigame you are in and always shows the single thing to do next: what to click, lit in gold in the world, the path there drawn on the ground and the minimap, and a line on why. You still do every click. It only reads the game and draws.
+**One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes, Guardians of the Rift, Tempoross, the Giants' Foundry, Mastering Mixology, Vale Totems, the Tithe Farm, stealing artefacts, stealing valuables, the Rogues' Den maze, the Wintertodt and Gnome Restaurant deliveries, with Barbarian Assault and Nightmare Zone companions.** The Pilot watches the minigame you are in and always shows the single thing to do next: what to click, lit in gold in the world, the path there drawn on the ground and the minimap, and a line on why. You still do every click. It only reads the game and draws.
 
 It is part of the **Codex** suite of RuneLite plugins and shares their look: warm ink, aged gold and the game's own fonts.
 
@@ -209,6 +209,24 @@ The popular Gnome Restaurant plugin shows the current delivery's food, customer 
 <p align="center">
   <img src="docs/screenshots/gnome-plaque-fetch.png" alt="Plaque: fetch what you lack">
   <img src="docs/screenshots/gnome-plaque-deliver.png" alt="Plaque: deliver">
+</p>
+
+### Nightmare Zone (a companion, outside the fight)
+NMZ Optimal Points and NMZ Utilities, two of the Plugin Hub's most installed plugins, help players choose bosses and run their dreams. The Pilot learns from your own dreams instead, since the best set depends on your stats and gear, and leaves the fight to you: inside a dream it gives no cue to drink, pray or attack.
+- **Every dream kept.** Per account: its mode (the price Dominic's coffer paid on entering, and hard or normal by the bosses in it), the bosses seen, its points from the game's own count, its time, how it ended, and the doses drunk of overload, absorption, super ranging, super magic and the potions you bring from the bank, counted from your pack.
+- **Your sets ranked.** Points an hour for each set of bosses you have dreamt, and after the points your overloads and absorptions cost at the chest.
+- **Points a kill, learnt.** When a boss leaves the arena as the count rises, the rise is its kill; each boss's average builds up from your own dreams. The wiki's own strategy page says its per-boss figures are "not accurate", so none are assumed.
+- **The reward you are after.** Herb boxes (their seven grimy herbs at today's prices, 15 a day, and a word for ironmen) or any imbue, half price if you have the Hard Combat Achievements; the points left and the time to it at your pace, your potions paid for.
+- **In the lobby, one step.** Drink the dream potion once Dominic has filled it; take the potions you usually drink from their barrels, or buy doses at the Rewards chest; top up the coffer for the dream you paid for last; else ask Dominic Onion for a dream.
+- **In the dream, figures only.** The dream's count, absorption and overload left (as RuneLite's own plugins read them), the bosses seen with what each has given you, and the doses drunk. No plaque in the game view.
+
+<p align="center">
+  <img src="docs/screenshots/nmz-panel-lobby.png" width="225" alt="Nightmare Zone: the lobby, your sets and dreams">
+  <img src="docs/screenshots/nmz-panel-dream.png" width="225" alt="Nightmare Zone: in a dream, figures only">
+  <img src="docs/screenshots/nmz-panel-herbs.png" width="225" alt="Nightmare Zone: herb boxes and their worth">
+</p>
+<p align="center">
+  <img src="docs/screenshots/nmz-plaque-lobby.png" alt="Plaque: take your potions">
 </p>
 
 ### Barbarian Assault (a companion, outside the fight)

@@ -53,6 +53,8 @@ public final class Pilots
 	private volatile boolean useWintertodt = true;
 	private final GnomeRestaurantPilot gnome = new GnomeRestaurantPilot();
 	private volatile boolean useGnome = true;
+	private final NmzPilot nmz = new NmzPilot();
+	private volatile boolean useNmz = true;
 	private final Coach coach;
 	private final Recorder recorder;
 	private final IntUnaryOperator price;
@@ -100,13 +102,15 @@ public final class Pilots
 		wintertodt.setStore(load, saveKey);
 		gnome.setStore(load, saveKey);
 		gnome.setPrice(price);
+		nmz.setStore(load, saveKey);
+		nmz.setPrice(price);
 		this.coach = new Coach(loadBests, saveBests);
 		this.recorder = new Recorder(notes);
 		this.scene = new SceneIndex(client, id -> MotherlodePilot.isWatched(id) || FurnacePilot.isWatched(id) || HomesPilot.isWatched(id)
 			|| RiftPilot.isWatched(id) || StormPilot.isWatched(id) || FoundryPilot.isWatched(id)
 			|| MixologyPilot.isWatched(id) || TotemsPilot.isWatched(id) || TithePilot.isWatched(id)
 			|| ArtefactsPilot.isWatched(id) || HousesPilot.isWatched(id) || RoguesDenPilot.isWatched(id)
-			|| AssaultPilot.isWatched(id) || WintertodtPilot.isWatched(id));
+			|| AssaultPilot.isWatched(id) || WintertodtPilot.isWatched(id) || NmzPilot.isWatched(id));
 		this.homes = new HomesPilot(saved, save, load, saveKey);
 		homes.readers(null, stock);
 	}
@@ -130,6 +134,13 @@ public final class Pilots
 	public void gnomeRestaurant(boolean on)
 	{
 		useGnome = on;
+	}
+
+	/** The "Nightmare Zone" settings: on, the reward saved for (or null), and imbues at half price. */
+	public void nightmareZone(boolean on, com.codex.minigamepilot.core.Nmz.Reward reward, boolean halved)
+	{
+		useNmz = on;
+		nmz.settings(reward, halved);
 	}
 
 	/** After a Mahogany Homes hand-in, a line when the planks left run low, once, or null. */
@@ -287,6 +298,7 @@ public final class Pilots
 			assault.newAccount();
 			wintertodt.newAccount();
 			gnome.newAccount();
+			nmz.newAccount();
 			said.clear();
 			unsaid.clear();
 		}
@@ -406,6 +418,11 @@ public final class Pilots
 		{
 			gnome.watch(client, now);
 		}
+		// A Nightmare Zone dream is followed every tick too, so waking or logging out ends it.
+		if (useNmz)
+		{
+			nmz.watch(client, now);
+		}
 		if (useMotherlode && MotherlodePilot.inMine(client))
 		{
 			activity = View.Activity.MOTHERLODE;
@@ -511,6 +528,13 @@ public final class Pilots
 			state = gnome.lastState;
 			units = gnome.units();
 		}
+		else if (useNmz && nmz.active(client))
+		{
+			activity = View.Activity.NIGHTMARE_ZONE;
+			flight = nmz.fly(client, scene, npcs(), now);
+			state = nmz.lastState;
+			units = nmz.units();
+		}
 		else if (useAssault && assault.active(client, scene, npcs()))
 		{
 			activity = View.Activity.BARBARIAN_ASSAULT;
@@ -582,6 +606,10 @@ public final class Pilots
 			else if (last == View.Activity.GNOME_RESTAURANT)
 			{
 				gnome.left();
+			}
+			else if (last == View.Activity.NIGHTMARE_ZONE)
+			{
+				nmz.left();
 			}
 			last = activity;
 		}
@@ -677,6 +705,8 @@ public final class Pilots
 		wintertodt.relogged(now, client.getTickCount());
 		// A Gnome Restaurant order's clock goes on in the save; it is picked up again on login.
 		gnome.relogged();
+		// A Nightmare Zone dream ends on logging out.
+		nmz.relogged(now, client.getTickCount());
 		motherlode.relogged();
 		furnace.relogged();
 		coach.left();
@@ -801,6 +831,7 @@ public final class Pilots
 		v.brief(assault.brief());
 		v.brief(wintertodt.brief());
 		v.brief(gnome.brief());
+		v.brief(nmz.brief());
 		return v;
 	}
 }
