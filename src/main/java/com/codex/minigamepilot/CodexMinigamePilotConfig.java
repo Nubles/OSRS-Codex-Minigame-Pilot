@@ -5,6 +5,7 @@ import com.codex.minigamepilot.core.Nmz;
 import com.codex.minigamepilot.core.Brewing;
 import com.codex.minigamepilot.core.Garden;
 import com.codex.minigamepilot.core.GardenEta;
+import com.codex.minigamepilot.core.SoulWars;
 import com.codex.minigamepilot.core.Volcanic;
 import com.codex.minigamepilot.core.Wintertodt;
 import com.codex.minigamepilot.core.Goals;
@@ -365,6 +366,41 @@ public interface CodexMinigamePilotConfig extends Config
 		public String toString()
 		{
 			return title;
+		}
+	}
+
+	/** What Soul Wars zeal is saved for. */
+	enum SoulWarsReward
+	{
+		NONE(null),
+		LIL_CREATOR(SoulWars.Reward.LIL_CREATOR),
+		SPOILS(SoulWars.Reward.SPOILS),
+		SOUL_CAPE(SoulWars.Reward.SOUL_CAPE),
+		ECTOPLASMATOR(SoulWars.Reward.ECTOPLASMATOR),
+		SLAYER_HELMET(SoulWars.Reward.SLAYER_HELMET),
+		SALVE(SoulWars.Reward.SALVE),
+		SUFFERING(SoulWars.Reward.SUFFERING),
+		RING(SoulWars.Reward.RING),
+		GRANITE_RING(SoulWars.Reward.GRANITE_RING),
+		SKILL_LEVEL(SoulWars.Reward.SKILL_LEVEL);
+
+		private final SoulWars.Reward reward;
+
+		SoulWarsReward(SoulWars.Reward reward)
+		{
+			this.reward = reward;
+		}
+
+		/** The reward, or null for none. */
+		public SoulWars.Reward reward()
+		{
+			return reward;
+		}
+
+		@Override
+		public String toString()
+		{
+			return reward == null ? "None" : reward == SoulWars.Reward.SKILL_LEVEL ? "A level in Zeal skill" : reward.getTitle();
 		}
 	}
 
@@ -941,6 +977,18 @@ public interface CodexMinigamePilotConfig extends Config
 		return true;
 	}
 
+	@ConfigItem(
+		keyName = "soulWars",
+		name = "Soul Wars",
+		description = "Keep every Soul Wars game (won, lost or drawn, the zeal it earned, your part and its length), zeal an hour at your own pace, the time to your reward and the experience zeal buys. Information only: no fight cues, nothing lit",
+		section = MINIGAMES,
+		position = 36
+	)
+	default boolean soulWars()
+	{
+		return true;
+	}
+
 	@ConfigItem(keyName = "plaque", name = "Step plaque", description = "Show the next step on a small plaque in the game view", section = GUIDANCE, position = 0)
 	default boolean plaque()
 	{
@@ -1213,6 +1261,68 @@ public interface CodexMinigamePilotConfig extends Config
 	default int gardenTarget()
 	{
 		return 0;
+	}
+
+	@ConfigItem(
+		keyName = "soulWarsReward",
+		name = "Soul Wars reward",
+		description = "What your zeal is saved for at Nomad's shop: Lil' Creator (a 1/400 roll on each Spoils of War), Spoils of War, the Soul cape, the Ectoplasmator, an imbue, or a level in Zeal skill, with the games and time to it at your pace",
+		section = GOALS,
+		position = 19
+	)
+	default SoulWarsReward soulWarsReward()
+	{
+		return SoulWarsReward.LIL_CREATOR;
+	}
+
+	@ConfigItem(
+		keyName = "soulWarsSkill",
+		name = "Zeal skill",
+		description = "The skill whose experience from zeal is shown first, and levelled by 'A level in Zeal skill'",
+		section = GOALS,
+		position = 20
+	)
+	default SoulWars.ZealSkill soulWarsSkill()
+	{
+		return SoulWars.ZealSkill.ATTACK;
+	}
+
+	@Range(min = 0, max = 99)
+	@ConfigItem(
+		keyName = "soulWarsLevel",
+		name = "Zeal level",
+		description = "The level in Zeal skill to buy with zeal. 0: the next",
+		section = GOALS,
+		position = 21
+	)
+	default int soulWarsLevel()
+	{
+		return 0;
+	}
+
+	@Range(min = 0, max = 1_000_000)
+	@ConfigItem(
+		keyName = "soulWarsSpend",
+		name = "Zeal to price",
+		description = "The Zeal Tokens to price in experience for each skill at your levels. 0: the tokens you hold",
+		section = GOALS,
+		position = 22
+	)
+	default int soulWarsSpend()
+	{
+		return 0;
+	}
+
+	@ConfigItem(
+		keyName = "soulWarsHalfImbue",
+		name = "Imbues at half price",
+		description = "You have claimed the hard Combat Achievements rewards, so Soul Wars imbues cost half",
+		section = GOALS,
+		position = 23
+	)
+	default boolean soulWarsHalfImbue()
+	{
+		return false;
 	}
 
 	@ConfigItem(

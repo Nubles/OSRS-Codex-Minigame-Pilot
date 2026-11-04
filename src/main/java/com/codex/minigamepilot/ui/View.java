@@ -33,7 +33,8 @@ public final class View
 		VOLCANIC_MINE("Volcanic Mine"),
 		BARRACUDA_TRIALS("Barracuda Trials"),
 		TROUBLE_BREWING("Trouble Brewing"),
-		SORCERESS_GARDEN("Sorceress's Garden");
+		SORCERESS_GARDEN("Sorceress's Garden"),
+		SOUL_WARS("Soul Wars");
 
 		private final String title;
 
@@ -675,6 +676,8 @@ public final class View
 			"Every game kept with its team, rum, pieces of eight and Cooking experience, pieces of eight an hour at your pace, and the time to your naval set or flags."));
 		v.brief(new Brief(Activity.SORCERESS_GARDEN, null,
 			"Every garden run kept, caught or not, your success rate and sq'irks an hour at your own pace, the juice you crush and Osman's Thieving xp for it, and the time to your level. No start cue: you run when you choose."));
+		v.brief(new Brief(Activity.SOUL_WARS, null,
+			"Every game kept, won, lost or drawn, with the zeal it earned and your part in it, zeal an hour at your own pace, the time to your reward from Nomad, and the experience your zeal buys. No fight cues."));
 		return v;
 	}
 

@@ -1,0 +1,84 @@
+# Soul Wars: Lil' Creator as the reward (a chance, not a price), a level bought with zeal a level at a
+# time, a skill below the level zeal buys from, a game left early (kept, no zeal, no result) with the
+# team read from the team varbit, and a game ended by logging out.
+#
+# Facts (OSRS wiki):
+#  - Spoils of war: "It can be purchased from Nomad on the Isle of Souls for 30 Zeal Tokens."; Lil' Creator
+#    "1/400" ("The Soul Wars pet rate is 1/400. The roll happens on the crate separately from the loot table.").
+#  - Soul Wars/Rewards: "If the skill is Prayer: N=14"; "Players must have at least level 30 in the chosen
+#    skill to purchase XP for it".
+# RuneLite: VarPlayerID.SOUL_WARS_ZEAL_TOKENS; VarbitID.SOUL_WARS_TEAM 1 for blue is unconfirmed (source: the
+# Soul Wars plugin), read only when no team cape is worn.
+soulwars reward LIL_CREATOR
+scene 2160 2800
+at 2209 2855
+skill ATTACK 70
+skill STRENGTH 70
+skill DEFENCE 70
+skill HITPOINTS 70
+skill RANGED 60
+skill MAGIC 60
+skill PRAYER 52
+varp SOUL_WARS_ZEAL_TOKENS 900
+never quiet = false
+never target != NONE
+always route = 0
+# A total level of 469 (combat 70 or so): short of the 500.
+tick
+expect activity = SOUL_WARS
+expect step = "Soul Wars needs a total level of 500"
+expect detail = "Yours is 469; it also needs combat level 40"
+skill MINING 50
+tick
+expect step = "Join a game of Soul Wars"
+expect goal = "900/12000"
+# 30 spoils: 1 - (399/400)^30 = 7.2%. Half a chance: 277 spoils.
+expect goal.note = "A 1/400 roll on each Spoils of War, 30 zeal each. Your tokens buy 30 spoils, a 7% chance. Even odds take 277 spoils (8,310 zeal); the average 400 is 11,100 zeal away. Play a game and the time to it follows from your own pace."
+expect supply.headline = -
+
+# A Prayer level from zeal: 52 to 53 is 12,934 xp at floor(52^2/600) x 14 = 56 a token.
+soulwars reward SKILL_LEVEL
+soulwars skill PRAYER
+tick
+expect goal = "231/231"
+expect goal.note = "You hold the tokens: buy it from Nomad, a level at a time."
+expect lines ~ "Prayer 52 · 56 a token NEXT"
+# A chosen amount priced instead of the tokens held: 1,000 at 240 a token for Attack 70.
+soulwars spend 1000
+tick
+expect lines.note = "1,000 chosen"
+expect lines ~ "Attack 70 · 240 a token IDLE"
+soulwars spend 0
+
+# Below 30, zeal buys nothing in the skill.
+skill MAGIC 20
+soulwars skill MAGIC
+tick
+expect goal.note = "Zeal buys Magic experience from level 30; yours is 20."
+expect lines ~ "Magic 20 NEXT"
+
+# A game left early, the team from the varbit: kept as left, no zeal, no result.
+varbit SOUL_WARS_TEAM 1
+at 2200 2900
+widget SoulWarsGame.CONTENT text ""
+tick
+expect place = "Soul Wars · blue team"
+expect stat.In_the_game = "0:00"
+tick 100
+close SoulWarsGame.CONTENT
+varbit SOUL_WARS_TEAM 0
+at 2209 2855
+tick 20
+expect saved.soulwars.kept ~ ",b,u,0,-1,-1,-1,-1,-1,-1,-1,l"
+expect supply.headline = "null"
+# No game played to its end yet: no zeal a game.
+expect stat.Zeal_a_game = -
+
+# A game ended by logging out.
+varbit SOUL_WARS_TEAM 2
+at 2200 2900
+widget SoulWarsGame.CONTENT text ""
+tick 60
+state LOGIN_SCREEN
+tick
+expect saved.soulwars.kept ~ ",r,u,0,-1,-1,-1,-1,-1,-1,-1,o"

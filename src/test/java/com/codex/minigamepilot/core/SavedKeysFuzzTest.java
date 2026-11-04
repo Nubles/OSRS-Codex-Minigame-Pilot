@@ -589,6 +589,26 @@ public class SavedKeysFuzzTest
 	}
 
 	@Test
+	public void soulWarsKept()
+	{
+		survive("soulwars.kept", "1;1767000000000,1500,b,w,58,3,1,4,2,300,27,6,f;1767000700000,1400,r,l,36,0,2,-1,-1,-1,-1,-1,f;1767001400000,90,-,u,0,-1,-1,-1,-1,-1,-1,-1,l", s ->
+		{
+			SoulWarsLog g = SoulWarsLog.decode(s);
+			for (double h : new double[]{g.zealPerHour(), g.zealPerHourSitting(), g.pace(), g.averageZeal(), g.share()})
+			{
+				assertTrue(!Double.isNaN(h) && !Double.isInfinite(h));
+			}
+			for (SoulWarsLog.Game x : g.all())
+			{
+				assertTrue(x.ticks >= 0 && x.ticks <= SoulWarsLog.LONGEST && x.zeal >= 0 && x.zeal <= SoulWarsLog.ZEAL_MAX
+					&& x.result != null && x.end != null && x.part != null);
+			}
+			assertTrue(g.decided() <= g.count() && g.totalZeal() >= 0);
+			SoulWarsLog.decode(g.encode());
+		});
+	}
+
+	@Test
 	public void barracudaKept()
 	{
 		survive("barracuda.kept", "1;1767000000000,t,s,190,776,f,60.2970.2960/120.2990.2980/190.2960.2950;1767000100000,j,-,30,0,o,;1767000200000,g,m,600,9000,a,100.0.0", s ->

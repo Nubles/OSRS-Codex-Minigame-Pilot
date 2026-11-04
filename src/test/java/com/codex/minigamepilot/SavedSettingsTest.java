@@ -64,6 +64,8 @@ public class SavedSettingsTest
 			"troubleBrewing", "brewingReward",
 			// Sorceress's Garden.
 			"sorceressGarden", "gardenSeason", "gardenGoal", "gardenTarget",
+			// Soul Wars.
+			"soulWars", "soulWarsReward", "soulWarsSkill", "soulWarsLevel", "soulWarsSpend", "soulWarsHalfImbue",
 			"fieldNotes")), keys);
 		assertEquals("codexminigamepilot", CodexMinigamePilotConfig.GROUP);
 	}
