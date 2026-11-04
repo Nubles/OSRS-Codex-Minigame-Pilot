@@ -38,6 +38,8 @@ public class SavedSettingsTest
 			"foundry",
 			// Mastering Mixology.
 			"mixology", "mixologyPlan", "mixologyCues", "mixologyReward",
+			// Vale Totems.
+			"valeTotems", "totemsWood", "totemsClaim", "totemsReward",
 			"fieldNotes")), keys);
 		assertEquals("codexminigamepilot", CodexMinigamePilotConfig.GROUP);
 	}

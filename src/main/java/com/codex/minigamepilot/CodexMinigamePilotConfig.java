@@ -3,6 +3,7 @@ package com.codex.minigamepilot;
 import com.codex.minigamepilot.core.Goals;
 import com.codex.minigamepilot.core.MixCycle;
 import com.codex.minigamepilot.core.Mixology;
+import com.codex.minigamepilot.core.Totems;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
@@ -100,6 +101,66 @@ public interface CodexMinigamePilotConfig extends Config
 		public String toString()
 		{
 			return choice.toString();
+		}
+	}
+
+	/** The wood Vale Totems are built with. */
+	enum TotemsWood
+	{
+		BEST(null),
+		OAK(Totems.Wood.OAK),
+		WILLOW(Totems.Wood.WILLOW),
+		MAPLE(Totems.Wood.MAPLE),
+		YEW(Totems.Wood.YEW),
+		MAGIC(Totems.Wood.MAGIC),
+		REDWOOD(Totems.Wood.REDWOOD);
+
+		private final Totems.Wood wood;
+
+		TotemsWood(Totems.Wood wood)
+		{
+			this.wood = wood;
+		}
+
+		/** The wood, or null for the best your level and logs allow. */
+		public Totems.Wood wood()
+		{
+			return wood;
+		}
+
+		@Override
+		public String toString()
+		{
+			return wood == null ? "Best you carry" : wood.getTitle();
+		}
+	}
+
+	/** What Vale Research Points are saved for. */
+	enum TotemsReward
+	{
+		NONE(null),
+		ENT_BRANCH(Totems.Reward.ENT_BRANCH),
+		BOW_STRING_SPOOL(Totems.Reward.BOW_STRING_SPOOL),
+		FLETCHING_KNIFE(Totems.Reward.FLETCHING_KNIFE),
+		GREENMAN_MASK(Totems.Reward.GREENMAN_MASK);
+
+		private final Totems.Reward reward;
+
+		TotemsReward(Totems.Reward reward)
+		{
+			this.reward = reward;
+		}
+
+		/** The reward, or null for none. */
+		public Totems.Reward reward()
+		{
+			return reward;
+		}
+
+		@Override
+		public String toString()
+		{
+			return reward == null ? "None" : reward.getTitle() + " (" + reward.points() + ")";
 		}
 	}
 
@@ -321,6 +382,42 @@ public interface CodexMinigamePilotConfig extends Config
 		return true;
 	}
 
+	@ConfigItem(
+		keyName = "valeTotems",
+		name = "Vale Totems",
+		description = "Guide Vale Totems: the next totem site and the logs to bring, the build, the three spirits each totem wants ringed in the carving choices, the decorations, the offerings to claim and the ent trails near you, and every totem kept",
+		section = MINIGAMES,
+		position = 15
+	)
+	default boolean valeTotems()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "totemsWood",
+		name = "Vale totem wood",
+		description = "The logs to build Vale totems with: the best your Fletching level allows of those you carry, or one wood",
+		section = MINIGAMES,
+		position = 16
+	)
+	default TotemsWood totemsWood()
+	{
+		return TotemsWood.BEST;
+	}
+
+	@ConfigItem(
+		keyName = "totemsClaim",
+		name = "Claim offerings as you pass",
+		description = "Make claiming a site's offerings a step whenever you are at it with nothing else to do there; off, only when 15,000 offerings stop you building there",
+		section = MINIGAMES,
+		position = 17
+	)
+	default boolean totemsClaim()
+	{
+		return true;
+	}
+
 	@ConfigItem(keyName = "plaque", name = "Step plaque", description = "Show the next step on a small plaque in the game view", section = GUIDANCE, position = 0)
 	default boolean plaque()
 	{
@@ -345,19 +442,19 @@ public interface CodexMinigamePilotConfig extends Config
 		return true;
 	}
 
-	@ConfigItem(keyName = "others", name = "Mark what comes after", description = "Quietly outline what comes after the next step: the next vein, and furniture still to fix", section = GUIDANCE, position = 4)
+	@ConfigItem(keyName = "others", name = "Mark what comes after", description = "Quietly outline what comes after the next step: the next vein, furniture still to fix, and ent trails near you at Vale Totems", section = GUIDANCE, position = 4)
 	default boolean others()
 	{
 		return true;
 	}
 
-	@ConfigItem(keyName = "hintArrow", name = "Hint arrow", description = "Point the game's hint arrow at a Mahogany Homes client's house", section = GUIDANCE, position = 5)
+	@ConfigItem(keyName = "hintArrow", name = "Hint arrow", description = "Point the game's hint arrow at a Mahogany Homes client's house, or at the next Vale totem site when it is out of sight", section = GUIDANCE, position = 5)
 	default boolean hintArrow()
 	{
 		return true;
 	}
 
-	@ConfigItem(keyName = "worldMap", name = "World map marker", description = "Mark a Mahogany Homes client's house on the world map", section = GUIDANCE, position = 6)
+	@ConfigItem(keyName = "worldMap", name = "World map marker", description = "Mark a Mahogany Homes client's house, or the next Vale totem site out of sight, on the world map", section = GUIDANCE, position = 6)
 	default boolean worldMap()
 	{
 		return true;
@@ -425,11 +522,23 @@ public interface CodexMinigamePilotConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = "totemsReward",
+		name = "Vale Totems reward",
+		description = "The Vale Research Exchange reward your research points are saved for: the panel shows your points (and the offerings you hold, at a hundred a point) against its price and the time to it at your pace",
+		section = GOALS,
+		position = 4
+	)
+	default TotemsReward totemsReward()
+	{
+		return TotemsReward.NONE;
+	}
+
+	@ConfigItem(
 		keyName = "showGoals",
 		name = "Show goals",
 		description = "Show the goal card on the panel",
 		section = GOALS,
-		position = 4
+		position = 5
 	)
 	default boolean showGoals()
 	{
@@ -441,7 +550,7 @@ public interface CodexMinigamePilotConfig extends Config
 		name = "Reward road",
 		description = "In each minigame, show its rewards as a road (at the Blast Furnace, the bars each Smithing level opens): what you own, what you can have now and how far off the rest is at your pace",
 		section = GOALS,
-		position = 5
+		position = 6
 	)
 	default boolean rewardRoad()
 	{

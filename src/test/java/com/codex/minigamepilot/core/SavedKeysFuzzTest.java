@@ -385,6 +385,24 @@ public class SavedKeysFuzzTest
 	}
 
 	@Test
+	public void totemsKept()
+	{
+		survive("totems.kept", "1;1760000000000,200,MAGIC,5000,1000;1760000100000,0,-,190,0", s ->
+		{
+			TotemLog g = TotemLog.decode(s);
+			sane(String.valueOf(g.xpPerHour() < 0 ? 0 : Math.round(g.xpPerHour())));
+			sane(String.valueOf(g.offeringsPerHour() < 0 ? 0 : Math.round(g.offeringsPerHour())));
+			double h = g.hoursTo(Totems.Reward.GREENMAN_MASK, 0, 0);
+			sane(String.valueOf(h < 0 ? 0 : Math.round(h)));
+			for (TotemLog.Totem t : g.all())
+			{
+				assertTrue(t.xp >= 0 && t.ticks >= 0 && t.offerings >= 0);
+			}
+			TotemLog.decode(g.encode());
+		});
+	}
+
+	@Test
 	public void contractLog()
 	{
 		survive("homes.log", "1;1760000000000,LARRY,EXPERT,2950,190;1760000200000,BOB,ADEPT,0,0", s ->

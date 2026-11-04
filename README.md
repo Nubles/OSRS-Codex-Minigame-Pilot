@@ -1,6 +1,6 @@
 # Codex Minigame Pilot
 
-**One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes, Guardians of the Rift, Tempoross, the Giants' Foundry and Mastering Mixology.** The Pilot watches the minigame you are in and always shows the single thing to do next: what to click, lit in gold in the world, the path there drawn on the ground and the minimap, and a line on why. You still do every click. It only reads the game and draws.
+**One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes, Guardians of the Rift, Tempoross, the Giants' Foundry, Mastering Mixology and Vale Totems.** The Pilot watches the minigame you are in and always shows the single thing to do next: what to click, lit in gold in the world, the path there drawn on the ground and the minimap, and a line on why. You still do every click. It only reads the game and draws.
 
 It is part of the **Codex** suite of RuneLite plugins and shares their look: warm ink, aged gold and the game's own fonts.
 
@@ -86,6 +86,26 @@ It is part of the **Codex** suite of RuneLite plugins and shares their look: war
   <img src="docs/screenshots/mixology-plaque-cue.png" alt="Plaque at the agitator's cue">
 </p>
 
+### Vale Totems
+- **The next site and what to bring.** At an empty site it builds with the best logs you carry that your Fletching allows (boosts count, as the wiki says), or the wood you pick under *Vale totem wood*. Then on to the next site with work: the one you usually go to next, which the Pilot learns from your own loops, else the nearest. Each site's place is learnt as it comes into view and kept, so a site out of sight gets the hint arrow and a world map marker. With no logs, the step is the bank, for the best logs your level builds; the panel says what the rest of the loop takes: "Loop: 5 logs, 26 decorations".
+- **The three spirits, ringed.** Each site wants three of the five spirits (buffalo, jaguar, eagle, snake and scorpion), and each wrong carving costs a quarter of the decoration experience. The step names the next one, and when the game's carving choices are open the right ones are ringed in gold, read by the icons the game draws in them. For the last carving it passes on the wiki's tip: finish it once a visiting ent's animation ends.
+- **Decorations of the totem's own wood.** Four fletched items of the totem's wood finish it (any of its bows, strung or not, a shield or a stock; redwood shields or hiking staves), read from the totem the site shows. Carrying logs and a knife but no decorations, the step is to fletch them.
+- **Offerings, claimed as you pass.** The offerings waiting at each site, and claiming them before you move on (*Claim offerings as you pass*), or only when 15,000 of them stop you building there. The panel lists all eight sites: wood, carved or decorated, and offerings.
+- **Ent trails.** Trails near you are outlined quietly while no trail bonus is under way; once it is, a gauge counts the bonus.
+- **Research points towards a reward.** Pick one under *Vale Totems reward* (ent branch, bow string spool, fletching knife or greenman mask): your points, with the offerings you hold and the ones waiting at your sites at a hundred a point, against its price, and how long it is at your own pace.
+- **Every totem kept.** Each totem you finish is kept per account with its wood, the Fletching experience since the one before, the offerings the ents left meanwhile and the time; across them, experience, offerings and research points an hour and your quickest totem. A world hop or logout is no ent visit: counts that arrive with a login are a new base, not offerings.
+
+<p align="center">
+  <img src="docs/screenshots/totems-panel-carve.png" width="225" alt="Vale Totems: the next carving and the eight sites">
+  <img src="docs/screenshots/totems-panel-claim.png" width="225" alt="Vale Totems: claiming the offerings">
+</p>
+<p align="center">
+  <img src="docs/screenshots/totems-carving-choices.png" alt="The spirits the totem wants, ringed among the carving choices (an illustration of the game's box)">
+</p>
+<p align="center">
+  <img src="docs/screenshots/totems-plaque-carve.png" alt="Plaque at the totem">
+</p>
+
 ### Tempoross
 - **One step through the storm.** Catch harpoonfish, cook them at the shrine, fill the ammunition crate, and harpoon the spirit pool while Tempoross is down. Each step is lit in the world, the fishing spot, the shrine, the crate or the pool, with its path and a line of why.
 - **The double spot first.** When a spot of jumping harpoonfish is up, that is where you fish, even with raw fish still to cook: it can give two a catch, and the wiki's strategies say to fish there wherever possible.
@@ -151,7 +171,7 @@ Each round is also split into the stages of its loop (Mine, Hopper, Sack, Bank; 
 
 ## Tick coach
 
-The game runs on 0.6-second ticks, and the tick coach counts every loop in them: Motherlode's mine, hopper, sack and bank; the Blast Furnace's bank, belt and bars; a Mahogany Homes contract from the contractor through the furniture and back; a Guardians of the Rift altar trip from mining through essence and the altar to handing in; a Tempoross round from fishing through the shrine and the crate (and the spirit pool, when Tempoross goes down) back to fishing; a Giants' Foundry sword from the commission to the hand-in; a Mastering Mixology round from one delivery to the next. After each loop the panel shows:
+The game runs on 0.6-second ticks, and the tick coach counts every loop in them: Motherlode's mine, hopper, sack and bank; the Blast Furnace's bank, belt and bars; a Mahogany Homes contract from the contractor through the furniture and back; a Guardians of the Rift altar trip from mining through essence and the altar to handing in; a Tempoross round from fishing through the shrine and the crate (and the spirit pool, when Tempoross goes down) back to fishing; a Giants' Foundry sword from the commission to the hand-in; a Mastering Mixology round from one delivery to the next; a Vale totem from the build through the carvings and decorations to the offerings. After each loop the panel shows:
 
 - **The loop in ticks against your best** of the same kind ("176 ticks, +26 on best"), or "new best".
 - **Its walking against a floor.** Every walk the Pilot sends you on is measured over the game's collision map, so its shortest way is known; at run pace (two tiles a tick) that walk has a floor nobody can beat. The card sets the ticks you spent on foot against it: "On foot 19 ticks against a floor of 17 at run pace, 2 over". Mining, smelting and building have no fixed duration the wiki states, so the coach never invents a floor for them: those parts are only compared with your own best.
@@ -208,7 +228,7 @@ All are read only, never written, and everything works without them.
 
 ## Your data
 
-Your bank's goal items and supplies as last seen, your Mahogany Homes points, your Guardians of the Rift points, your last thirty Tempoross games, your last fifty Giants' Foundry swords and the moulds the jig has shown you own, your last hundred Mastering Mixology deliveries, your last fifty Mahogany Homes contracts, the rewards you own, your round bests, your last and best visit to each minigame and what your contracts take are saved in your RuneLite profile, per account. A damaged or hand-edited value is read as far as it can be and the rest left out, so it never stops the Pilot.
+Your bank's goal items and supplies as last seen, your Mahogany Homes points, your Guardians of the Rift points, your last thirty Tempoross games, your last fifty Giants' Foundry swords and the moulds the jig has shown you own, your last hundred Mastering Mixology deliveries, your last hundred Vale totems with where each totem site stands and the order you visit them, your last fifty Mahogany Homes contracts, the rewards you own, your round bests, your last and best visit to each minigame and what your contracts take are saved in your RuneLite profile, per account. A damaged or hand-edited value is read as far as it can be and the rest left out, so it never stops the Pilot.
 
 ## Field notes
 
@@ -220,9 +240,9 @@ Codex Minigame Pilot is guidance only. It reads what the game already shows you 
 
 ## Settings that matter
 
-- **Minigames:** turn each of the seven off; *Mixology orders to make* (every order, or the most resin per paste) and *Mixology station cues*; *Cook before loading* and *Load what you hold at storm* (80%) for Tempoross; *Fragments before first craft* for Guardians of the Rift (120 by default); fix the *Blast Furnace bar* instead of letting the Pilot work it out; *Top up coffer below* (2,500 coins by default).
+- **Minigames:** turn each of the eight off; *Vale totem wood* and *Claim offerings as you pass* for Vale Totems; *Mixology orders to make* (every order, or the most resin per paste) and *Mixology station cues*; *Cook before loading* and *Load what you hold at storm* (80%) for Tempoross; *Fragments before first craft* for Guardians of the Rift (120 by default); fix the *Blast Furnace bar* instead of letting the Pilot work it out; *Top up coffer below* (2,500 coins by default).
 - **Guidance:** *Step plaque*, *Path on the ground*, *Path on minimap*, *Action labels*, *Mark what comes after*, *Hint arrow*, *World map marker* and *Low planks in chat* for Mahogany Homes, and *Visit summary in chat*. All on by default.
-- **Goals:** what Motherlode nuggets and Mahogany Homes points are saved for, the *Mixology reward* your resin is saved for, the *Blast Furnace level* to work toward (0 for the next), *Show goals* and *Reward road*.
+- **Goals:** what Motherlode nuggets and Mahogany Homes points are saved for, the *Mixology reward* your resin is saved for, the *Vale Totems reward* your research points are saved for, the *Blast Furnace level* to work toward (0 for the next), *Show goals* and *Reward road*.
 - **Tick coach:** *Tick coach*, on by default.
 - **Field notes:** *Keep field notes*, off by default.
 

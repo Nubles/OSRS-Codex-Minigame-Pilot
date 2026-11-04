@@ -84,7 +84,12 @@ public final class Step
 		ALEMBIC,
 		CONVEYOR,
 		REFINER,
-		DIGWEED
+		DIGWEED,
+		// Vale Totems (the Auburnvale bank is BANK)
+		/** A totem site: the totem to build, carve or decorate there. */
+		TOTEM,
+		/** A site's offerings, to claim. */
+		OFFERINGS
 	}
 
 	private final String verb;

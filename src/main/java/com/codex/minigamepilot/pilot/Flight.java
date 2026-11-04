@@ -32,6 +32,8 @@ public final class Flight
 	public final List<TileObject> mends = new ArrayList<>();
 	/** Lines of an open interface to ring, by their text, such as the moulds to set in the jig. */
 	public final List<String> marks = new ArrayList<>();
+	/** Interface components to ring, such as the right spirits among Vale Totems' carving choices. */
+	public final List<Integer> widgets = new ArrayList<>();
 
 	public Flight(View.Activity activity, Step step, View view)
 	{

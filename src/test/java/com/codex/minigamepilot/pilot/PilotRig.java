@@ -20,6 +20,7 @@ import net.runelite.api.TileObject;
  * <p>Commands it adds: {@code setting NAME on|off} (motherlode, furnace, homes, upperHopper, rift, tickCoach),
  * {@code stormload N} (Tempoross's "Load what you hold at storm"; setting names tempoross and temporossCook too),
  * {@code foundry stages TOOL...} and {@code foundry bonus on|off} (the Giants' Foundry HUD's stage icons and sweet spot),
+ * {@code totems wood WOOD|BEST} and {@code totems reward REWARD|none} (Vale Totems; setting names valeTotems and totemsClaim),
  * {@code mixology plan ALL|PER_PASTE}, {@code mixology reward REWARD|none} and {@code mixology cue SPOTANIM} (a Mastering
  * Mixology setting, or a spot animation appearing, by its {@code SpotanimID} name; setting names mixology and mixologyCues),
  * {@code bank ITEM COUNT} (the bank as last seen), {@code teleport "Name" "Source" X Y SECONDS carried|banked},
@@ -30,7 +31,7 @@ import net.runelite.api.TileObject;
  * {@code saved KEY VALUE} to seed the account's saved state, and {@code profile NAME} for an
  * account login. Readings each tick: {@code activity}, {@code step} (its title), {@code verb},
  * {@code target}, {@code waiting}, {@code place}, {@code object} (the script's name for the
- * object lit up, else its id), {@code route} (tiles to walk), {@code lowPlanks} (the last low-planks line for the chat), and {@code saved.KEY} for every
+ * object lit up, else its id), {@code route} (tiles to walk), {@code destination} (a place beyond the scene, "X Y"), {@code others} (objects marked quietly), {@code lowPlanks} (the last low-planks line for the chat), and {@code saved.KEY} for every
  * saved key.
  */
 final class PilotRig implements Rig
@@ -54,6 +55,9 @@ final class PilotRig implements Rig
 	/** The Mastering Mixology settings as the script sets them. */
 	private com.codex.minigamepilot.core.MixCycle.Plan mixPlan = com.codex.minigamepilot.core.MixCycle.Plan.ALL;
 	private com.codex.minigamepilot.core.Mixology.Reward mixReward;
+	/** The Vale Totems settings as the script sets them. */
+	private com.codex.minigamepilot.core.Totems.Wood totemsWood;
+	private com.codex.minigamepilot.core.Totems.Reward totemsReward;
 	/** The bank as last seen, set by {@code bank ITEM COUNT}; null until the script sets one. */
 	private com.codex.minigamepilot.core.BankStock bank;
 	private final Map<Integer, Long> bankItems = new HashMap<>();
@@ -76,6 +80,8 @@ final class PilotRig implements Rig
 		settings.put("foundry", true);
 		settings.put("mixology", true);
 		settings.put("mixologyCues", true);
+		settings.put("valeTotems", true);
+		settings.put("totemsClaim", true);
 		pilots = new Pilots(game.client(), null, c -> { }, new FieldNotes(() -> null, new Gson()),
 			bests::get, bests::put, game::price, store::get, store::put, () -> bank);
 		pilots.atlas(() -> teleports == null ? null : com.codex.minigamepilot.core.WayfinderAtlas.of(walkPace, teleports));
@@ -114,6 +120,23 @@ final class PilotRig implements Rig
 				pilots.tempoross(settings.get("tempoross"), settings.get("temporossCook"), stormLoad);
 				pilots.foundry(settings.get("foundry"));
 				mixology();
+				totems();
+				return true;
+			case "totems":
+				// totems wood WOOD|BEST | totems reward REWARD|none
+				if ("wood".equals(args.get(0)))
+				{
+					totemsWood = "BEST".equals(args.get(1)) ? null : com.codex.minigamepilot.core.Totems.Wood.valueOf(args.get(1));
+				}
+				else if ("reward".equals(args.get(0)))
+				{
+					totemsReward = "none".equals(args.get(1)) ? null : com.codex.minigamepilot.core.Totems.Reward.valueOf(args.get(1));
+				}
+				else
+				{
+					throw new IllegalArgumentException("totems wood WOOD|BEST | totems reward REWARD|none");
+				}
+				totems();
 				return true;
 			case "mixology":
 				// mixology plan PLAN | reward REWARD|none | cue SPOTANIM
@@ -262,6 +285,11 @@ final class PilotRig implements Rig
 		}
 	}
 
+	private void totems()
+	{
+		pilots.totems(settings.get("valeTotems"), totemsWood, settings.get("totemsClaim"), totemsReward);
+	}
+
 	private void mixology()
 	{
 		pilots.mixology(settings.get("mixology"), mixPlan, mixReward, settings.get("mixologyCues"));
@@ -331,6 +359,19 @@ final class PilotRig implements Rig
 			r.put("object", game.nameOf(f.object));
 		}
 		r.put("route", String.valueOf(f.route.size()));
+		if (f.destination != null)
+		{
+			r.put("destination", f.destination.getX() + " " + f.destination.getY());
+		}
+		if (!f.others.isEmpty())
+		{
+			StringBuilder o = new StringBuilder();
+			for (TileObject x : f.others)
+			{
+				o.append(o.length() == 0 ? "" : ", ").append(game.nameOf(x));
+			}
+			r.put("others", o.toString());
+		}
 		if (f.npc != null)
 		{
 			r.put("npc", f.npc.getName());
