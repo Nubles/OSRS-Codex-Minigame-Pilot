@@ -2,6 +2,7 @@ package com.codex.minigamepilot;
 
 import com.codex.minigamepilot.core.Assault;
 import com.codex.minigamepilot.core.Nmz;
+import com.codex.minigamepilot.core.Brewing;
 import com.codex.minigamepilot.core.Volcanic;
 import com.codex.minigamepilot.core.Wintertodt;
 import com.codex.minigamepilot.core.Goals;
@@ -258,6 +259,43 @@ public interface CodexMinigamePilotConfig extends Config
 
 		/** The reward, or null for none. */
 		public Wintertodt.Reward reward()
+		{
+			return reward;
+		}
+
+		@Override
+		public String toString()
+		{
+			return reward == null ? "None" : reward.getTitle();
+		}
+	}
+
+	/** What Trouble Brewing pieces of eight are saved for. */
+	enum BrewingReward
+	{
+		NONE(null),
+		EVERYTHING(Brewing.Reward.EVERYTHING),
+		NAVAL_BLUE(Brewing.Reward.NAVAL_BLUE),
+		NAVAL_GREEN(Brewing.Reward.NAVAL_GREEN),
+		NAVAL_RED(Brewing.Reward.NAVAL_RED),
+		NAVAL_BROWN(Brewing.Reward.NAVAL_BROWN),
+		NAVAL_BLACK(Brewing.Reward.NAVAL_BLACK),
+		NAVAL_PURPLE(Brewing.Reward.NAVAL_PURPLE),
+		NAVAL_GREY(Brewing.Reward.NAVAL_GREY),
+		FLAGS(Brewing.Reward.FLAGS),
+		MEDIUM_CLUE(Brewing.Reward.MEDIUM_CLUE),
+		RUM(Brewing.Reward.RUM),
+		THE_STUFF(Brewing.Reward.THE_STUFF);
+
+		private final Brewing.Reward reward;
+
+		BrewingReward(Brewing.Reward reward)
+		{
+			this.reward = reward;
+		}
+
+		/** The reward, or null for none. */
+		public Brewing.Reward reward()
 		{
 			return reward;
 		}
@@ -818,6 +856,18 @@ public interface CodexMinigamePilotConfig extends Config
 		return true;
 	}
 
+	@ConfigItem(
+		keyName = "troubleBrewing",
+		name = "Trouble Brewing",
+		description = "Keep every Trouble Brewing game (team, rum made, pieces of eight, Cooking experience, length), your pieces of eight an hour, the next step in the lobby, and in a game one plain line on the next link of the ingredient chain you are on",
+		section = MINIGAMES,
+		position = 34
+	)
+	default boolean troubleBrewing()
+	{
+		return true;
+	}
+
 	@ConfigItem(keyName = "plaque", name = "Step plaque", description = "Show the next step on a small plaque in the game view", section = GUIDANCE, position = 0)
 	default boolean plaque()
 	{
@@ -1041,6 +1091,18 @@ public interface CodexMinigamePilotConfig extends Config
 	default VolcanicReward volcanicReward()
 	{
 		return VolcanicReward.PROSPECTOR_KIT;
+	}
+
+	@ConfigItem(
+		keyName = "brewingReward",
+		name = "Trouble Brewing reward",
+		description = "What your pieces of eight are for at Honest Jimmy's: a naval set, every flag, every flag and naval piece, medium clues, rum or the stuff, with the time to it at your pace",
+		section = GOALS,
+		position = 15
+	)
+	default BrewingReward brewingReward()
+	{
+		return BrewingReward.NAVAL_BLUE;
 	}
 
 	@ConfigItem(

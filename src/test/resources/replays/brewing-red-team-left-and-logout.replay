@@ -1,0 +1,99 @@
+# Trouble Brewing: rum as the reward (bought again and again), a red-team game whose scroll shows
+# with the overlay still up (kept once), a game left early and one ended by logging out, each kept
+# with how it ended; and your teams ranked by your own pieces of eight an hour.
+#
+# Facts (OSRS wiki, Trouble Brewing; Honest Jimmy's House of Stuff; Pirate hat):
+#  - "Rum (red) 20", "Rum (blue) 20".
+#  - The pirate hat "is worn in Trouble Brewing to signify that a player is a member of Fancy Dan's team."
+#  - "Fancy Dan will sign you to the red team."
+#  - "10 pieces of eight are awarded per bottle of rum produced by the team".
+# RuneLite: pieces of eight held are VarPlayerID.BREW_PIECES. The interface texts are schematic.
+brewing reward RUM
+quest CABIN_FEVER done
+# Two blue games already kept, twenty-three minutes apart.
+saved brewing.kept "1;1767223000000,2000,b,12,10,150,2000,f;1767224380000,2000,b,10,14,120,1800,f"
+scene 3760 2960
+at 3811 3021
+npc HONEST_JIMMY "Honest Jimmy" 3814 3023 as jimmy
+skill COOKING 50 101333
+varp BREW_PIECES 70
+tick
+expect goal = "10/20"
+expect goal.note ~ "3 affordable now. 10 pieces of eight to the next"
+# Rum is bought again and again: the lobby's step stays on the game.
+expect step = "Join a team"
+expect supply.headline = "Best game: 150 pieces of eight, 12 rum"
+
+# Red: the hat on, the overlay up.
+items WORN BREW_RED_PIRATE_HAT 1
+at 3790 2990
+widget BrewOverlay.CONTENT_TOP text ""
+widget BrewOverlay.BREW_TIME_DISPLAY text "20 mins"
+widget BrewOverlay.RED_SCORE text "0"
+widget BrewOverlay.BLUE_SCORE text "0"
+tick
+expect place = "Trouble Brewing · red team"
+# Nothing carried and the overlay's counts not up: one plain line.
+expect step = "Bring an ingredient for the still"
+items INV BUCKET_WATER 3
+tick
+expect step = "Put the water in the hopper"
+expect detail = "On the top floor are the hoppers; a bottle takes five buckets"
+items INV clear
+items INV BREW_SWEETGRUBS 1
+tick
+expect step = "Put the sweetgrubs in the hopper"
+items INV clear
+widget BrewOverlay.RED_SCORE text "5"
+widget BrewOverlay.BLUE_SCORE text "2"
+xp COOKING 102333
+tick 1900
+expect stat.Rum = "5"
+expect stat.Rum ~ "5"
+
+# The scroll shows with the overlay still up, then closes; the overlay goes a few ticks later.
+widget BrewGameOver.BREW_SCORE text ""
+widget BrewGameOver.BREW_DAN_FINAL_SCORE text "6"
+widget BrewGameOver.BREW_SAN_FINAL_SCORE text "3"
+widget BrewGameOver.BREW_PIECES_OF_EIGHT text "140"
+varp BREW_PIECES 210
+xp COOKING 102583
+tick
+close BrewGameOver.BREW_SCORE
+tick 12
+expect saved.brewing.kept ~ ",r,6,3,140,1250,f"
+tick 3
+close BrewOverlay.CONTENT_TOP
+close BrewOverlay.BREW_TIME_DISPLAY
+items WORN clear
+at 3811 3021
+tick 5
+# One game kept, not two.
+expect saved.brewing.kept !~ ",r,6,3,140,1250,f;"
+expect pick = "2 teams"
+expect goal.note ~ "10 affordable now"
+
+# A game left early: no scroll, no pieces of eight.
+items WORN BREW_RED_PIRATE_HAT 1
+at 3790 2990
+widget BrewOverlay.CONTENT_TOP text ""
+widget BrewOverlay.RED_SCORE text "1"
+widget BrewOverlay.BLUE_SCORE text "2"
+tick 100
+close BrewOverlay.CONTENT_TOP
+items WORN clear
+at 3811 3021
+tick 12
+expect saved.brewing.kept ~ ",r,1,2,0,0,l"
+expect supply.headline = "Best game: 150 pieces of eight, 12 rum"
+
+# A game ended by logging out.
+items WORN BREW_BLUE_PIRATE_HAT 1
+at 3790 2990
+widget BrewOverlay.CONTENT_TOP text ""
+widget BrewOverlay.RED_SCORE text "0"
+widget BrewOverlay.BLUE_SCORE text "3"
+tick 50
+state LOGIN_SCREEN
+tick
+expect saved.brewing.kept ~ ",b,3,0,0,0,o"

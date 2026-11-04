@@ -59,6 +59,8 @@ public final class Pilots
 	private volatile boolean useVolcanic = true;
 	private final BarracudaPilot barracuda = new BarracudaPilot();
 	private volatile boolean useBarracuda = true;
+	private final BrewingPilot brewing = new BrewingPilot();
+	private volatile boolean useBrewing = true;
 	private final Coach coach;
 	private final Recorder recorder;
 	private final IntUnaryOperator price;
@@ -110,6 +112,7 @@ public final class Pilots
 		nmz.setPrice(price);
 		volcanic.setStore(load, saveKey);
 		barracuda.setStore(load, saveKey);
+		brewing.setStore(load, saveKey);
 		this.coach = new Coach(loadBests, saveBests);
 		this.recorder = new Recorder(notes);
 		this.scene = new SceneIndex(client, id -> MotherlodePilot.isWatched(id) || FurnacePilot.isWatched(id) || HomesPilot.isWatched(id)
@@ -188,6 +191,14 @@ public final class Pilots
 	void riftReaders(java.util.function.Predicate<net.runelite.api.Quest> quest, IntUnaryOperator sprite)
 	{
 		rift.readers(quest, sprite);
+		brewing.readers(quest);
+	}
+
+	/** The "Trouble Brewing" settings: on, and the reward saved for (or null). */
+	public void troubleBrewing(boolean on, com.codex.minigamepilot.core.Brewing.Reward reward)
+	{
+		useBrewing = on;
+		brewing.settings(reward);
 	}
 
 	/** The "Tempoross" settings: on, cook before loading, and the storm at which to load what you hold. */
@@ -321,6 +332,7 @@ public final class Pilots
 			nmz.newAccount();
 			volcanic.newAccount();
 			barracuda.newAccount();
+			brewing.newAccount();
 			said.clear();
 			unsaid.clear();
 		}
@@ -457,6 +469,11 @@ public final class Pilots
 		{
 			barracuda.watch(client, npcs(), now);
 		}
+		// A Trouble Brewing game is followed every tick too, so its end and its rewards are kept.
+		if (useBrewing)
+		{
+			brewing.watch(client, now);
+		}
 		if (useMotherlode && MotherlodePilot.inMine(client))
 		{
 			activity = View.Activity.MOTHERLODE;
@@ -583,6 +600,13 @@ public final class Pilots
 			state = barracuda.lastState;
 			units = barracuda.units();
 		}
+		else if (useBrewing && brewing.active(client))
+		{
+			activity = View.Activity.TROUBLE_BREWING;
+			flight = brewing.fly(client, npcs(), now);
+			state = brewing.lastState;
+			units = brewing.units();
+		}
 		else if (useAssault && assault.active(client, scene, npcs()))
 		{
 			activity = View.Activity.BARBARIAN_ASSAULT;
@@ -666,6 +690,10 @@ public final class Pilots
 			else if (last == View.Activity.BARRACUDA_TRIALS)
 			{
 				barracuda.left();
+			}
+			else if (last == View.Activity.TROUBLE_BREWING)
+			{
+				brewing.left();
 			}
 			last = activity;
 		}
@@ -767,6 +795,8 @@ public final class Pilots
 		volcanic.relogged(client, now, client.getTickCount());
 		// A Barracuda Trial run ends on logging out.
 		barracuda.relogged(client, now, client.getTickCount());
+		// A Trouble Brewing game ends on logging out.
+		brewing.relogged(client, now, client.getTickCount());
 		motherlode.relogged();
 		furnace.relogged();
 		coach.left();
@@ -894,6 +924,7 @@ public final class Pilots
 		v.brief(nmz.brief());
 		v.brief(volcanic.brief());
 		v.brief(barracuda.brief(client.getRealSkillLevel(net.runelite.api.Skill.SAILING)));
+		v.brief(brewing.brief());
 		return v;
 	}
 }
