@@ -420,6 +420,23 @@ public final class Pilots
 		{
 			keep(last, furnace.visit(now), furnace.pace(now), false);
 		}
+		else if (last == View.Activity.RIFT)
+		{
+			rift.left();
+		}
+		else if (last == View.Activity.TEMPOROSS)
+		{
+			// Logged out or hopped mid-game: that game is over, and must not run on into the next.
+			storm.left(client.getTickCount(), now);
+		}
+		else if (last == View.Activity.FOUNDRY)
+		{
+			foundry.left();
+		}
+		else if (last == View.Activity.MIXOLOGY)
+		{
+			mixology.left();
+		}
 		motherlode.relogged();
 		furnace.relogged();
 		coach.left();
