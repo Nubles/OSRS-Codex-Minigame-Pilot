@@ -40,6 +40,8 @@ public class SavedSettingsTest
 			"mixology", "mixologyPlan", "mixologyCues", "mixologyReward",
 			// Vale Totems.
 			"valeTotems", "totemsWood", "totemsClaim", "totemsReward",
+			// Tithe Farm.
+			"titheFarm", "tithePlants", "titheReward",
 			"fieldNotes")), keys);
 		assertEquals("codexminigamepilot", CodexMinigamePilotConfig.GROUP);
 	}

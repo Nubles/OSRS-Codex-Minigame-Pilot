@@ -21,7 +21,8 @@ public final class View
 		TEMPOROSS("Tempoross"),
 		FOUNDRY("Giants' Foundry"),
 		MIXOLOGY("Mastering Mixology"),
-		TOTEMS("Vale Totems");
+		TOTEMS("Vale Totems"),
+		TITHE("Tithe Farm");
 
 		private final String title;
 
@@ -378,6 +379,84 @@ public final class View
 		}
 	}
 
+	/**
+	 * A small map of a minigame's patches as they stand, such as the Tithe Farm's: each patch at
+	 * its place on the ground, coloured by what it needs, numbered in your round's order.
+	 */
+	public static final class Field
+	{
+		/** What a patch needs, which sets its colour. */
+		public enum Need
+		{
+			EMPTY,
+			/** Needs water. */
+			DRY,
+			/** Needs water and is about to die. */
+			URGENT,
+			WET,
+			GROWN,
+			DEAD
+		}
+
+		/** One patch: its south-west tile relative to the field's, its size in tiles, and its state. */
+		public static final class Cell
+		{
+			final int x;
+			final int y;
+			final int size;
+			final Need need;
+			/** Its place in your round, from 1, or 0 when it is not in it. */
+			final int order;
+			final boolean next;
+			/** Planned as one of the next to plant. */
+			final boolean planned;
+
+			public Cell(int x, int y, int size, Need need, int order, boolean next, boolean planned)
+			{
+				this.x = x;
+				this.y = y;
+				this.size = Math.max(1, size);
+				this.need = need;
+				this.order = order;
+				this.next = next;
+				this.planned = planned;
+			}
+		}
+
+		final String title;
+		final String note;
+		final List<Cell> cells;
+		/** Where you stand relative to the field, or null. */
+		final int[] you;
+
+		public Field(String title, String note, List<Cell> cells, int[] you)
+		{
+			this.title = title;
+			this.note = note;
+			this.cells = cells == null ? Collections.emptyList() : cells;
+			this.you = you;
+		}
+
+		/** "D2 W5 G1" style counts, for replays and tests. */
+		public String summary()
+		{
+			int[] n = new int[Need.values().length];
+			for (Cell c : cells)
+			{
+				n[c.need.ordinal()]++;
+			}
+			StringBuilder b = new StringBuilder();
+			for (Need k : Need.values())
+			{
+				if (k != Need.EMPTY && n[k.ordinal()] > 0)
+				{
+					b.append(b.length() == 0 ? "" : " ").append(k.name().toLowerCase(java.util.Locale.ROOT)).append(' ').append(n[k.ordinal()]);
+				}
+			}
+			return b.length() == 0 ? "empty" : b.toString();
+		}
+	}
+
 	final boolean loggedIn;
 	final Activity activity;
 	final Step step;
@@ -397,6 +476,7 @@ public final class View
 	final List<RewardRoad.Stop> road = new ArrayList<>();
 	PickCard pick;
 	Supply supply;
+	Field field;
 
 	/**
 	 * @param place where, such as "Falador" or "Lower level", or null
@@ -439,6 +519,8 @@ public final class View
 			"Which orders your paste can fill, the levers for each, the right station with its cue, the paste to refine next, and your resin towards a reward."));
 		v.brief(new Brief(Activity.TOTEMS, null,
 			"The next totem site and the logs to bring, the three spirits each totem wants ringed in the carving choices, the offerings waiting, and your research points towards a reward."));
+		v.brief(new Brief(Activity.TITHE, null,
+			"The seed your Farming grows, the next patch to plant, water or harvest read from the patches themselves, the water you carry, and your points towards a reward."));
 		return v;
 	}
 
@@ -456,6 +538,12 @@ public final class View
 	public View pick(PickCard p)
 	{
 		pick = p;
+		return this;
+	}
+
+	public View field(Field f)
+	{
+		field = f;
 		return this;
 	}
 
@@ -564,6 +652,10 @@ public final class View
 		{
 			r.put("supply.headline", String.valueOf(supply.headline));
 		}
+		if (field != null)
+		{
+			r.put("field", field.summary());
+		}
 		return r;
 	}
 
@@ -618,6 +710,18 @@ public final class View
 			for (Pick p : pick.picks)
 			{
 				b.append(p.name).append(p.figure).append(p.detail).append(p.current);
+			}
+		}
+		if (field != null)
+		{
+			b.append("|field").append(field.title).append(field.note);
+			for (Field.Cell c : field.cells)
+			{
+				b.append(c.need.ordinal()).append(c.order).append(c.next ? '*' : '.').append(c.planned ? '+' : '.');
+			}
+			if (field.you != null)
+			{
+				b.append(field.you[0]).append(',').append(field.you[1]);
 			}
 		}
 		if (supply != null)

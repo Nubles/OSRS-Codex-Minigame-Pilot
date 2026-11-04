@@ -385,6 +385,25 @@ public class SavedKeysFuzzTest
 	}
 
 	@Test
+	public void titheKept()
+	{
+		survive("tithe.kept", "1;1760000000000,1000,LOGAVANO,100,35,37030;1760000100000,0,-,30,10,900", s ->
+		{
+			TitheLog g = TitheLog.decode(s);
+			sane(String.valueOf(g.xpPerHour() < 0 ? 0 : Math.round(g.xpPerHour())));
+			sane(String.valueOf(g.pointsPerHour() < 0 ? 0 : Math.round(g.pointsPerHour())));
+			double h = g.hoursFor(400);
+			sane(String.valueOf(h < 0 ? 0 : Math.round(h)));
+			sane(String.valueOf(g.sacksFor(400)));
+			for (TitheLog.Run r : g.all())
+			{
+				assertTrue(r.xp >= 0 && r.ticks >= 0 && r.points >= 0 && r.fruit >= 0);
+			}
+			TitheLog.decode(g.encode());
+		});
+	}
+
+	@Test
 	public void totemsKept()
 	{
 		survive("totems.kept", "1;1760000000000,200,MAGIC,5000,1000;1760000100000,0,-,190,0", s ->

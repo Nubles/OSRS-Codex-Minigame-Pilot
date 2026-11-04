@@ -3,6 +3,7 @@ package com.codex.minigamepilot;
 import com.codex.minigamepilot.core.Goals;
 import com.codex.minigamepilot.core.MixCycle;
 import com.codex.minigamepilot.core.Mixology;
+import com.codex.minigamepilot.core.Tithe;
 import com.codex.minigamepilot.core.Totems;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
@@ -132,6 +133,66 @@ public interface CodexMinigamePilotConfig extends Config
 		public String toString()
 		{
 			return wood == null ? "Best you carry" : wood.getTitle();
+		}
+	}
+
+	/** Plants a Tithe Farm round: the wiki's strategies. */
+	enum TithePlants
+	{
+		SIXTEEN(Tithe.Plan.SIXTEEN),
+		TWENTY(Tithe.Plan.TWENTY),
+		TWENTY_THREE(Tithe.Plan.TWENTY_THREE),
+		TWENTY_FIVE(Tithe.Plan.TWENTY_FIVE);
+
+		private final Tithe.Plan plan;
+
+		TithePlants(Tithe.Plan plan)
+		{
+			this.plan = plan;
+		}
+
+		public Tithe.Plan plan()
+		{
+			return plan;
+		}
+
+		@Override
+		public String toString()
+		{
+			return plan.getTitle() + " (" + plan.cans() + " cans)";
+		}
+	}
+
+	/** What Tithe Farm points are saved for. */
+	enum TitheReward
+	{
+		NONE(null),
+		FARMERS_OUTFIT(Tithe.Reward.FARMERS_OUTFIT),
+		STRAWHAT(Tithe.Reward.STRAWHAT),
+		JACKET(Tithe.Reward.JACKET),
+		TROUSERS(Tithe.Reward.TROUSERS),
+		BOOTS(Tithe.Reward.BOOTS),
+		GRICOLLERS_CAN(Tithe.Reward.GRICOLLERS_CAN),
+		SEED_BOX(Tithe.Reward.SEED_BOX),
+		HERB_SACK(Tithe.Reward.HERB_SACK);
+
+		private final Tithe.Reward reward;
+
+		TitheReward(Tithe.Reward reward)
+		{
+			this.reward = reward;
+		}
+
+		/** The reward, or null for none. */
+		public Tithe.Reward reward()
+		{
+			return reward;
+		}
+
+		@Override
+		public String toString()
+		{
+			return reward == null ? "None" : reward.getTitle() + " (" + reward.points() + ")";
 		}
 	}
 
@@ -418,6 +479,30 @@ public interface CodexMinigamePilotConfig extends Config
 		return true;
 	}
 
+	@ConfigItem(
+		keyName = "titheFarm",
+		name = "Tithe Farm",
+		description = "Guide the Tithe Farm: the seed your Farming grows, then each patch of your round to plant, water, harvest or clear, read from the patches, the water you carry, the fruit sack, and every sack kept",
+		section = MINIGAMES,
+		position = 18
+	)
+	default boolean titheFarm()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "tithePlants",
+		name = "Tithe plants a round",
+		description = "How many patches a Tithe Farm round plants, as the wiki's strategies do: 16 or 20 (basic), 23 or 25. Fewer are planted when your seeds or water run short",
+		section = MINIGAMES,
+		position = 19
+	)
+	default TithePlants tithePlants()
+	{
+		return TithePlants.TWENTY;
+	}
+
 	@ConfigItem(keyName = "plaque", name = "Step plaque", description = "Show the next step on a small plaque in the game view", section = GUIDANCE, position = 0)
 	default boolean plaque()
 	{
@@ -534,11 +619,23 @@ public interface CodexMinigamePilotConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = "titheReward",
+		name = "Tithe Farm reward",
+		description = "The reward from Farmer Gricoller your Tithe Farm points are saved for: the panel shows your points against its price (less pieces you own) and the time and sacks to it at your pace",
+		section = GOALS,
+		position = 5
+	)
+	default TitheReward titheReward()
+	{
+		return TitheReward.NONE;
+	}
+
+	@ConfigItem(
 		keyName = "showGoals",
 		name = "Show goals",
 		description = "Show the goal card on the panel",
 		section = GOALS,
-		position = 5
+		position = 6
 	)
 	default boolean showGoals()
 	{
@@ -550,7 +647,7 @@ public interface CodexMinigamePilotConfig extends Config
 		name = "Reward road",
 		description = "In each minigame, show its rewards as a road (at the Blast Furnace, the bars each Smithing level opens): what you own, what you can have now and how far off the rest is at your pace",
 		section = GOALS,
-		position = 6
+		position = 7
 	)
 	default boolean rewardRoad()
 	{

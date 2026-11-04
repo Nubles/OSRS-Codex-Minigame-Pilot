@@ -116,7 +116,7 @@ public class PilotPanel extends PluginPanel
 
 		if (!v.gauges.isEmpty())
 		{
-			body.add(new SectionHeader(v.activity == View.Activity.FURNACE ? "The furnace" : v.activity == View.Activity.HOMES ? "Materials" : v.activity == View.Activity.RIFT ? "The rift" : v.activity == View.Activity.TEMPOROSS ? "The storm" : v.activity == View.Activity.FOUNDRY ? "The forge" : v.activity == View.Activity.MIXOLOGY ? "The hopper" : v.activity == View.Activity.TOTEMS ? "The site" : "The sack"));
+			body.add(new SectionHeader(v.activity == View.Activity.FURNACE ? "The furnace" : v.activity == View.Activity.HOMES ? "Materials" : v.activity == View.Activity.RIFT ? "The rift" : v.activity == View.Activity.TEMPOROSS ? "The storm" : v.activity == View.Activity.FOUNDRY ? "The forge" : v.activity == View.Activity.MIXOLOGY ? "The hopper" : v.activity == View.Activity.TOTEMS ? "The site" : v.activity == View.Activity.TITHE ? (v.gauges.size() > 1 ? "Water and sack" : "Water") : "The sack"));
 			Card card = new Card(new BorderLayout());
 			StackPanel gauges = new StackPanel(6, 0);
 			for (View.Gauge gauge : v.gauges)
@@ -124,6 +124,15 @@ public class PilotPanel extends PluginPanel
 				gauges.add(new GaugeBar(gauge));
 			}
 			card.add(gauges, BorderLayout.CENTER);
+			body.add(card);
+		}
+
+		if (v.field != null && !v.field.cells.isEmpty())
+		{
+			body.add(new SectionHeader(v.field.title, v.field.note));
+			Card card = new Card(new BorderLayout());
+			card.setBorder(new javax.swing.border.EmptyBorder(4, 4, 4, 4));
+			card.add(new FieldMap(v.field, WIDTH - 24), BorderLayout.CENTER);
 			body.add(card);
 		}
 

@@ -39,6 +39,8 @@ public final class Pilots
 	private volatile boolean useMixology = true;
 	private final TotemsPilot totems = new TotemsPilot();
 	private volatile boolean useTotems = true;
+	private final TithePilot tithe = new TithePilot();
+	private volatile boolean useTithe = true;
 	private final Coach coach;
 	private final Recorder recorder;
 	private final IntUnaryOperator price;
@@ -77,11 +79,12 @@ public final class Pilots
 		mixology.setStore(load, saveKey);
 		mixology.setPrice(price);
 		totems.setStore(load, saveKey);
+		tithe.setStore(load, saveKey);
 		this.coach = new Coach(loadBests, saveBests);
 		this.recorder = new Recorder(notes);
 		this.scene = new SceneIndex(client, id -> MotherlodePilot.isWatched(id) || FurnacePilot.isWatched(id) || HomesPilot.isWatched(id)
 			|| RiftPilot.isWatched(id) || StormPilot.isWatched(id) || FoundryPilot.isWatched(id)
-			|| MixologyPilot.isWatched(id) || TotemsPilot.isWatched(id));
+			|| MixologyPilot.isWatched(id) || TotemsPilot.isWatched(id) || TithePilot.isWatched(id));
 		this.homes = new HomesPilot(saved, save, load, saveKey);
 		homes.readers(null, stock);
 	}
@@ -156,6 +159,13 @@ public final class Pilots
 		totems.settings(wood, claim, reward);
 	}
 
+	/** The "Tithe Farm" settings: on, plants a round, and the reward saved for (or null). */
+	public void tithe(boolean on, com.codex.minigamepilot.core.Tithe.Plan plan, com.codex.minigamepilot.core.Tithe.Reward reward)
+	{
+		useTithe = on;
+		tithe.settings(plan, reward);
+	}
+
 	/** A spot animation appeared in the scene: Mastering Mixology's station cues. */
 	public void spotanim(int id)
 	{
@@ -206,6 +216,7 @@ public final class Pilots
 			foundry.newAccount();
 			mixology.newAccount();
 			totems.newAccount();
+			tithe.newAccount();
 			said.clear();
 			unsaid.clear();
 		}
@@ -358,6 +369,13 @@ public final class Pilots
 			state = totems.lastState;
 			units = totems.units();
 		}
+		else if (useTithe && tithe.active(client, scene))
+		{
+			activity = View.Activity.TITHE;
+			flight = tithe.fly(client, scene, now);
+			state = tithe.lastState;
+			units = tithe.units();
+		}
 		else
 		{
 			activity = View.Activity.NONE;
@@ -394,6 +412,10 @@ public final class Pilots
 			else if (last == View.Activity.TOTEMS)
 			{
 				totems.left();
+			}
+			else if (last == View.Activity.TITHE)
+			{
+				tithe.left(now);
 			}
 			last = activity;
 		}
@@ -462,6 +484,11 @@ public final class Pilots
 		else if (last == View.Activity.TOTEMS)
 		{
 			totems.left();
+		}
+		else if (last == View.Activity.TITHE)
+		{
+			// Logged out or hopped: the farm's game is over, and its sack with it.
+			tithe.left(now);
 		}
 		motherlode.relogged();
 		furnace.relogged();
@@ -580,6 +607,7 @@ public final class Pilots
 		v.brief(foundry.brief());
 		v.brief(mixology.brief());
 		v.brief(totems.brief());
+		v.brief(tithe.brief());
 		return v;
 	}
 }

@@ -136,6 +136,8 @@ final class Coach
 				return Skill.HERBLORE;
 			case TOTEMS:
 				return Skill.FLETCHING;
+			case TITHE:
+				return Skill.FARMING;
 			default:
 				return null;
 		}
@@ -347,6 +349,14 @@ final class Coach
 				return "the totem";
 			case OFFERINGS:
 				return "the offerings";
+			case PLOT:
+				return "the patch";
+			case SEED_TABLE:
+				return "the seed table";
+			case WATER_BARREL:
+				return "the water barrel";
+			case FARM_DOOR:
+				return "the farm door";
 			default:
 				return null;
 		}

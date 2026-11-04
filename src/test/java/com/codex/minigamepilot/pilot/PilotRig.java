@@ -21,6 +21,8 @@ import net.runelite.api.TileObject;
  * {@code stormload N} (Tempoross's "Load what you hold at storm"; setting names tempoross and temporossCook too),
  * {@code foundry stages TOOL...} and {@code foundry bonus on|off} (the Giants' Foundry HUD's stage icons and sweet spot),
  * {@code totems wood WOOD|BEST} and {@code totems reward REWARD|none} (Vale Totems; setting names valeTotems and totemsClaim),
+ * {@code tithe plants PLAN} and {@code tithe reward REWARD|none} (the Tithe Farm, by {@code Tithe.Plan} and {@code Tithe.Reward}
+ * names; setting name titheFarm),
  * {@code mixology plan ALL|PER_PASTE}, {@code mixology reward REWARD|none} and {@code mixology cue SPOTANIM} (a Mastering
  * Mixology setting, or a spot animation appearing, by its {@code SpotanimID} name; setting names mixology and mixologyCues),
  * {@code bank ITEM COUNT} (the bank as last seen), {@code teleport "Name" "Source" X Y SECONDS carried|banked},
@@ -58,6 +60,9 @@ final class PilotRig implements Rig
 	/** The Vale Totems settings as the script sets them. */
 	private com.codex.minigamepilot.core.Totems.Wood totemsWood;
 	private com.codex.minigamepilot.core.Totems.Reward totemsReward;
+	/** The Tithe Farm settings as the script sets them. */
+	private com.codex.minigamepilot.core.Tithe.Plan tithePlan = com.codex.minigamepilot.core.Tithe.Plan.TWENTY;
+	private com.codex.minigamepilot.core.Tithe.Reward titheReward;
 	/** The bank as last seen, set by {@code bank ITEM COUNT}; null until the script sets one. */
 	private com.codex.minigamepilot.core.BankStock bank;
 	private final Map<Integer, Long> bankItems = new HashMap<>();
@@ -82,6 +87,7 @@ final class PilotRig implements Rig
 		settings.put("mixologyCues", true);
 		settings.put("valeTotems", true);
 		settings.put("totemsClaim", true);
+		settings.put("titheFarm", true);
 		pilots = new Pilots(game.client(), null, c -> { }, new FieldNotes(() -> null, new Gson()),
 			bests::get, bests::put, game::price, store::get, store::put, () -> bank);
 		pilots.atlas(() -> teleports == null ? null : com.codex.minigamepilot.core.WayfinderAtlas.of(walkPace, teleports));
@@ -121,6 +127,23 @@ final class PilotRig implements Rig
 				pilots.foundry(settings.get("foundry"));
 				mixology();
 				totems();
+				tithe();
+				return true;
+			case "tithe":
+				// tithe plants PLAN | tithe reward REWARD|none
+				if ("plants".equals(args.get(0)))
+				{
+					tithePlan = com.codex.minigamepilot.core.Tithe.Plan.valueOf(args.get(1));
+				}
+				else if ("reward".equals(args.get(0)))
+				{
+					titheReward = "none".equals(args.get(1)) ? null : com.codex.minigamepilot.core.Tithe.Reward.valueOf(args.get(1));
+				}
+				else
+				{
+					throw new IllegalArgumentException("tithe plants PLAN | tithe reward REWARD|none");
+				}
+				tithe();
 				return true;
 			case "totems":
 				// totems wood WOOD|BEST | totems reward REWARD|none
@@ -283,6 +306,11 @@ final class PilotRig implements Rig
 				throw new IllegalArgumentException("No ItemID." + name);
 			}
 		}
+	}
+
+	private void tithe()
+	{
+		pilots.tithe(settings.get("titheFarm"), tithePlan, titheReward);
 	}
 
 	private void totems()

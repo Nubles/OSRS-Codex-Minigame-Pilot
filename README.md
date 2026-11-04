@@ -1,6 +1,6 @@
 # Codex Minigame Pilot
 
-**One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes, Guardians of the Rift, Tempoross, the Giants' Foundry, Mastering Mixology and Vale Totems.** The Pilot watches the minigame you are in and always shows the single thing to do next: what to click, lit in gold in the world, the path there drawn on the ground and the minimap, and a line on why. You still do every click. It only reads the game and draws.
+**One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes, Guardians of the Rift, Tempoross, the Giants' Foundry, Mastering Mixology, Vale Totems and the Tithe Farm.** The Pilot watches the minigame you are in and always shows the single thing to do next: what to click, lit in gold in the world, the path there drawn on the ground and the minimap, and a line on why. You still do every click. It only reads the game and draws.
 
 It is part of the **Codex** suite of RuneLite plugins and shares their look: warm ink, aged gold and the game's own fonts.
 
@@ -104,6 +104,23 @@ It is part of the **Codex** suite of RuneLite plugins and shares their look: war
 </p>
 <p align="center">
   <img src="docs/screenshots/totems-plaque-carve.png" alt="Plaque at the totem">
+</p>
+
+### Tithe Farm
+- **The seed your Farming grows.** At the seed table it asks for the best of golovanova (34), bologano (54) and logavano (74) that your level reaches, boosts counted, and says what a sack of a hundred gives: "Your Farming (80) grows logavano, from 74: 37k xp a sack of 100". Lower seeds in your pack are named as giving less. Then full cans for your round, and the door.
+- **One patch at a time, read from the patches.** Every tithe patch shows what it needs in the object the game draws: empty, a seedling or plant dry or watered at each of its three stages, grown, or blighted. The step is always one patch, lit in gold: plant the next of your round, water each seed as soon as it is in ("Plant and water on the first round"), then round again for its second and third watering, harvest what has grown (grown plants cannot die, so water comes first), clear what blighted, and deposit the fruit before the next round.
+- **Before its minute runs out.** Each stage lasts a minute, and a plant left dry dies when it ends. The Pilot times each stage from the moment the patch changes, says how long a plant has ("Only 0:13 left before it wilts"), and puts a plant with fifteen seconds left first, wherever it is in your round. With every plant watered it says which one needs water next and when.
+- **Your route.** A round is sized as the wiki's strategies do (*Tithe plants a round*: 16, 20, 23 or 25), and never more than your seeds or your water cover: three doses a plant. The first round goes patch to nearest patch; the order you actually plant in is kept per account as your route, and every round after follows it.
+- **The farm on the panel.** A map of the patches as they lie, coloured by what each needs (water, wilting, watered, grown), numbered in your round's order with the next ringed and the patches still to plant dashed, and where you stand.
+- **Water and the sack.** Doses in your cans (or Gricoller's can) against what the round still needs, and the sack's fill with the points in it: a point for every three fruit and two more at the hundredth.
+- **Points towards a reward, and every sack kept.** Pick one under *Tithe Farm reward* (the farmer's outfit or a piece of it, Gricoller's can, the seed box or the herb sack): your points against its price, less the pieces you already own, with the time and sacks it is at your own pace. Each sack of a hundred is kept per account with its seed, points, Farming experience and time from first seed to last deposit; a sack begun when you leave, hop or log out is kept as it stood, since leaving resets the farm's game.
+
+<p align="center">
+  <img src="docs/screenshots/tithe-panel-round.png" width="225" alt="Tithe Farm: a round under way, the patches on the map">
+  <img src="docs/screenshots/tithe-panel-table.png" width="225" alt="Tithe Farm: the seed your level grows">
+</p>
+<p align="center">
+  <img src="docs/screenshots/tithe-plaque-water.png" alt="Plaque at a wilting plant">
 </p>
 
 ### Tempoross
@@ -228,7 +245,7 @@ All are read only, never written, and everything works without them.
 
 ## Your data
 
-Your bank's goal items and supplies as last seen, your Mahogany Homes points, your Guardians of the Rift points, your last thirty Tempoross games, your last fifty Giants' Foundry swords and the moulds the jig has shown you own, your last hundred Mastering Mixology deliveries, your last hundred Vale totems with where each totem site stands and the order you visit them, your last fifty Mahogany Homes contracts, the rewards you own, your round bests, your last and best visit to each minigame and what your contracts take are saved in your RuneLite profile, per account. A damaged or hand-edited value is read as far as it can be and the rest left out, so it never stops the Pilot.
+Your bank's goal items and supplies as last seen, your Mahogany Homes points, your Guardians of the Rift points, your last thirty Tempoross games, your last fifty Giants' Foundry swords and the moulds the jig has shown you own, your last hundred Mastering Mixology deliveries, your last hundred Vale totems with where each totem site stands and the order you visit them, your last hundred Tithe Farm sacks and the order you plant your round in, your last fifty Mahogany Homes contracts, the rewards you own, your round bests, your last and best visit to each minigame and what your contracts take are saved in your RuneLite profile, per account. A damaged or hand-edited value is read as far as it can be and the rest left out, so it never stops the Pilot.
 
 ## Field notes
 
@@ -240,9 +257,9 @@ Codex Minigame Pilot is guidance only. It reads what the game already shows you 
 
 ## Settings that matter
 
-- **Minigames:** turn each of the eight off; *Vale totem wood* and *Claim offerings as you pass* for Vale Totems; *Mixology orders to make* (every order, or the most resin per paste) and *Mixology station cues*; *Cook before loading* and *Load what you hold at storm* (80%) for Tempoross; *Fragments before first craft* for Guardians of the Rift (120 by default); fix the *Blast Furnace bar* instead of letting the Pilot work it out; *Top up coffer below* (2,500 coins by default).
+- **Minigames:** turn each of the nine off; *Tithe plants a round* for the Tithe Farm; *Vale totem wood* and *Claim offerings as you pass* for Vale Totems; *Mixology orders to make* (every order, or the most resin per paste) and *Mixology station cues*; *Cook before loading* and *Load what you hold at storm* (80%) for Tempoross; *Fragments before first craft* for Guardians of the Rift (120 by default); fix the *Blast Furnace bar* instead of letting the Pilot work it out; *Top up coffer below* (2,500 coins by default).
 - **Guidance:** *Step plaque*, *Path on the ground*, *Path on minimap*, *Action labels*, *Mark what comes after*, *Hint arrow*, *World map marker* and *Low planks in chat* for Mahogany Homes, and *Visit summary in chat*. All on by default.
-- **Goals:** what Motherlode nuggets and Mahogany Homes points are saved for, the *Mixology reward* your resin is saved for, the *Vale Totems reward* your research points are saved for, the *Blast Furnace level* to work toward (0 for the next), *Show goals* and *Reward road*.
+- **Goals:** what Motherlode nuggets and Mahogany Homes points are saved for, the *Mixology reward* your resin is saved for, the *Vale Totems reward* your research points are saved for, the *Tithe Farm reward* your points are saved for, the *Blast Furnace level* to work toward (0 for the next), *Show goals* and *Reward road*.
 - **Tick coach:** *Tick coach*, on by default.
 - **Field notes:** *Keep field notes*, off by default.
 

@@ -74,8 +74,8 @@ import net.runelite.client.util.Text;
 	name = "Codex Minigame Pilot",
 	internalName = "codex-minigame-pilot",
 	legacyDataDirectory = "codex-minigame-pilot",
-	description = "One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes, Guardians of the Rift, Tempoross, the Giants' Foundry, Mastering Mixology and Vale Totems: what to click, the path there, and why",
-	tags = {"motherlode", "mlm", "blast furnace", "mahogany homes", "construction", "mining", "smithing", "guardians of the rift", "gotr", "runecraft", "tempoross", "fishing", "giants foundry", "mastering mixology", "mixology", "herblore", "vale totems", "fletching", "varlamore", "guide", "codex"}
+	description = "One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes, Guardians of the Rift, Tempoross, the Giants' Foundry, Mastering Mixology, Vale Totems and the Tithe Farm: what to click, the path there, and why",
+	tags = {"motherlode", "mlm", "blast furnace", "mahogany homes", "construction", "mining", "smithing", "guardians of the rift", "gotr", "runecraft", "tempoross", "fishing", "giants foundry", "mastering mixology", "mixology", "herblore", "vale totems", "fletching", "varlamore", "tithe farm", "farming", "guide", "codex"}
 )
 public class CodexMinigamePilotPlugin extends Plugin
 {
@@ -182,6 +182,7 @@ public class CodexMinigamePilotPlugin extends Plugin
 		pilots.foundry(config.foundry());
 		pilots.mixology(config.mixology(), config.mixologyPlan(), config.mixologyReward().reward(), config.mixologyCues());
 		pilots.totems(config.valeTotems(), config.totemsWood().wood(), config.totemsClaim(), config.totemsReward().reward());
+		pilots.tithe(config.titheFarm(), config.tithePlants().plan(), config.titheReward().reward());
 		goals = new GoalWatch(key -> configManager.getRSProfileConfiguration(CodexMinigamePilotConfig.GROUP, key),
 			(key, value) -> configManager.setRSProfileConfiguration(CodexMinigamePilotConfig.GROUP, key, value),
 			this::navigatorBoard);
@@ -282,6 +283,11 @@ public class CodexMinigamePilotPlugin extends Plugin
 			&& ("valeTotems".equals(event.getKey()) || event.getKey().startsWith("totems")) && pilots != null)
 		{
 			pilots.totems(config.valeTotems(), config.totemsWood().wood(), config.totemsClaim(), config.totemsReward().reward());
+			return;
+		}
+		if (CodexMinigamePilotConfig.GROUP.equals(event.getGroup()) && event.getKey() != null && event.getKey().startsWith("tithe") && pilots != null)
+		{
+			pilots.tithe(config.titheFarm(), config.tithePlants().plan(), config.titheReward().reward());
 			return;
 		}
 		if (CodexMinigamePilotConfig.GROUP.equals(event.getGroup()) && "tickCoach".equals(event.getKey()) && pilots != null)
