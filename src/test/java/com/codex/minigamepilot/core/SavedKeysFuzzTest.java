@@ -428,6 +428,46 @@ public class SavedKeysFuzzTest
 	}
 
 	@Test
+	public void assaultKept()
+	{
+		survive("assault.kept", "1;1760000000000,1500,5,170,5,5,1C93d/2C120d/3C80d/4C90d/5C99d/6C88d/7C91d/8C95d/9C97d/10C210d;1760000100000,0,12,0,0,0,1A60x/1A70d/2-0x",
+			s ->
+			{
+				AssaultLog g = AssaultLog.decode(s);
+				sane(String.valueOf(g.pointsPerHour() < 0 ? 0 : Math.round(g.pointsPerHour())));
+				sane(String.valueOf(g.typicalGame()));
+				for (int n = 1; n <= Assault.WAVES; n++)
+				{
+					sane(String.valueOf(g.quickestWave(n)));
+				}
+				for (AssaultLog.Game x : g.all())
+				{
+					assertTrue(x.ticks >= 0 && x.ticks <= AssaultLog.LONGEST_GAME && !x.waves.isEmpty());
+					for (Assault.Role r : Assault.Role.values())
+					{
+						assertTrue(x.points(r) >= 0 && x.points(r) <= Assault.CAP);
+					}
+					for (AssaultLog.Wave w : x.waves)
+					{
+						assertTrue(w.number >= 1 && w.number <= Assault.WAVES && w.ticks >= 0 && w.ticks <= AssaultLog.LONGEST_WAVE);
+					}
+				}
+				for (AssaultLog.Rate r : g.rates().values())
+				{
+					assertTrue(r.games > 0 && r.own >= 0 && r.side >= 0 && r.ticks >= 0 && !Double.isNaN(r.own));
+				}
+				java.util.Map<Assault.Role, Integer> need = new java.util.EnumMap<>(Assault.Role.class);
+				for (Assault.Role r : Assault.Role.values())
+				{
+					need.put(r, 375);
+				}
+				AssaultPlan.Result p = AssaultPlan.plan(need, new java.util.EnumMap<>(Assault.Role.class), g.rates(), g.typicalGame());
+				assertTrue(p.total >= 0 && p.total <= AssaultPlan.MOST && !Double.isNaN(p.hours));
+				AssaultLog.decode(g.encode());
+			});
+	}
+
+	@Test
 	public void roguesDenOwned()
 	{
 		survive("roguesden.owned", "MASK,TOP,BOOTS", s ->

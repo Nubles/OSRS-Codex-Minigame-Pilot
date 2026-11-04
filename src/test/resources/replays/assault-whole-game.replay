@@ -1,0 +1,161 @@
+# Barbarian Assault: a whole game as collector, waves 1 to 10, kept with each wave's time and the
+# honour points it gave each role, then the role to play next for the fighter torso.
+#
+# Facts (OSRS wiki, Barbarian Assault; Fighter torso; and the game's client scripts in runelite/cs2-scripts):
+#  - the fighter torso "can be purchased from Commander Connad for 375 honour points in all four roles,
+#    and one Penance Queen kill"
+#  - "For completing wave 10, each player gets 80 points for their role plus 5 points in each of the
+#    other 3 roles"
+#  - a role's points are "%barbassault_points_collector_extra * 512 + %barbassault_points_collector_base"
+#  - each wave starts with the game message "---- Wave: N ----" (RuneLite's Barbarian Assault plugin)
+# The outpost's tiles here are only a stage for the replay: the Pilot reads no tile of it.
+scene 2500 3520
+at 2535 3570
+npc BARBASSAULT_BARBARIAN_COMMANDER "Commander Connad" 2538 3572 as connad
+skill HITPOINTS 40
+varbit BARBASSAULT_POINTS_ATTACKER_BASE 400
+varbit BARBASSAULT_POINTS_COLLECTOR_BASE 120
+varbit BARBASSAULT_POINTS_DEFENDER_BASE 300
+varbit BARBASSAULT_POINTS_HEALER_BASE 380
+varbit BARBASSULT_ROLELEVEL_ATT 2
+varbit BARBASSULT_ROLELEVEL_COL 3
+varbit BARBASSULT_ROLELEVEL_DEF 1
+varbit BARBASSULT_ROLELEVEL_HEAL 1
+tick
+expect activity = BARBARIAN_ASSAULT
+expect place = "Barbarian Outpost"
+# Collector is 255 short, defender 75: collector first. With no game of yours yet, the queen's 80
+# and 5 alone: four collector games (their 5s leave defender 55 short) and one defender game, at most.
+expect step = "Play collector next"
+expect detail = "255 short · at most 5 games"
+expect gauge.Collector = "120/375"
+expect gauge.Attacker = "400/375"
+expect goal = "1170/1500"
+expect goal.pieces ~ "A Penance Queen kill TODO"
+expect pick = "Next: collector"
+expect pick.current = "Collector 4 games"
+expect lines ~ "Collector level 3 TODO"
+never step ~ "Spend"
+
+chat GAMEMESSAGE "---- Wave: 1 ----"
+widget BarbassaultOverCol.BARBASSAULT_COLLECTOR_HORN_TEXT text "Collector"
+tick 30
+expect step = "Wave 1 as collector"
+expect detail = "0:18 so far"
+expect place = "Barbarian Assault · wave 1"
+expect lines ~ "Wave 1 · collector NEXT"
+tick 70
+close BarbassaultOverCol.BARBASSAULT_COLLECTOR_HORN_TEXT
+varbit BARBASSAULT_POINTS_COLLECTOR_BASE 130
+widget BarbassaultWavecomplete.ROOT_MODEL0
+tick
+close BarbassaultWavecomplete.ROOT_MODEL0
+tick 20
+expect step = "Wave 2 next"
+expect detail ~ "Wave 1 won · "
+expect detail ~ "+10 points"
+expect lines ~ "Wave 1 · collector DONE"
+expect stat.Waves_won = "1"
+chat GAMEMESSAGE "---- Wave: 2 ----"
+widget BarbassaultOverCol.BARBASSAULT_COLLECTOR_HORN_TEXT text "Collector"
+tick 102
+close BarbassaultOverCol.BARBASSAULT_COLLECTOR_HORN_TEXT
+varbit BARBASSAULT_POINTS_COLLECTOR_BASE 140
+widget BarbassaultWavecomplete.ROOT_MODEL0
+tick
+close BarbassaultWavecomplete.ROOT_MODEL0
+tick 20
+chat GAMEMESSAGE "---- Wave: 3 ----"
+widget BarbassaultOverCol.BARBASSAULT_COLLECTOR_HORN_TEXT text "Collector"
+tick 103
+close BarbassaultOverCol.BARBASSAULT_COLLECTOR_HORN_TEXT
+varbit BARBASSAULT_POINTS_COLLECTOR_BASE 150
+widget BarbassaultWavecomplete.ROOT_MODEL0
+tick
+close BarbassaultWavecomplete.ROOT_MODEL0
+tick 20
+chat GAMEMESSAGE "---- Wave: 4 ----"
+widget BarbassaultOverCol.BARBASSAULT_COLLECTOR_HORN_TEXT text "Collector"
+tick 104
+close BarbassaultOverCol.BARBASSAULT_COLLECTOR_HORN_TEXT
+varbit BARBASSAULT_POINTS_COLLECTOR_BASE 160
+widget BarbassaultWavecomplete.ROOT_MODEL0
+tick
+close BarbassaultWavecomplete.ROOT_MODEL0
+tick 20
+chat GAMEMESSAGE "---- Wave: 5 ----"
+widget BarbassaultOverCol.BARBASSAULT_COLLECTOR_HORN_TEXT text "Collector"
+tick 105
+close BarbassaultOverCol.BARBASSAULT_COLLECTOR_HORN_TEXT
+varbit BARBASSAULT_POINTS_COLLECTOR_BASE 170
+widget BarbassaultWavecomplete.ROOT_MODEL0
+tick
+close BarbassaultWavecomplete.ROOT_MODEL0
+tick 20
+chat GAMEMESSAGE "---- Wave: 6 ----"
+widget BarbassaultOverCol.BARBASSAULT_COLLECTOR_HORN_TEXT text "Collector"
+tick 106
+close BarbassaultOverCol.BARBASSAULT_COLLECTOR_HORN_TEXT
+varbit BARBASSAULT_POINTS_COLLECTOR_BASE 180
+widget BarbassaultWavecomplete.ROOT_MODEL0
+tick
+close BarbassaultWavecomplete.ROOT_MODEL0
+tick 20
+chat GAMEMESSAGE "---- Wave: 7 ----"
+widget BarbassaultOverCol.BARBASSAULT_COLLECTOR_HORN_TEXT text "Collector"
+tick 107
+close BarbassaultOverCol.BARBASSAULT_COLLECTOR_HORN_TEXT
+varbit BARBASSAULT_POINTS_COLLECTOR_BASE 190
+widget BarbassaultWavecomplete.ROOT_MODEL0
+tick
+close BarbassaultWavecomplete.ROOT_MODEL0
+tick 20
+chat GAMEMESSAGE "---- Wave: 8 ----"
+widget BarbassaultOverCol.BARBASSAULT_COLLECTOR_HORN_TEXT text "Collector"
+tick 108
+close BarbassaultOverCol.BARBASSAULT_COLLECTOR_HORN_TEXT
+varbit BARBASSAULT_POINTS_COLLECTOR_BASE 200
+widget BarbassaultWavecomplete.ROOT_MODEL0
+tick
+close BarbassaultWavecomplete.ROOT_MODEL0
+tick 20
+chat GAMEMESSAGE "---- Wave: 9 ----"
+widget BarbassaultOverCol.BARBASSAULT_COLLECTOR_HORN_TEXT text "Collector"
+tick 109
+close BarbassaultOverCol.BARBASSAULT_COLLECTOR_HORN_TEXT
+varbit BARBASSAULT_POINTS_COLLECTOR_BASE 210
+widget BarbassaultWavecomplete.ROOT_MODEL0
+tick
+close BarbassaultWavecomplete.ROOT_MODEL0
+tick 20
+expect step = "Wave 10 next: the Penance Queen"
+expect lines.note ~ "Wave 10 of 10"
+chat GAMEMESSAGE "---- Wave: 10 ----"
+widget BarbassaultOverCol.BARBASSAULT_COLLECTOR_HORN_TEXT text "Collector"
+tick 250
+expect step = "Wave 10 as collector"
+close BarbassaultOverCol.BARBASSAULT_COLLECTOR_HORN_TEXT
+varbit BARBASSAULT_POINTS_COLLECTOR_BASE 290
+varbit BARBASSAULT_POINTS_ATTACKER_BASE 405
+varbit BARBASSAULT_POINTS_DEFENDER_BASE 305
+varbit BARBASSAULT_POINTS_HEALER_BASE 385
+widget BarbassaultWavecomplete.ROOT_MODEL0
+tick
+close BarbassaultWavecomplete.ROOT_MODEL0
+tick 5
+# Kept: ten waves won as collector, 170 collector points and 5 in each other role.
+expect saved.assault.kept ~ ",5,170,5,5,1C101d/2C103d/"
+expect saved.assault.kept ~ "/10C251d"
+expect stat.Full_games = "1"
+expect stat.Waves_won = "10"
+expect stat.Points = "185"
+expect supply.headline ~ "Quickest full game: "
+# Collector 85 short now, defender 70: half a game at your own 170 a collector game, most of one at
+# the queen's 80 for defender, so defender first; then one collector game. The time at your pace.
+expect step = "Play defender next"
+expect detail ~ "70 short · at most 2 games, "
+expect pick.current = "Defender 1 game"
+expect goal = "1345/1500"
+expect goal.pieces ~ "A Penance Queen kill DONE"
+expect gauge.Defender = "305/375"
+

@@ -25,6 +25,7 @@ import net.runelite.api.TileObject;
  * names; setting name titheFarm), {@code artefacts level N} (the Thieving level to work toward when stealing artefacts;
  * setting names stealingArtefacts and artefactsPatrols), {@code valuables level N} (the same for stealing valuables;
  * setting names stealingValuables and valuablesOwners), setting names roguesDen and roguesDenTraps (the Rogues' Den),
+ * {@code assault reward REWARD|none} (Barbarian Assault, by {@code Assault.Reward} name; setting name barbarianAssault),
  * {@code mixology plan ALL|PER_PASTE}, {@code mixology reward REWARD|none} and {@code mixology cue SPOTANIM} (a Mastering
  * Mixology setting, or a spot animation appearing, by its {@code SpotanimID} name; setting names mixology and mixologyCues),
  * {@code bank ITEM COUNT} (the bank as last seen), {@code teleport "Name" "Source" X Y SECONDS carried|banked},
@@ -100,6 +101,7 @@ final class PilotRig implements Rig
 		settings.put("valuablesOwners", true);
 		settings.put("roguesDen", true);
 		settings.put("roguesDenTraps", true);
+		settings.put("barbarianAssault", true);
 		pilots = new Pilots(game.client(), null, c -> { }, new FieldNotes(() -> null, new Gson()),
 			bests::get, bests::put, game::price, store::get, store::put, () -> bank);
 		pilots.atlas(() -> teleports == null ? null : com.codex.minigamepilot.core.WayfinderAtlas.of(walkPace, teleports));
@@ -143,6 +145,16 @@ final class PilotRig implements Rig
 				artefacts();
 				valuables();
 				den();
+				assault();
+				return true;
+			case "assault":
+				// assault reward REWARD|none
+				if (!"reward".equals(args.get(0)))
+				{
+					throw new IllegalArgumentException("assault reward REWARD|none");
+				}
+				assaultReward = "none".equals(args.get(1)) ? null : com.codex.minigamepilot.core.Assault.Reward.valueOf(args.get(1));
+				assault();
 				return true;
 			case "valuables":
 				// valuables level N
@@ -339,6 +351,13 @@ final class PilotRig implements Rig
 				throw new IllegalArgumentException("No ItemID." + name);
 			}
 		}
+	}
+
+	private com.codex.minigamepilot.core.Assault.Reward assaultReward = com.codex.minigamepilot.core.Assault.Reward.FIGHTER_TORSO;
+
+	private void assault()
+	{
+		pilots.barbarianAssault(settings.get("barbarianAssault"), assaultReward);
 	}
 
 	private void den()
