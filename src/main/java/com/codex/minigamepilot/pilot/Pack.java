@@ -52,6 +52,23 @@ final class Pack
 		return bank == null ? -1 : count(bank, ids);
 	}
 
+	/** What the inventory holds, by item id, stacks counted in full. */
+	java.util.Map<Integer, Integer> contents()
+	{
+		java.util.Map<Integer, Integer> out = new java.util.HashMap<>();
+		if (inventory != null)
+		{
+			for (Item i : inventory)
+			{
+				if (i.getId() > 0 && i.getQuantity() > 0)
+				{
+					out.merge(i.getId(), i.getQuantity(), Integer::sum);
+				}
+			}
+		}
+		return out;
+	}
+
 	/** Empty inventory slots. */
 	int free()
 	{

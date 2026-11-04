@@ -1,6 +1,6 @@
 # Codex Minigame Pilot
 
-**One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes, Guardians of the Rift, Tempoross, the Giants' Foundry, Mastering Mixology, Vale Totems, the Tithe Farm and stealing artefacts.** The Pilot watches the minigame you are in and always shows the single thing to do next: what to click, lit in gold in the world, the path there drawn on the ground and the minimap, and a line on why. You still do every click. It only reads the game and draws.
+**One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes, Guardians of the Rift, Tempoross, the Giants' Foundry, Mastering Mixology, Vale Totems, the Tithe Farm, stealing artefacts and stealing valuables.** The Pilot watches the minigame you are in and always shows the single thing to do next: what to click, lit in gold in the world, the path there drawn on the ground and the minimap, and a line on why. You still do every click. It only reads the game and draws.
 
 It is part of the **Codex** suite of RuneLite plugins and shares their look: warm ink, aged gold and the game's own fonts.
 
@@ -139,6 +139,21 @@ It is part of the **Codex** suite of RuneLite plugins and shares their look: war
   <img src="docs/screenshots/artefacts-plaque-hot.png" alt="Plaque with an artefact in hand">
 </p>
 
+### Stealing valuables (Civitas illa Fortis house thieving)
+- **The distracted citizen, then the keys.** When the game says *"You notice an urchin distract a wealthy citizen nearby."* the step is that citizen, lit gold: the wiki says every pick succeeds for about twenty seconds. The citizen is the one the urchin is interacting with, else the one beside it, as the wiki names no marker. Between distractions the panel counts down to the next (the wiki's 84 to 99 seconds) and says when to wait by the citizens instead.
+- **The vacant house, when it is safe.** Only one house is vacant at a time and its door is a *Locked Door*. The Pilot names it by its owner (Lavinia, Victor or Caius, learned from who stands by each door), waits while the owner is still about the door (the game turns you back), and from the moment it saw the door lock counts the wiki's 180 to 190 seconds until the owner is back. A house with too little time left is not worth a key; an urchin can tell you the next for 15 valuables.
+- **Inside: search, then the window.** The step is the nearest chest, wardrobe or jewellery case, then "keep searching" while valuables come, the flashing arrow when something shines (14 valuables and 630 xp, gone in about seven seconds), and the open window (the way out the wiki gives) as soon as the owner may be back or the whistle sounds: caught inside, about 90% of the house's valuables go. The windows are marked quietly all the while, and the owner near you is outlined in ember (*Mark homeowners*).
+- **Every haul kept and valued.** Each house is kept per account: its owner, time inside, valuables taken and kept (a catch shows as "Caught: 11 of 109"), jewellery and anything else at RuneLite's Grand Exchange prices, and the experience of the house and of the whole round since the last one, pickpocketing included. Valuables are valued at what Oriana pays you: 55, until a trade-in shows she pays you 65 (Gladiator rank). The panel shows coins and experience an hour at your own pace beside the wiki's, your best haul, your average at each house, and a Thieving level in valuables and time (*Stealing valuables level*).
+
+<p align="center">
+  <img src="docs/screenshots/valuables-panel-door.png" width="225" alt="Stealing valuables: Lavinia's locked door with her time away">
+  <img src="docs/screenshots/valuables-panel-window.png" width="225" alt="Stealing valuables: out by the window as the owner comes back">
+</p>
+<p align="center">
+  <img src="docs/screenshots/valuables-plaque-distracted.png" alt="Plaque at a distracted citizen">
+  <img src="docs/screenshots/valuables-plaque-window.png" alt="Plaque when the owner is coming back">
+</p>
+
 ### Tempoross
 - **One step through the storm.** Catch harpoonfish, cook them at the shrine, fill the ammunition crate, and harpoon the spirit pool while Tempoross is down. Each step is lit in the world, the fishing spot, the shrine, the crate or the pool, with its path and a line of why.
 - **The double spot first.** When a spot of jumping harpoonfish is up, that is where you fish, even with raw fish still to cook: it can give two a catch, and the wiki's strategies say to fish there wherever possible.
@@ -261,7 +276,7 @@ All are read only, never written, and everything works without them.
 
 ## Your data
 
-Your bank's goal items and supplies as last seen, your Mahogany Homes points, your Guardians of the Rift points, your last thirty Tempoross games, your last fifty Giants' Foundry swords and the moulds the jig has shown you own, your last hundred Mastering Mixology deliveries, your last hundred Vale totems with where each totem site stands and the order you visit them, your last hundred Tithe Farm sacks and the order you plant your round in, your last two hundred artefact trips with where each house's drawers and Captain Khaled were seen, your last fifty Mahogany Homes contracts, the rewards you own, your round bests, your last and best visit to each minigame and what your contracts take are saved in your RuneLite profile, per account. A damaged or hand-edited value is read as far as it can be and the rest left out, so it never stops the Pilot.
+Your bank's goal items and supplies as last seen, your Mahogany Homes points, your Guardians of the Rift points, your last thirty Tempoross games, your last fifty Giants' Foundry swords and the moulds the jig has shown you own, your last hundred Mastering Mixology deliveries, your last hundred Vale totems with where each totem site stands and the order you visit them, your last hundred Tithe Farm sacks and the order you plant your round in, your last two hundred artefact trips with where each house's drawers and Captain Khaled were seen, your last two hundred house hauls with where each house's door and Oriana were seen and what Oriana pays you a valuable, your last fifty Mahogany Homes contracts, the rewards you own, your round bests, your last and best visit to each minigame and what your contracts take are saved in your RuneLite profile, per account. A damaged or hand-edited value is read as far as it can be and the rest left out, so it never stops the Pilot.
 
 ## Field notes
 
@@ -273,9 +288,9 @@ Codex Minigame Pilot is guidance only. It reads what the game already shows you 
 
 ## Settings that matter
 
-- **Minigames:** turn each of the ten off; *Mark patrols* for stealing artefacts; *Tithe plants a round* for the Tithe Farm; *Vale totem wood* and *Claim offerings as you pass* for Vale Totems; *Mixology orders to make* (every order, or the most resin per paste) and *Mixology station cues*; *Cook before loading* and *Load what you hold at storm* (80%) for Tempoross; *Fragments before first craft* for Guardians of the Rift (120 by default); fix the *Blast Furnace bar* instead of letting the Pilot work it out; *Top up coffer below* (2,500 coins by default).
+- **Minigames:** turn each of the eleven off; *Mark patrols* for stealing artefacts; *Mark homeowners* for stealing valuables; *Tithe plants a round* for the Tithe Farm; *Vale totem wood* and *Claim offerings as you pass* for Vale Totems; *Mixology orders to make* (every order, or the most resin per paste) and *Mixology station cues*; *Cook before loading* and *Load what you hold at storm* (80%) for Tempoross; *Fragments before first craft* for Guardians of the Rift (120 by default); fix the *Blast Furnace bar* instead of letting the Pilot work it out; *Top up coffer below* (2,500 coins by default).
 - **Guidance:** *Step plaque*, *Path on the ground*, *Path on minimap*, *Action labels*, *Mark what comes after*, *Hint arrow*, *World map marker* and *Low planks in chat* for Mahogany Homes, and *Visit summary in chat*. All on by default.
-- **Goals:** what Motherlode nuggets and Mahogany Homes points are saved for, the *Mixology reward* your resin is saved for, the *Vale Totems reward* your research points are saved for, the *Tithe Farm reward* your points are saved for, the *Stealing artefacts level* (0 for the next), the *Blast Furnace level* to work toward (0 for the next), *Show goals* and *Reward road*.
+- **Goals:** what Motherlode nuggets and Mahogany Homes points are saved for, the *Mixology reward* your resin is saved for, the *Vale Totems reward* your research points are saved for, the *Tithe Farm reward* your points are saved for, the *Stealing artefacts level* and *Stealing valuables level* (0 for the next), the *Blast Furnace level* to work toward (0 for the next), *Show goals* and *Reward road*.
 - **Tick coach:** *Tick coach*, on by default.
 - **Field notes:** *Keep field notes*, off by default.
 

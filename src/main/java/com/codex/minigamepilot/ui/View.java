@@ -23,7 +23,8 @@ public final class View
 		MIXOLOGY("Mastering Mixology"),
 		TOTEMS("Vale Totems"),
 		TITHE("Tithe Farm"),
-		ARTEFACTS("Stealing Artefacts");
+		ARTEFACTS("Stealing Artefacts"),
+		HOUSES("Stealing Valuables");
 
 		private final String title;
 
@@ -510,6 +511,23 @@ public final class View
 		/** You carry an artefact: the patrols matter. */
 		final boolean hot;
 
+		/** What the key calls the ringed house, the marks and the teal dot: "Task", "Patrol" and "Khaled" unless renamed. */
+		String targetName = "Task";
+		String patrolName = "Patrol";
+		String keeperName = "Khaled";
+		/** Name the marks in the key even when there are none. */
+		boolean keyPatrols = true;
+
+		/** The same map for another place: what the ringed house, the marks and the teal dot are called. */
+		public District named(String target, String patrol, String keeper)
+		{
+			targetName = target;
+			patrolName = patrol;
+			keeperName = keeper;
+			keyPatrols = false;
+			return this;
+		}
+
 		public District(String title, String note, List<Place> houses, List<Patrol> patrols, int[] khaled, int[] you, boolean hot)
 		{
 			this.title = title;
@@ -531,6 +549,11 @@ public final class View
 				{
 					t = p.label;
 				}
+			}
+			if (!keyPatrols)
+			{
+				return "target " + t + ", " + houses.size() + (houses.size() == 1 ? " house" : " houses") + ", " + patrols.size() + " "
+					+ patrolName.toLowerCase(java.util.Locale.ROOT) + (patrols.size() == 1 ? "" : "s") + (khaled != null ? ", " + keeperName : "");
 			}
 			return "target " + t + ", " + patrols.size() + (patrols.size() == 1 ? " patrol" : " patrols") + (khaled != null ? ", Khaled" : "");
 		}
@@ -603,6 +626,8 @@ public final class View
 			"The seed your Farming grows, the next patch to plant, water or harvest read from the patches themselves, the water you carry, and your points towards a reward."));
 		v.brief(new Brief(Activity.ARTEFACTS, null,
 			"The house Captain Khaled names, its ladder and drawers lit, the patrols marked on the way back, and every artefact kept with experience and coins an hour."));
+		v.brief(new Brief(Activity.HOUSES, null,
+			"The citizen an urchin has distracted, the vacant house once its owner has gone and how long you have, the open window out, and every haul kept with coins and experience an hour."));
 		return v;
 	}
 
@@ -837,7 +862,7 @@ public final class View
 		}
 		if (district != null)
 		{
-			b.append("|district").append(district.title).append(district.note).append(district.hot);
+			b.append("|district").append(district.title).append(district.note).append(district.hot).append(district.keeperName);
 			for (District.Place p : district.houses)
 			{
 				b.append(p.x).append(',').append(p.y).append(p.target ? '*' : '.').append(p.seen ? '+' : '.');

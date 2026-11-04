@@ -23,7 +23,8 @@ import net.runelite.api.TileObject;
  * {@code totems wood WOOD|BEST} and {@code totems reward REWARD|none} (Vale Totems; setting names valeTotems and totemsClaim),
  * {@code tithe plants PLAN} and {@code tithe reward REWARD|none} (the Tithe Farm, by {@code Tithe.Plan} and {@code Tithe.Reward}
  * names; setting name titheFarm), {@code artefacts level N} (the Thieving level to work toward when stealing artefacts;
- * setting names stealingArtefacts and artefactsPatrols),
+ * setting names stealingArtefacts and artefactsPatrols), {@code valuables level N} (the same for stealing valuables;
+ * setting names stealingValuables and valuablesOwners),
  * {@code mixology plan ALL|PER_PASTE}, {@code mixology reward REWARD|none} and {@code mixology cue SPOTANIM} (a Mastering
  * Mixology setting, or a spot animation appearing, by its {@code SpotanimID} name; setting names mixology and mixologyCues),
  * {@code bank ITEM COUNT} (the bank as last seen), {@code teleport "Name" "Source" X Y SECONDS carried|banked},
@@ -66,6 +67,8 @@ final class PilotRig implements Rig
 	private com.codex.minigamepilot.core.Tithe.Reward titheReward;
 	/** The Thieving level stealing artefacts works toward, as the script sets it. */
 	private int artefactsLevel;
+	/** The Thieving level stealing valuables works toward, as the script sets it. */
+	private int valuablesLevel;
 	/** The bank as last seen, set by {@code bank ITEM COUNT}; null until the script sets one. */
 	private com.codex.minigamepilot.core.BankStock bank;
 	private final Map<Integer, Long> bankItems = new HashMap<>();
@@ -93,6 +96,8 @@ final class PilotRig implements Rig
 		settings.put("titheFarm", true);
 		settings.put("stealingArtefacts", true);
 		settings.put("artefactsPatrols", true);
+		settings.put("stealingValuables", true);
+		settings.put("valuablesOwners", true);
 		pilots = new Pilots(game.client(), null, c -> { }, new FieldNotes(() -> null, new Gson()),
 			bests::get, bests::put, game::price, store::get, store::put, () -> bank);
 		pilots.atlas(() -> teleports == null ? null : com.codex.minigamepilot.core.WayfinderAtlas.of(walkPace, teleports));
@@ -134,6 +139,16 @@ final class PilotRig implements Rig
 				totems();
 				tithe();
 				artefacts();
+				valuables();
+				return true;
+			case "valuables":
+				// valuables level N
+				if (!"level".equals(args.get(0)))
+				{
+					throw new IllegalArgumentException("valuables level N");
+				}
+				valuablesLevel = Integer.parseInt(args.get(1));
+				valuables();
 				return true;
 			case "artefacts":
 				// artefacts level N
@@ -321,6 +336,11 @@ final class PilotRig implements Rig
 				throw new IllegalArgumentException("No ItemID." + name);
 			}
 		}
+	}
+
+	private void valuables()
+	{
+		pilots.valuables(settings.get("stealingValuables"), settings.get("valuablesOwners"), valuablesLevel);
 	}
 
 	private void artefacts()

@@ -43,6 +43,8 @@ public final class Pilots
 	private volatile boolean useTithe = true;
 	private final ArtefactsPilot artefacts = new ArtefactsPilot();
 	private volatile boolean useArtefacts = true;
+	private final HousesPilot valuables = new HousesPilot();
+	private volatile boolean useValuables = true;
 	private final Coach coach;
 	private final Recorder recorder;
 	private final IntUnaryOperator price;
@@ -83,12 +85,14 @@ public final class Pilots
 		totems.setStore(load, saveKey);
 		tithe.setStore(load, saveKey);
 		artefacts.setStore(load, saveKey);
+		valuables.setStore(load, saveKey);
+		valuables.setPrice(price);
 		this.coach = new Coach(loadBests, saveBests);
 		this.recorder = new Recorder(notes);
 		this.scene = new SceneIndex(client, id -> MotherlodePilot.isWatched(id) || FurnacePilot.isWatched(id) || HomesPilot.isWatched(id)
 			|| RiftPilot.isWatched(id) || StormPilot.isWatched(id) || FoundryPilot.isWatched(id)
 			|| MixologyPilot.isWatched(id) || TotemsPilot.isWatched(id) || TithePilot.isWatched(id)
-			|| ArtefactsPilot.isWatched(id));
+			|| ArtefactsPilot.isWatched(id) || HousesPilot.isWatched(id));
 		this.homes = new HomesPilot(saved, save, load, saveKey);
 		homes.readers(null, stock);
 	}
@@ -177,6 +181,13 @@ public final class Pilots
 		artefacts.settings(patrols, level);
 	}
 
+	/** The "Stealing valuables" settings: on, mark the homeowners, and the Thieving level to work toward (0 for the next). */
+	public void valuables(boolean on, boolean owners, int level)
+	{
+		useValuables = on;
+		valuables.settings(owners, level);
+	}
+
 	/** A spot animation appeared in the scene: Mastering Mixology's station cues. */
 	public void spotanim(int id)
 	{
@@ -229,6 +240,7 @@ public final class Pilots
 			totems.newAccount();
 			tithe.newAccount();
 			artefacts.newAccount();
+			valuables.newAccount();
 			said.clear();
 			unsaid.clear();
 		}
@@ -259,6 +271,7 @@ public final class Pilots
 		rift.chat(message);
 		storm.chat(message);
 		foundry.chat(message);
+		valuables.chat(message);
 	}
 
 	/** @param bankCoal coal in the open bank, or -1 when the bank is closed */
@@ -406,6 +419,13 @@ public final class Pilots
 			state = artefacts.lastState;
 			units = artefacts.units();
 		}
+		else if (useValuables && valuables.active(client, scene, npcs()))
+		{
+			activity = View.Activity.HOUSES;
+			flight = valuables.fly(client, scene, npcs(), now);
+			state = valuables.lastState;
+			units = valuables.units();
+		}
 		else
 		{
 			activity = View.Activity.NONE;
@@ -450,6 +470,10 @@ public final class Pilots
 			else if (last == View.Activity.ARTEFACTS)
 			{
 				artefacts.left();
+			}
+			else if (last == View.Activity.HOUSES)
+			{
+				valuables.left(now);
 			}
 			last = activity;
 		}
@@ -528,6 +552,11 @@ public final class Pilots
 		{
 			// Logging out takes the artefact: one carried is lost.
 			artefacts.relogged(now);
+		}
+		else if (last == View.Activity.HOUSES)
+		{
+			// Logging out and in leaves a house with what you hold.
+			valuables.relogged(now);
 		}
 		motherlode.relogged();
 		furnace.relogged();
@@ -648,6 +677,7 @@ public final class Pilots
 		v.brief(totems.brief());
 		v.brief(tithe.brief());
 		v.brief(artefacts.brief());
+		v.brief(valuables.brief());
 		return v;
 	}
 }

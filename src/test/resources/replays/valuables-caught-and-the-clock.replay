@@ -1,0 +1,117 @@
+# Stealing valuables when it goes wrong: below 50 Thieving; the game turning you back while the
+# owner is near; the owner's clock running down inside (out by the window before the whistle);
+# caught inside, kept as caught with what was left; a house with too little time not worth a key;
+# an urchin to ask; being escorted out; and logging out inside, which leaves the house with the haul.
+#
+# Facts (OSRS wiki, Stealing valuables; Valuables):
+#  - "requiring level 50 Thieving and completion of Children of the Sun to participate."
+#  - "You notice the owner is still near the door and decide not to enter."
+#  - "The homeowner will return 180–190 seconds after they left the house"
+#  - caught inside, "causing them to lose around 90% of the valuables stolen from that house."
+#  - "Players can also pay 15 valuables to several urchins around this area" to learn the vacant house
+#  - "You are escorted out of the house as the owner has locked the door."
+#  - "it is possible to avoid the penalty by either dropping the valuables or logging out and in
+#    to automatically leave the home."
+include /replays/scenes/valuables.scene
+skill HITPOINTS 10
+skill THIEVING 45
+items INV set COINS 100 VARLAMORE_THIEVING_HOUSE_KEY 2
+tick
+expect activity = HOUSES
+expect step = "Stealing valuables needs 50 Thieving"
+expect detail = "Yours is 45; it also needs Children of the Sun"
+skill THIEVING 70
+tick
+
+# Lavinia locks up and walks off; the game still turns you back.
+remove lavDoor
+object VARLAMORE_THIEVING_HOUSE_DOOR_LOCKED 1660 3090 as lavLocked
+remove lavinia
+npc VARLAMORE_THIEVING_HOUSE_OWNER_1 "Lavinia" 1690 3070 as lavinia
+at 1660 3089
+tick
+expect step = "Open the locked door of Lavinia's house"
+chat GAMEMESSAGE "You notice the owner is still near the door and decide not to enter."
+tick
+expect step = "Lavinia is still by the door"
+tick 6
+expect step = "Open the locked door of Lavinia's house"
+
+# In; the clock runs down while searching.
+items INV set COINS 100 VARLAMORE_THIEVING_HOUSE_KEY 1
+at 1660 3092
+tick
+expect step = "Search a chest, wardrobe or jewellery case"
+expect detail = "Lavinia back in 176-186s"
+items INV set COINS 100 VARLAMORE_THIEVING_HOUSE_KEY 1 VARLAMORE_THIEVING_HOUSE_VALUABLE 100
+xp THIEVING 742000
+tick 265
+expect step = "Leave by the open window now"
+expect detail ~ "Lavinia may be back in "
+expect target = WINDOW
+
+# Too slow: she catches you, and about 90% goes.
+items INV set COINS 100 VARLAMORE_THIEVING_HOUSE_KEY 1 VARLAMORE_THIEVING_HOUSE_VALUABLE 10
+remove lavLocked
+object VARLAMORE_THIEVING_HOUSE_DOOR_OPEN 1660 3090 as lavDoor
+at 1660 3088
+tick 2
+expect saved.valuables.kept ~ ",LAVINIA,"
+expect saved.valuables.kept ~ ",100,10,"
+expect supply.headline = "Best: 10 valuables at Lavinia's"
+expect step = "Find the house with a Locked Door"
+
+# Caius' house is vacant, but nearly over: not worth the key. Lucia knows the next.
+items INV set COINS 100 VARLAMORE_THIEVING_HOUSE_KEY 1 VARLAMORE_THIEVING_HOUSE_VALUABLE 30
+at 1663 3087
+tick
+remove caiDoor
+object VARLAMORE_THIEVING_HOUSE_DOOR_LOCKED 1630 3125 as caiLocked
+tick 260
+expect step = "Ask the urchin which house is vacant"
+expect npc = "Lucia"
+expect detail = "Too little time left at this one; 15 valuables"
+items INV set COINS 100 VARLAMORE_THIEVING_HOUSE_KEY 1
+tick
+expect step = "Pickpocket a wealthy citizen"
+expect detail = "Too little time at Caius' house: keep the key"
+
+# Caius is home again, and Victor goes out: his house, just locked.
+remove caiLocked
+object VARLAMORE_THIEVING_HOUSE_DOOR_OPEN 1630 3125 as caiDoor
+remove vicDoor
+object VARLAMORE_THIEVING_HOUSE_DOOR_LOCKED 1625 3080 as vicLocked
+remove victor
+npc VARLAMORE_THIEVING_HOUSE_OWNER_2 "Victor" 1640 3060 as victor
+at 1625 3079
+tick
+expect step = "Open the locked door of Victor's house"
+expect pick.current = "Victor's house Vacant"
+
+# In with the last key, and escorted out: the haul is kept as it stands.
+items INV set COINS 100
+at 1625 3081
+tick
+expect place = "Civitas illa Fortis · in Victor's house"
+chat GAMEMESSAGE "You are escorted out of the house as the owner has locked the door."
+tick
+expect saved.valuables.kept ~ ",VICTOR,"
+expect place = "Civitas illa Fortis · Victor out"
+expect step = "Pickpocket a wealthy citizen"
+
+# A key again, back in, and a logout: leaving with the haul.
+items INV set COINS 100 VARLAMORE_THIEVING_HOUSE_KEY 1
+at 1625 3079
+tick
+items INV set COINS 100
+at 1625 3081
+tick
+items INV set COINS 100 VARLAMORE_THIEVING_HOUSE_VALUABLE 40
+tick
+expect step = "Keep searching: valuables keep coming"
+state LOGIN_SCREEN
+state LOGGED_IN
+tick
+expect saved.valuables.kept ~ ",VICTOR,"
+expect saved.valuables.kept ~ ",40,40,"
+expect stat.Houses = "3"
