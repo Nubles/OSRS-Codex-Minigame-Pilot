@@ -1,0 +1,41 @@
+# A schematic Temple of the Eye (Guardians of the Rift) for replays. Not the real map: just the
+# things the Pilot points at, laid out so every walk is short and open.
+#
+# Facts:
+#  - the temple is map region 14484 (x 3584-3647, y 9472-9535), as RuneLite's own loot tracker
+#    (GUARDIANS_OF_THE_RIFT_REGION) and Discord plugin have it; every tile the player uses here is in it
+#  - object, NPC and item names are RuneLite's (net.runelite.api.gameval); the portal guardians
+#    are GOTR_PORTAL_<RUNE>, "Guardian of Air" and so on, the workbench GOTR_WORKBENCH, the
+#    deposit pool GOTR_DEPOSITCHEST, the uncharged cells GOTR_UNCHARGED_CELLS, the guardian
+#    parts GOTR_ESSENCE_TIER_1 and the Great Guardian NPC GOTR_GREAT_GUARDIAN
+#  - cell tiles are ground objects in the game; here a game object stands in (the Pilot indexes both)
+#
+#   y 9520  air mind water earth fire body cosmic chaos nature law death blood   (portal guardians)
+#   y 9508                  Great Guardian
+#   y 9496  guardianParts              cellTile
+#   y 9488  cellTable   workbench  depositPool
+#        x 3592                                   3640
+
+scene 3570 9460
+
+object GOTR_PORTAL_AIR 3592 9520 as portalAir
+object GOTR_PORTAL_MIND 3596 9520 as portalMind
+object GOTR_PORTAL_WATER 3600 9520 as portalWater
+object GOTR_PORTAL_EARTH 3604 9520 as portalEarth
+object GOTR_PORTAL_FIRE 3608 9520 as portalFire
+object GOTR_PORTAL_BODY 3612 9520 as portalBody
+object GOTR_PORTAL_COSMIC 3616 9520 as portalCosmic
+object GOTR_PORTAL_CHAOS 3620 9520 as portalChaos
+object GOTR_PORTAL_NATURE 3624 9520 as portalNature
+object GOTR_PORTAL_LAW 3628 9520 as portalLaw
+object GOTR_PORTAL_DEATH 3632 9520 as portalDeath
+object GOTR_PORTAL_BLOOD 3636 9520 as portalBlood
+
+npc GOTR_GREAT_GUARDIAN "The Great Guardian" 3614 9508 3 as greatGuardian
+
+object GOTR_ESSENCE_TIER_1 3594 9496 2 2 as guardianParts
+object GOTR_CELL_TILE_INACTIVE 3626 9496 as cellTile
+
+object GOTR_UNCHARGED_CELLS 3600 9488 as cellTable
+object GOTR_WORKBENCH 3610 9488 2 2 as workbench
+object GOTR_DEPOSITCHEST 3618 9488 2 2 as depositPool

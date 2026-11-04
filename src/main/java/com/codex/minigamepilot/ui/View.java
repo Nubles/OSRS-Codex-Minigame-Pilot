@@ -16,7 +16,8 @@ public final class View
 		NONE("Minigame Pilot"),
 		MOTHERLODE("Motherlode Mine"),
 		FURNACE("Blast Furnace"),
-		HOMES("Mahogany Homes");
+		HOMES("Mahogany Homes"),
+		RIFT("Guardians of the Rift");
 
 		private final String title;
 
@@ -416,6 +417,8 @@ public final class View
 			"Coal trips worked out ahead, the whole round in order, the coffer watched, and what each bar pays."));
 		v.brief(new Brief(Activity.HOMES, null,
 			"The planks to bring, the way to the client, each piece of furniture in walking order, and what a contract costs you."));
+		v.brief(new Brief(Activity.RIFT, null,
+			"Fragments to mine, essence to craft, the best open altar for your levels and points, then hand in."));
 		return v;
 	}
 
@@ -500,6 +503,29 @@ public final class View
 		linesNote = note;
 		lines.addAll(list == null ? Collections.emptyList() : list);
 		return this;
+	}
+
+	/**
+	 * What the tiles and gauges show, by label: a tile's value and a gauge's "value/max", plus
+	 * the choice card's headline as "pick". For replays and tests.
+	 */
+	public java.util.Map<String, String> readings()
+	{
+		java.util.Map<String, String> r = new java.util.TreeMap<>();
+		for (Stat s : stats)
+		{
+			r.put("stat." + s.label.replace(' ', '_'), s.value);
+		}
+		for (Gauge g : gauges)
+		{
+			r.put("gauge." + g.label.replace(' ', '_'), g.value + "/" + g.max);
+		}
+		if (pick != null)
+		{
+			r.put("pick", pick.trailing);
+			r.put("pick.note", pick.note);
+		}
+		return r;
 	}
 
 	/** A summary of everything shown, so the panel is only rebuilt when something on it changes. */

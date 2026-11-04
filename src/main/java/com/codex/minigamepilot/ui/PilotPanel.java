@@ -116,7 +116,7 @@ public class PilotPanel extends PluginPanel
 
 		if (!v.gauges.isEmpty())
 		{
-			body.add(new SectionHeader(v.activity == View.Activity.FURNACE ? "The furnace" : v.activity == View.Activity.HOMES ? "Materials" : "The sack"));
+			body.add(new SectionHeader(v.activity == View.Activity.FURNACE ? "The furnace" : v.activity == View.Activity.HOMES ? "Materials" : v.activity == View.Activity.RIFT ? "The rift" : "The sack"));
 			Card card = new Card(new BorderLayout());
 			StackPanel gauges = new StackPanel(6, 0);
 			for (View.Gauge gauge : v.gauges)
@@ -367,7 +367,7 @@ public class PilotPanel extends PluginPanel
 		JPanel tiles = new JPanel(new GridLayout(1, 2, 6, 0));
 		tiles.setOpaque(false);
 		tiles.add(new StatTile(Figures.count(t.perHour), "Loops", "an hour", Theme.GOLD));
-		tiles.add(new StatTile(t.xpPerHour < 0 ? "-" : Figures.count(t.xpPerHour), t.xpLabel, "an hour", Theme.GREEN));
+		tiles.add(new StatTile(t.xpPerHour < 0 ? "-" : Figures.count(t.xpPerHour), t.xpLabel, t.xpPerHour < 0 ? "none yet" : "an hour", Theme.GREEN));
 		stack.add(tiles);
 		card.add(stack, BorderLayout.CENTER);
 		return card;

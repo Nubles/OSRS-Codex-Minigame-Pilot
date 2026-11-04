@@ -1,0 +1,75 @@
+# Guardians of the Rift: picking the open altar that is right for your levels, quests and points.
+#
+# Facts (OSRS wiki, Guardians of the Rift, "Runic altars"): air 1 and water 5 are elemental;
+# cosmic 27 (needs Lost City), chaos 35 and death 65 (needs Mourning's End Part II) are catalytic.
+# The rule (Guardians of the Rift/Strategies): "For even points, prioritise crafting at the blood
+# and death altars, followed by fire and earth. When none of these are active, craft at whichever
+# type you have the fewest points for." One point of each type is spent on every search of the
+# Rewards Guardian (Rewards Guardian page), and searching says "You found some loot:" (RuneLite's
+# loot tracker). The Check message's wording is as the Guardians of the Rift Helper reads it.
+include /replays/scenes/rift.scene
+skill RUNECRAFT 60
+items INV RUNE_PICKAXE 1
+items INV GOTR_CELL_UNCHARGED 1
+items INV GOTR_GUARDIAN_ESSENCE 26
+at 3610 9500
+widget GotrHud.CONTENT hidden false
+widget GotrHud.ELEMENTAL_PORTAL hidden false
+widget GotrHud.CATALYTIC_PORTAL hidden false
+
+# Air and death open at 60 Runecraft: death is the better altar, but not yet yours.
+hud elemental AIR
+hud catalytic DEATH
+tick 2
+expect step = "Enter the air altar"
+expect object = portalAir
+expect detail ~ "The death altar is not yours yet"
+expect pick = "Air"
+never step = "Enter the death altar"
+
+# 65 Runecraft is not enough on its own: death also needs Mourning's End Part II.
+skill RUNECRAFT 65
+tick
+expect step = "Enter the air altar"
+forget
+quest MOURNINGS_END_PART_II done
+tick
+expect step = "Enter the death altar"
+expect object = portalDeath
+expect detail ~ "Blood and death come first"
+expect detail ~ "overcharged cell"
+
+# A rotation: water and chaos. Neither is in the wiki's first four, and points are not known yet,
+# so the stronger cell (chaos, 35).
+hud elemental WATER
+hud catalytic CHAOS
+tick
+expect step = "Enter the chaos altar"
+expect detail ~ "Points not known yet"
+
+# The Rewards Guardian's Check says 120 elemental and 200 catalytic: elemental is behind, so water.
+chat MESBOX "You have 200 catalytic energy and 120 elemental energy."
+tick
+expect step = "Enter the water altar"
+expect object = portalWater
+expect detail = "Fewer elemental points · medium cell"
+expect saved.rift.points = "120:200"
+expect stat.Searches = "120"
+# Whole points, as the game reports them, and the balance said once, under the open altars.
+expect stat.Elemental_points = "120"
+expect pick.note = "Elemental runs out first: 120 searches, 80 catalytic to spare."
+varbit GOTR_ELEMENTAL_EARNED_THIS_GAME 470
+tick
+expect stat.Elemental_points = "120"
+expect pick.note ~ "This game adds about 4 and 0"
+
+# A search spends one of each.
+chat GAMEMESSAGE "You found some loot: 20 x Mist rune"
+tick
+expect saved.rift.points = "119:199"
+
+# Water against cosmic at 60 without Lost City: cosmic is shut, whatever the points.
+hud catalytic COSMIC
+tick
+expect step = "Enter the water altar"
+expect detail ~ "The cosmic altar is not yours yet"

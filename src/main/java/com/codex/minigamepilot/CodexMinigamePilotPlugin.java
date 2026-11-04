@@ -40,6 +40,8 @@ import net.runelite.api.events.GameObjectDespawned;
 import net.runelite.api.events.GameObjectSpawned;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
+import net.runelite.api.events.GroundObjectDespawned;
+import net.runelite.api.events.GroundObjectSpawned;
 import net.runelite.api.events.ItemContainerChanged;
 import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.events.MenuOptionClicked;
@@ -69,8 +71,8 @@ import net.runelite.client.util.Text;
 	name = "Codex Minigame Pilot",
 	internalName = "codex-minigame-pilot",
 	legacyDataDirectory = "codex-minigame-pilot",
-	description = "One clear next step for Motherlode Mine, Blast Furnace and Mahogany Homes: what to click, the path there, and why",
-	tags = {"motherlode", "mlm", "blast furnace", "mahogany homes", "construction", "mining", "smithing", "guide", "codex"}
+	description = "One clear next step for Motherlode Mine, Blast Furnace, Mahogany Homes and Guardians of the Rift: what to click, the path there, and why",
+	tags = {"motherlode", "mlm", "blast furnace", "mahogany homes", "construction", "mining", "smithing", "guardians of the rift", "gotr", "runecraft", "guide", "codex"}
 )
 public class CodexMinigamePilotPlugin extends Plugin
 {
@@ -166,6 +168,8 @@ public class CodexMinigamePilotPlugin extends Plugin
 		pilots.profile(configManager.getRSProfileKey());
 		pilots.upperHopper(config.upperHopper());
 		pilots.tickCoach(config.tickCoach());
+		pilots.rift(config.rift());
+		pilots.riftFragments(config.riftFragments());
 		goals = new GoalWatch(key -> configManager.getRSProfileConfiguration(CodexMinigamePilotConfig.GROUP, key),
 			(key, value) -> configManager.setRSProfileConfiguration(CodexMinigamePilotConfig.GROUP, key, value),
 			this::navigatorBoard);
@@ -236,6 +240,12 @@ public class CodexMinigamePilotPlugin extends Plugin
 		if (CodexMinigamePilotConfig.GROUP.equals(event.getGroup()) && "upperHopper".equals(event.getKey()) && pilots != null)
 		{
 			pilots.upperHopper(config.upperHopper());
+			return;
+		}
+		if (CodexMinigamePilotConfig.GROUP.equals(event.getGroup()) && ("rift".equals(event.getKey()) || "riftFragments".equals(event.getKey())) && pilots != null)
+		{
+			pilots.rift(config.rift());
+			pilots.riftFragments(config.riftFragments());
 			return;
 		}
 		if (CodexMinigamePilotConfig.GROUP.equals(event.getGroup()) && "tickCoach".equals(event.getKey()) && pilots != null)
@@ -473,6 +483,18 @@ public class CodexMinigamePilotPlugin extends Plugin
 	public void onDecorativeObjectDespawned(DecorativeObjectDespawned e)
 	{
 		pilots.scene().remove(e.getDecorativeObject());
+	}
+
+	@Subscribe
+	public void onGroundObjectSpawned(GroundObjectSpawned e)
+	{
+		pilots.scene().add(e.getGroundObject());
+	}
+
+	@Subscribe
+	public void onGroundObjectDespawned(GroundObjectDespawned e)
+	{
+		pilots.scene().remove(e.getGroundObject());
 	}
 
 	@Subscribe

@@ -17,7 +17,10 @@ import net.runelite.api.TileObject;
  * Runs the Minigame Pilot's three pilots on a replay, wired as the plugin wires them: the same
  * object, varbit, chat and game-state events, its settings, and its saved per-account state.
  *
- * <p>Commands it adds: {@code setting NAME on|off} (motherlode, furnace, homes, upperHopper),
+ * <p>Commands it adds: {@code setting NAME on|off} (motherlode, furnace, homes, upperHopper, rift, tickCoach),
+ * {@code fragments N} (fragments before the first Guardians of the Rift craft), {@code quest QUEST done|not}
+ * (by RuneLite's {@code Quest} name), {@code hud elemental|catalytic ALTAR|none} (the rune icon the
+ * Guardians of the Rift HUD shows for an open altar; the HUD component itself is a {@code widget}),
  * {@code saved KEY VALUE} to seed the account's saved state, and {@code profile NAME} for an
  * account login. Readings each tick: {@code activity}, {@code step} (its title), {@code verb},
  * {@code target}, {@code waiting}, {@code place}, {@code object} (the script's name for the
@@ -31,6 +34,12 @@ final class PilotRig implements Rig
 	private final Map<View.Activity, String> bests = new EnumMap<>(View.Activity.class);
 	private final Map<String, Boolean> settings = new HashMap<>();
 	private final Pilots pilots;
+	/** The last tick's guidance, for screenshots of a scripted moment. */
+	Flight last;
+	/** Quests the script has said are done; FakeGame cannot run the game's quest script. */
+	private final java.util.Set<net.runelite.api.Quest> quests = java.util.EnumSet.noneOf(net.runelite.api.Quest.class);
+	/** Sprites shown on HUD components by id; FakeGame's widgets have no sprites. */
+	private final Map<Integer, Integer> sprites = new HashMap<>();
 	PilotRig(FakeGame game)
 	{
 		this.game = game;
@@ -39,9 +48,11 @@ final class PilotRig implements Rig
 		settings.put("homes", true);
 		settings.put("upperHopper", false);
 		settings.put("tickCoach", true);
+		settings.put("rift", true);
 		pilots = new Pilots(game.client(), null, c -> { }, new FieldNotes(() -> null, new Gson()),
 			bests::get, bests::put, id -> 0, store::get, store::put, () -> null);
 		pilots.profile("replay");
+		pilots.riftReaders(q -> quests.contains(q), c -> sprites.getOrDefault(c, -1));
 	}
 
 	@Override
@@ -57,7 +68,42 @@ final class PilotRig implements Rig
 				settings.put(args.get(0), "on".equals(args.get(1)));
 				pilots.upperHopper(settings.get("upperHopper"));
 				pilots.tickCoach(settings.get("tickCoach"));
+				pilots.rift(settings.get("rift"));
 				return true;
+			case "fragments":
+				pilots.riftFragments(Integer.parseInt(args.get(0)));
+				return true;
+			case "quest":
+			{
+				net.runelite.api.Quest q = net.runelite.api.Quest.valueOf(args.get(0));
+				if ("done".equals(args.get(1)))
+				{
+					quests.add(q);
+				}
+				else
+				{
+					quests.remove(q);
+				}
+				// The Pilot asks about a quest not yet done only now and then; a script changes it now.
+				pilots.riftReaders(x -> quests.contains(x), c -> sprites.getOrDefault(c, -1));
+				return true;
+			}
+			case "hud":
+			{
+				// hud elemental|catalytic ALTAR|none: the rune icon a GotR HUD portal component shows.
+				int component = "elemental".equals(args.get(0)) ? net.runelite.api.gameval.InterfaceID.GotrHud.ELEMENTAL_PORTAL
+					: net.runelite.api.gameval.InterfaceID.GotrHud.CATALYTIC_PORTAL;
+				if ("none".equals(args.get(1)))
+				{
+					sprites.remove(component);
+				}
+				else
+				{
+					com.codex.minigamepilot.core.Altar a = com.codex.minigamepilot.core.Altar.valueOf(args.get(1));
+					sprites.put(component, net.runelite.api.gameval.SpriteID.IconRune32x32._0 + a.ordinal());
+				}
+				return true;
+			}
 			case "saved":
 				store.put(args.get(0), args.get(1));
 				return true;
@@ -114,6 +160,7 @@ final class PilotRig implements Rig
 	public Map<String, String> tick(long now)
 	{
 		Flight f = pilots.fly(settings.get("motherlode"), settings.get("furnace"), settings.get("homes"), null, 0, now);
+		last = f;
 		Map<String, String> r = new TreeMap<>();
 		r.put("activity", f.activity.name());
 		if (f.step != null)
@@ -132,6 +179,15 @@ final class PilotRig implements Rig
 			r.put("object", game.nameOf(f.object));
 		}
 		r.put("route", String.valueOf(f.route.size()));
+		if (f.npc != null)
+		{
+			r.put("npc", f.npc.getName());
+		}
+		if (f.step != null)
+		{
+			r.put("detail", f.step.getDetail());
+		}
+		r.putAll(f.view.readings());
 		View.TickCard t = f.view.ticks();
 		if (t != null)
 		{

@@ -170,6 +170,31 @@ public interface CodexMinigamePilotConfig extends Config
 		return false;
 	}
 
+	@ConfigItem(
+		keyName = "rift",
+		name = "Guardians of the Rift",
+		description = "Guide Guardians of the Rift: mine fragments, craft essence, enter the best open altar for your levels and points, then hand in",
+		section = MINIGAMES,
+		position = 6
+	)
+	default boolean rift()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "riftFragments",
+		name = "Fragments before first craft",
+		description = "How many guardian fragments to mine at the start of a game before crafting essence. The wiki's general strategy mines about 120",
+		section = MINIGAMES,
+		position = 7
+	)
+	@Range(min = 0, max = 500)
+	default int riftFragments()
+	{
+		return 120;
+	}
+
 	@ConfigItem(keyName = "plaque", name = "Step plaque", description = "Show the next step on a small plaque in the game view", section = GUIDANCE, position = 0)
 	default boolean plaque()
 	{

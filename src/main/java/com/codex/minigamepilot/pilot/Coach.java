@@ -126,6 +126,8 @@ final class Coach
 				return Skill.SMITHING;
 			case HOMES:
 				return Skill.CONSTRUCTION;
+			case RIFT:
+				return Skill.RUNECRAFT;
 			default:
 				return null;
 		}
@@ -259,6 +261,28 @@ final class Coach
 				return "the furniture";
 			case HOME:
 				return "the house";
+			case REMAINS:
+				return "the remains";
+			case WORKBENCH:
+				return "the workbench";
+			case CELLS:
+				return "the cell table";
+			case GUARDIAN:
+				return "the portal guardian";
+			case ALTAR:
+				return "the altar";
+			case EXIT:
+				return "the altar's portal";
+			case GREAT_GUARDIAN:
+				return "the Great Guardian";
+			case CELL_TILE:
+				return "the cell tile";
+			case DEPOSIT_POOL:
+				return "the deposit pool";
+			case RIFT_PORTAL:
+				return "the portal";
+			case HUGE_REMAINS:
+				return "the huge remains";
 			default:
 				return null;
 		}

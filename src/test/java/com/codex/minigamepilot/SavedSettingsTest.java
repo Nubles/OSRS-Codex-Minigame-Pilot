@@ -28,6 +28,8 @@ public class SavedSettingsTest
 			"motherlodeGoal", "homesGoal", "furnaceGoal", "showGoals", "rewardRoad",
 			// The tick coach.
 			"tickCoach",
+			// Guardians of the Rift.
+			"rift", "riftFragments",
 			"fieldNotes")), keys);
 		assertEquals("codexminigamepilot", CodexMinigamePilotConfig.GROUP);
 	}

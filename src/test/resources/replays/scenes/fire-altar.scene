@@ -1,0 +1,6 @@
+# A schematic fire altar, as entered from a Guardians of the Rift portal guardian. Not the real map.
+# Ids are RuneLite's (net.runelite.api.gameval.ObjectID): FIRE_ALTAR "Altar" and
+# FIRETEMPLE_EXIT_PORTAL "Portal". The real altar is far from the temple's region 14484; so is this.
+scene 2560 4800
+object FIRE_ALTAR 2585 4840 3 3 as fireAltar
+object FIRETEMPLE_EXIT_PORTAL 2576 4836 as firePortal

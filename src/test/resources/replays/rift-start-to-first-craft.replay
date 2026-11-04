@@ -1,0 +1,142 @@
+# Guardians of the Rift, from the wait before the rift opens to the first runes crafted and handed in.
+#
+# Facts (OSRS wiki, Guardians of the Rift and Guardians of the Rift/Strategies):
+#  - the minigame needs 27 Runecraft after Temple of the Eye; fire is an elemental altar at 14
+#    Runecraft that charges an overcharged cell, nature a catalytic altar at 44 that charges a strong one
+#  - "For even points, prioritise crafting at the blood and death altars, followed by fire and earth."
+#  - the general strategy mines about 120 fragments before the first craft
+#  - one fragment makes one guardian essence at the workbench; guardian stones are used on the
+#    Great Guardian, charged cells placed on cell tiles, runes put in the deposit pool
+# The opening message is as the Guardians of the Rift Helper plugin reads it (a cross-check).
+include /replays/scenes/rift.scene
+skill RUNECRAFT 50
+skill MINING 60
+items INV RUNE_PICKAXE 1
+at 3606 9492
+tick 2
+expect activity = RIFT
+expect place = "Temple of the Eye"
+expect step = "Take uncharged cells"
+expect object = cellTable
+
+# One uncharged cell in the pack: wait by the remains for the rift.
+items INV GOTR_CELL_UNCHARGED 1
+tick
+expect step = "Wait for the rift to open"
+expect waiting = true
+chat GAMEMESSAGE "The rift will become active in 30 seconds."
+tick
+expect step = "Wait for the rift to open"
+
+# The rift opens: mine to 120 fragments before the first craft.
+chat GAMEMESSAGE "The rift becomes active!"
+tick
+expect step = "Mine guardian fragments"
+expect object = guardianParts
+expect detail ~ "120 more to 120"
+expect gauge.Fragments = "0/120"
+items INV GOTR_GUARDIAN_FRAGMENT 60 stacked
+tick
+expect step = "Mine guardian fragments"
+expect detail ~ "60 more"
+never step = "Enter the fire altar"
+items INV clear
+items INV RUNE_PICKAXE 1
+items INV GOTR_CELL_UNCHARGED 1
+items INV GOTR_GUARDIAN_FRAGMENT 120 stacked
+tick
+expect step = "Craft guardian essence"
+expect object = workbench
+# Pickaxe, cell and the fragment stack leave 25 slots for essence.
+expect detail ~ "25 of your 120 fragments"
+
+# Crafting: essence fills the pack, fragments go down a fragment an essence.
+items INV clear
+items INV RUNE_PICKAXE 1
+items INV GOTR_CELL_UNCHARGED 1
+items INV GOTR_GUARDIAN_FRAGMENT 110 stacked
+items INV GOTR_GUARDIAN_ESSENCE 10
+tick
+expect step = "Craft guardian essence"
+items INV clear
+items INV RUNE_PICKAXE 1
+items INV GOTR_CELL_UNCHARGED 1
+items INV GOTR_GUARDIAN_FRAGMENT 95 stacked
+items INV GOTR_GUARDIAN_ESSENCE 25
+tick
+# A full pack and no altar shown yet: wait for one.
+expect step = "Wait for an altar you can use"
+expect waiting = true
+
+# The HUD shows fire and nature open: fire comes before nature.
+widget GotrHud.CONTENT hidden false
+widget GotrHud.ELEMENTAL_PORTAL hidden false
+widget GotrHud.CATALYTIC_PORTAL hidden false
+hud elemental FIRE
+hud catalytic NATURE
+forget
+tick
+expect step = "Enter the fire altar"
+expect object = portalFire
+expect pick = "Fire"
+expect detail ~ "Fire and earth come next"
+expect detail ~ "overcharged cell"
+
+# Through the portal: craft at the altar, then back.
+include /replays/scenes/fire-altar.scene
+at 2582 4838
+tick
+expect place = "Fire altar"
+expect step = "Craft fire runes"
+expect object = fireAltar
+expect detail ~ "the cell becomes overcharged"
+expect stat.Altar_trips = "1"
+items INV clear
+items INV RUNE_PICKAXE 1
+items INV GOTR_GUARDIAN_FRAGMENT 95 stacked
+items INV GOTR_CELL_TIER4 1
+items INV FIRERUNE 25 stacked
+items INV GOTR_GUARDIAN_STONE_ELEMENTAL 25 stacked
+varbit GOTR_ELEMENTAL_EARNED_THIS_GAME 0
+tick
+expect step = "Take the portal back"
+expect object = firePortal
+
+# Back in the temple: stones to the Great Guardian, the cell on a tile, runes in the pool.
+include /replays/scenes/rift.scene
+at 3612 9500
+tick
+expect place = "Temple of the Eye"
+expect step = "Power up the Great Guardian"
+expect npc = "The Great Guardian"
+items INV clear
+items INV RUNE_PICKAXE 1
+items INV GOTR_GUARDIAN_FRAGMENT 95 stacked
+items INV GOTR_CELL_TIER4 1
+items INV FIRERUNE 25 stacked
+varbit GOTR_ELEMENTAL_EARNED_THIS_GAME 50
+tick
+expect step = "Place the overcharged cell"
+expect object = cellTile
+items INV clear
+items INV RUNE_PICKAXE 1
+items INV GOTR_GUARDIAN_FRAGMENT 95 stacked
+items INV FIRERUNE 25 stacked
+tick
+expect step = "Deposit your runes"
+expect object = depositPool
+items INV clear
+items INV RUNE_PICKAXE 1
+items INV GOTR_GUARDIAN_FRAGMENT 95 stacked
+tick
+# The first craft is done: now only a trip's worth of fragments is needed, and 95 is plenty.
+expect step = "Craft guardian essence"
+expect stat.Energy_this_game = "50 / 0"
+
+# The tick coach times the whole altar trip: from mining round to mining again.
+items INV clear
+items INV RUNE_PICKAXE 1
+tick
+expect step = "Mine guardian fragments"
+expect detail ~ "more for a full trip"
+expect ticks.loops = "1"
