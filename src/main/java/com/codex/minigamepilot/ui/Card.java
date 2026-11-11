@@ -6,6 +6,7 @@ import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.LayoutManager;
+import java.awt.Shape;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.RoundRectangle2D;
@@ -101,10 +102,12 @@ public class Card extends JPanel
 
 		if (accent != null)
 		{
-			g.setClip(shape);
+			// Clipped to the card's rounded edge, then the clip it was given put back: never cleared.
+			Shape old = g.getClip();
+			g.clip(shape);
 			g.setPaint(new GradientPaint(0, 0, accent, 0, h, Theme.alpha(accent, 90)));
 			g.fillRect(0, 0, 3, h);
-			g.setClip(null);
+			g.setClip(old);
 		}
 
 		Color rim = highlighted ? Theme.alpha(Theme.GOLD, 150) : hover ? Theme.alpha(Theme.GOLD, 90) : Theme.STROKE_SOFT;

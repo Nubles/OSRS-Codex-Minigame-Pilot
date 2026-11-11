@@ -69,7 +69,21 @@ public class SceneGuide extends Overlay
 	}
 
 	@Override
-	public Dimension render(Graphics2D g)
+	public Dimension render(Graphics2D graphics)
+	{
+		// Drawn on a copy, so no clip, stroke, font or hint set here outlives this overlay.
+		Graphics2D g = (Graphics2D) graphics.create();
+		try
+		{
+			return draw(g);
+		}
+		finally
+		{
+			g.dispose();
+		}
+	}
+
+	private Dimension draw(Graphics2D g)
 	{
 		Flight f = flight.get();
 		if (f == null || f.step == null)

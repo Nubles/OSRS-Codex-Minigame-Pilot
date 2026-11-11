@@ -30,7 +30,21 @@ public class ItemGuide extends WidgetItemOverlay
 	}
 
 	@Override
-	public void renderItemOverlay(Graphics2D g, int itemId, WidgetItem item)
+	public void renderItemOverlay(Graphics2D graphics, int itemId, WidgetItem item)
+	{
+		// Drawn on a copy, so no stroke or hint set here outlives this overlay.
+		Graphics2D g = (Graphics2D) graphics.create();
+		try
+		{
+			draw(g, itemId, item);
+		}
+		finally
+		{
+			g.dispose();
+		}
+	}
+
+	private void draw(Graphics2D g, int itemId, WidgetItem item)
 	{
 		Flight f = flight.get();
 		if (f == null || f.step == null || !f.step.hasItem(itemId))
